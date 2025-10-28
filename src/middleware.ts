@@ -1,48 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { paymentMiddleware } from "x402-next";
-import { facilitator } from "@coinbase/x402";
-import { env } from "./lib/env";
-import { getOrCreateSellerAccount } from "./lib/accounts";
+// import { paymentMiddleware } from "x402-next";
+// import { facilitator } from "@coinbase/x402";
+// import { env } from "./lib/env";
+// import { getOrCreateSellerAccount } from "./lib/accounts";
 
-const network = env.NETWORK;
-const sellerAccount = await getOrCreateSellerAccount();
+// CDP DISABLED
+// const network = env.NETWORK;
+// const sellerAccount = await getOrCreateSellerAccount();
 
-export const x402Middleware = paymentMiddleware(
-  sellerAccount.address,
-  {
-    // pages
-    "/blog": {
-      price: "$0.001",
-      network,
-      config: {
-        description: "Access to protected content",
-      },
-    },
-    // api routes
-    "/api/add": {
-      price: "$0.005",
-      network,
-      config: {
-        description: "Access to protected content",
-      },
-    },
-  },
-  facilitator
-);
+// export const x402Middleware = paymentMiddleware(
+//   sellerAccount.address,
+//   {
+//     // pages
+//     "/blog": {
+//       price: "$0.001",
+//       network,
+//       config: {
+//         description: "Access to protected content",
+//       },
+//     },
+//     // api routes
+//     "/api/add": {
+//       price: "$0.005",
+//       network,
+//       config: {
+//         description: "Access to protected content",
+//       },
+//     },
+//   },
+//   facilitator
+// );
 
 export default async function middleware(request: NextRequest) {
+  // CDP disabled - pass through all requests
+  return NextResponse.next();
+  
   // run middleware for all api routes
-  if (request.nextUrl.pathname.startsWith("/api")) {
-    return x402Middleware(request);
-  } else {
-    // for normal pages, only run middleware if it's a bot
-    const isScraper = checkIsScraper(request);
-    if (isScraper) {
-      return x402Middleware(request);
-    } else {
-      return NextResponse.next();
-    }
-  }
+  // if (request.nextUrl.pathname.startsWith("/api")) {
+  //   return x402Middleware(request);
+  // } else {
+  //   // for normal pages, only run middleware if it's a bot
+  //   const isScraper = checkIsScraper(request);
+  //   if (isScraper) {
+  //     return x402Middleware(request);
+  //   } else {
+  //     return NextResponse.next();
+  //   }
+  // }
 }
 
 function checkIsScraper(request: NextRequest) {

@@ -1,19 +1,20 @@
 import { env } from "@/lib/env";
 import * as cheerio from "cheerio";
 import { NextRequest, NextResponse } from "next/server";
-import { wrapFetchWithPayment } from "x402-fetch";
-import { chain, getOrCreatePurchaserAccount } from "@/lib/accounts";
-import { createWalletClient, http } from "viem";
+// import { wrapFetchWithPayment } from "x402-fetch";
+// import { chain, getOrCreatePurchaserAccount } from "@/lib/accounts";
+// import { createWalletClient, http } from "viem";
 import { waitUntil } from "@vercel/functions";
 
 type Fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 
-const account = await getOrCreatePurchaserAccount();
-const walletClient = createWalletClient({
-  chain,
-  transport: http(),
-  account,
-});
+// CDP DISABLED
+// const account = await getOrCreatePurchaserAccount();
+// const walletClient = createWalletClient({
+//   chain,
+//   transport: http(),
+//   account,
+// });
 
 export async function GET(request: NextRequest) {
   const enablePayment =
@@ -49,9 +50,11 @@ export async function GET(request: NextRequest) {
       };
 
       const loggedFetch = makeLoggedFetch(log);
-      const fetch = enablePayment
-        ? wrapFetchWithPayment(loggedFetch, walletClient as any) // TODO: fix type
-        : loggedFetch;
+      // CDP DISABLED - no payment wrapping
+      const fetch = loggedFetch;
+      // const fetch = enablePayment
+      //   ? wrapFetchWithPayment(loggedFetch, walletClient as any) // TODO: fix type
+      //   : loggedFetch;
 
       const jobPromise = (async () => {
         try {

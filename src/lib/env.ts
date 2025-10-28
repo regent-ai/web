@@ -3,9 +3,10 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    CDP_WALLET_SECRET: z.string(),
-    CDP_API_KEY_ID: z.string(),
-    CDP_API_KEY_SECRET: z.string(),
+    // CDP DISABLED - made optional
+    CDP_WALLET_SECRET: z.string().optional(),
+    CDP_API_KEY_ID: z.string().optional(),
+    CDP_API_KEY_SECRET: z.string().optional(),
     NETWORK: z.enum(["base-sepolia", "base"]).default("base-sepolia"),
     URL: z.string().url().default("http://localhost:3000"),
   },
