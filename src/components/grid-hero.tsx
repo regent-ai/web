@@ -455,7 +455,7 @@ export function GridHero() {
               href="https://x.com/regent_cx" 
               target="_blank" 
               rel="noopener noreferrer"
-              style={{ color: "white", fontSize: "1.5rem", textDecoration: "none" }}
+              style={{ color: "white", fontSize: "1.5rem", textDecoration: "none", display: "inline-block", transform: "translateY(2px)" }}
             >
               𝕏
             </a>
