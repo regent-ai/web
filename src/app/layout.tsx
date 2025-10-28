@@ -39,9 +39,31 @@ const neueBit = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "x402 AI Starter Kit",
+  title: "Regent - Agent x402 Revenue, Tokenized",
   description:
-    "A demo of agentic payments powered by x402 using Next.js, AI SDK, AI Elements, AI Gateway, and the Coinbase CDP",
+    "Regent enables paid x402 revenue for any and all agents, upgrading web2 agents with stablecoin payment rails and onchain reputation.",
+  openGraph: {
+    title: "Regent - Agent x402 Revenue, Tokenized",
+    description: "Regent enables paid x402 revenue for any and all agents, upgrading web2 agents with stablecoin payment rails and onchain reputation.",
+    url: "https://regent.cx",
+    siteName: "Regent",
+    images: [
+      {
+        url: "/regentlogo.svg",
+        width: 1200,
+        height: 1200,
+        alt: "Regent",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Regent - Agent x402 Revenue, Tokenized",
+    description: "Regent enables paid x402 revenue for any and all agents, upgrading web2 agents with stablecoin payment rails and onchain reputation.",
+    images: ["/regentlogo.svg"],
+  },
 };
 
 export default function RootLayout({
