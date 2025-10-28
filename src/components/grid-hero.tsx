@@ -390,7 +390,7 @@ export function GridHero() {
               <div>Whitepaper 10/30 4:02am UTC</div>
               <div style={{ position: "relative" }}>
                 <span 
-                  className="glitch-text"
+                  className={isLogoAnimationActive ? "glitch-text-green" : "glitch-text"}
                   onMouseEnter={() => setShowAnimataCard(true)}
                   onMouseLeave={() => setShowAnimataCard(false)}
                   onClick={() => setShowAnimataCard(!showAnimataCard)}
@@ -499,9 +499,9 @@ export function GridHero() {
               style={{
                 position: "absolute",
                 top: "100%",
-                left: "200px",
+                left: "175px",
                 marginTop: "8px",
-                padding: "40px",
+                padding: "30px",
                 background: "rgba(0, 0, 0, 0.95)",
                 borderRadius: "12px",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -512,8 +512,8 @@ export function GridHero() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                height: "150px",
-                width: "150px",
+                height: "112.5px",
+                width: "112.5px",
                 overflow: "hidden",
               }}
             >
@@ -532,7 +532,7 @@ export function GridHero() {
                   height: "100%", 
                   filter: "invert(1)",
                   objectFit: "contain",
-                  transform: "scale(2.5)",
+                  transform: "scale(2.2)",
                   cursor: "pointer"
                 }} 
               />

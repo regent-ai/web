@@ -152,6 +152,57 @@
     font-weight: 700;
   }
   
+  @keyframes glitchGreen {
+    0%, 100% {
+      transform: translate(0);
+      text-shadow: 0 0 0;
+    }
+    10% {
+      transform: translate(-1px, 1px);
+      text-shadow: -1px 0 #00ff00;
+    }
+    20% {
+      transform: translate(1px, -1px);
+      text-shadow: 1px 0 #39ff14;
+    }
+    30% {
+      transform: translate(-1px, -1px);
+      text-shadow: -1px 0 #00ff00;
+    }
+    40% {
+      transform: translate(1px, 1px);
+      text-shadow: 1px 0 #39ff14;
+    }
+    50% {
+      transform: translate(-1px, 1px);
+      text-shadow: -1px 0 #00ff00;
+    }
+    60% {
+      transform: translate(1px, -1px);
+      text-shadow: 1px 0 #39ff14;
+    }
+    70% {
+      transform: translate(-1px, -1px);
+      text-shadow: -1px 0 #00ff00;
+    }
+    80% {
+      transform: translate(1px, 1px);
+      text-shadow: 1px 0 #39ff14;
+    }
+    90% {
+      transform: translate(-1px, 1px);
+      text-shadow: -1px 0 #00ff00;
+    }
+  }
+  
+  .glitch-text-green {
+    display: inline-block;
+    position: relative;
+    animation: glitchGreen 0.15s infinite;
+    color: #39ff14;
+    font-weight: 700;
+  }
+  
   /* Social links card hover effect */
   .social-links-card a {
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
