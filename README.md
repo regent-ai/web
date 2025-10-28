@@ -33,7 +33,7 @@ This template built with [Next.js](https://nextjs.org), [AI SDK](https://ai-sdk.
 ```bash
 git clone https://github.com/vercel-labs/x402-ai-starter
 cd x402-ai-starter
-pnpm install
+bun install
 ```
 
 ## Running Locally
@@ -51,7 +51,7 @@ To get an OIDC token, simply run `vc link` then `vc env pull`. An API can be obt
 
 Using AI Gateway isn't required, you can use any AI SDK model provider and its associated credentials.
 
-3. Run `pnpm dev`
+3. Run `bun run dev`
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the app in action.
 
