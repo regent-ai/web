@@ -1,0 +1,649 @@
+@import "tailwindcss" source(none);
+@import "../../../../packages/regent_ui/assets/css/regent.css";
+@source "../css";
+@source "../js";
+@source "../../lib/platform_phx_web";
+
+@font-face {
+  font-family: "GeistPixel Circle";
+  src: url("/fonts/GeistPixel-Circle.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GeistPixel Square";
+  src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --brand-charcoal: #315569;
+  --brand-ink: #034568;
+  --brand-paper: #fbf4de;
+  --brand-gold: #d4a756;
+  --brand-olive: #848078;
+  --background: color-mix(in oklch, var(--brand-paper) 92%, var(--brand-gold) 8%);
+  --foreground: color-mix(in oklch, var(--brand-ink) 92%, var(--brand-charcoal) 8%);
+  --card: color-mix(in oklch, var(--brand-paper) 95%, var(--brand-charcoal) 5%);
+  --muted-foreground: color-mix(in oklch, var(--brand-charcoal) 76%, var(--brand-paper) 24%);
+  --accent: var(--brand-gold);
+  --primary: var(--brand-ink);
+  --positive: var(--brand-olive);
+  --chart-2: var(--brand-charcoal);
+  --chart-3: var(--brand-olive);
+  --border: color-mix(in oklch, var(--brand-paper) 72%, var(--brand-charcoal) 28%);
+  --ring: color-mix(in oklch, var(--brand-gold) 68%, var(--brand-ink) 32%);
+  --sidebar: color-mix(in oklch, var(--brand-paper) 84%, var(--brand-charcoal) 16%);
+  --sidebar-accent: color-mix(in oklch, var(--brand-gold) 20%, var(--brand-paper) 80%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+  font-family: "GeistPixel Square", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 14%, color-mix(in oklch, var(--brand-charcoal) 14%, transparent), transparent 30%),
+    radial-gradient(circle at 84% 12%, color-mix(in oklch, var(--accent) 16%, transparent), transparent 36%),
+    linear-gradient(180deg, color-mix(in oklch, var(--background) 86%, var(--brand-paper) 14%), var(--background));
+  color: var(--foreground);
+  font-family: "GeistPixel Square", sans-serif;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--accent) 42%, transparent);
+  color: var(--foreground);
+}
+
+.font-display {
+  font-family: "GeistPixel Circle", "GeistPixel Square", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.pp-platform-layout {
+  position: relative;
+  isolation: isolate;
+}
+
+.pp-home-shell,
+.pp-route-shell,
+.pp-dashboard-shell,
+.pp-demo-shell {
+  position: relative;
+  min-height: 100%;
+}
+
+.pp-home-stage,
+.pp-route-stage,
+.pp-dashboard-shell,
+.pp-demo-stage {
+  position: relative;
+  z-index: 1;
+  width: min(1440px, 100%);
+  margin: 0 auto;
+}
+
+.pp-home-stage {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.pp-demo-stage {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.pp-home-briefing,
+.pp-route-panel,
+.pp-dashboard-hero,
+.pp-demo-hero,
+.pp-demo-panel {
+  border: 1px solid var(--border);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(circle at 14% 16%, color-mix(in oklch, var(--accent) 14%, transparent), transparent 32%),
+    linear-gradient(180deg, color-mix(in oklch, var(--card) 90%, transparent), color-mix(in oklch, var(--card) 96%, var(--background) 4%));
+  box-shadow: 0 26px 70px -44px color-mix(in oklch, var(--brand-ink) 52%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.pp-home-briefing {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+.pp-demo-hero,
+.pp-demo-panel {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+.pp-home-kicker,
+.pp-entry-eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+}
+
+.pp-home-title,
+.pp-entry-title,
+.pp-route-panel-title {
+  margin: 0;
+  font-family: "GeistPixel Circle", "GeistPixel Square", sans-serif;
+  color: var(--foreground);
+}
+
+.pp-home-title {
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  max-width: 14ch;
+}
+
+.pp-entry-title {
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 0.95;
+  max-width: 16ch;
+}
+
+.pp-route-panel-title {
+  font-size: clamp(1.45rem, 2.4vw, 2.25rem);
+  line-height: 1;
+}
+
+.pp-home-copy,
+.pp-entry-description,
+.pp-panel-copy {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+.pp-home-chip-row,
+.pp-tag-row,
+.pp-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pp-home-chip-row span,
+.pp-tag {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--background) 72%, transparent);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.pp-entry-carousel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.pp-entry-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0.5rem;
+}
+
+.pp-entry-track {
+  display: flex;
+  gap: 1rem;
+}
+
+.pp-entry-slide {
+  min-width: min(36rem, calc(100vw - 2rem));
+}
+
+.pp-entry-card {
+  min-height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  padding: 1rem;
+  box-shadow: 0 30px 90px -52px color-mix(in oklch, var(--brand-ink) 70%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.pp-entry-card.rg-regent-theme-techtree,
+.pp-demo-card.rg-regent-theme-techtree {
+  background:
+    radial-gradient(circle at 16% 12%, color-mix(in oklch, var(--accent) 22%, transparent), transparent 34%),
+    radial-gradient(circle at 82% 78%, color-mix(in oklch, var(--positive) 16%, transparent), transparent 40%),
+    linear-gradient(160deg, color-mix(in oklch, var(--card) 82%, var(--brand-paper) 18%), color-mix(in oklch, var(--card) 68%, var(--background) 32%));
+}
+
+.pp-entry-card.rg-regent-theme-autolaunch,
+.pp-demo-card.rg-regent-theme-autolaunch {
+  background:
+    radial-gradient(circle at 18% 14%, color-mix(in oklch, var(--primary) 20%, transparent), transparent 34%),
+    radial-gradient(circle at 84% 78%, color-mix(in oklch, var(--accent) 18%, transparent), transparent 38%),
+    linear-gradient(150deg, color-mix(in oklch, var(--card) 78%, var(--brand-charcoal) 22%), color-mix(in oklch, var(--card) 64%, var(--background) 36%));
+}
+
+.pp-entry-card.rg-regent-theme-platform,
+.pp-demo-card.rg-regent-theme-platform {
+  background:
+    radial-gradient(circle at 14% 12%, color-mix(in oklch, var(--brand-charcoal) 18%, transparent), transparent 34%),
+    radial-gradient(circle at 84% 82%, color-mix(in oklch, var(--accent) 14%, transparent), transparent 38%),
+    linear-gradient(165deg, color-mix(in oklch, var(--card) 90%, var(--brand-paper) 10%), color-mix(in oklch, var(--card) 74%, var(--background) 26%));
+}
+
+.pp-entry-card-copy {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pp-card-surface,
+.pp-dashboard-header-surface {
+  grid-template-columns: 1fr;
+}
+
+.pp-card-surface .rg-surface-rail,
+.pp-dashboard-header-surface .rg-surface-rail {
+  display: none;
+}
+
+.pp-card-surface .rg-surface-scene {
+  min-height: 14rem;
+  padding: 0.75rem;
+}
+
+.pp-dashboard-header-surface .rg-surface-scene {
+  min-height: 18rem;
+  padding: 0.75rem;
+}
+
+.pp-entry-bullets {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pp-entry-bullets li,
+.pp-auction-row {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--background) 66%, transparent);
+  padding: 0.85rem 1rem;
+  color: var(--foreground);
+}
+
+.pp-entry-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pp-entry-note {
+  margin: 0;
+  max-width: 22ch;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.pp-entry-link,
+.pp-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--background) 76%, transparent);
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.pp-entry-link:hover,
+.pp-link-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--ring);
+}
+
+.pp-link-button-ghost {
+  background: transparent;
+}
+
+.pp-route-stage {
+  display: grid;
+  gap: 1rem;
+}
+
+.pp-route-surface-wrap,
+.pp-route-grid,
+.pp-auction-columns {
+  position: relative;
+  z-index: 1;
+}
+
+.pp-route-surface .rg-surface-scene {
+  min-height: 26rem;
+}
+
+.pp-route-grid,
+.pp-auction-columns {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pp-route-panel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.25rem;
+}
+
+.pp-cli-boot {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(circle at 16% 14%, color-mix(in oklch, var(--accent) 16%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in oklch, var(--card) 90%, transparent), color-mix(in oklch, var(--card) 96%, var(--background) 4%));
+  box-shadow: 0 26px 70px -44px color-mix(in oklch, var(--brand-ink) 52%, transparent);
+  backdrop-filter: blur(16px);
+  padding: 1.25rem;
+}
+
+.pp-cli-steps {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pp-cli-step {
+  display: grid;
+  gap: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: color-mix(in oklch, var(--background) 70%, transparent);
+  padding: 1rem;
+}
+
+.pp-command {
+  display: block;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--background) 72%, transparent);
+  padding: 1rem;
+  color: var(--foreground);
+  font-family: "GeistPixel Square", sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.pp-auction-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.pp-auction-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pp-auction-row h3 {
+  margin: 0;
+  font-family: "GeistPixel Circle", "GeistPixel Square", sans-serif;
+  font-size: 1.1rem;
+}
+
+.pp-auction-row p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.pp-auction-meta {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted-foreground);
+}
+
+.pp-dashboard-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.pp-demo-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pp-demo-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  padding: 1rem;
+  box-shadow: 0 30px 90px -52px color-mix(in oklch, var(--brand-ink) 70%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.pp-demo-card-copy {
+  display: grid;
+  gap: 1rem;
+  min-height: 100%;
+  align-content: start;
+}
+
+.pp-demo-surface {
+  grid-template-columns: 1fr;
+}
+
+.pp-demo-surface .rg-surface-rail {
+  display: none;
+}
+
+.pp-demo-surface .rg-surface-scene {
+  min-height: 15rem;
+  padding: 0.75rem;
+}
+
+.pp-demo-settings {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.pp-demo-settings div {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--background) 68%, transparent);
+  padding: 0.85rem 0.95rem;
+}
+
+.pp-demo-settings dt {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted-foreground);
+}
+
+.pp-demo-settings dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.pp-demo-note {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.pp-demo-reference {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+}
+
+.pp-demo-atlas-table {
+  width: 100%;
+}
+
+.pp-demo-rule-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--foreground);
+}
+
+.pp-demo-rule-list li {
+  padding-left: 0.2rem;
+  line-height: 1.7;
+}
+
+.pp-demo-code-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.pp-demo-code-card {
+  display: grid;
+  gap: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: color-mix(in oklch, var(--background) 70%, transparent);
+  padding: 1rem;
+}
+
+.pp-dashboard-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.pp-dashboard-copy {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+@media (max-width: 1100px) {
+  .pp-route-grid,
+  .pp-auction-columns,
+  .pp-demo-grid,
+  .pp-demo-reference,
+  .pp-dashboard-hero,
+  .pp-cli-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .pp-home-stage,
+  .pp-route-stage,
+  .pp-dashboard-shell,
+  .pp-demo-stage {
+    width: 100%;
+  }
+
+  .pp-route-surface .rg-surface {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .pp-entry-card,
+  .pp-demo-card,
+  .pp-route-panel,
+  .pp-demo-hero,
+  .pp-demo-panel,
+  .pp-dashboard-hero,
+  .pp-home-briefing,
+  .pp-cli-boot {
+    border-radius: 1.5rem;
+  }
+
+  .pp-entry-footer,
+  .pp-auction-row {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .pp-auction-meta {
+    justify-items: start;
+  }
+
+  .pp-demo-settings {
+    grid-template-columns: 1fr;
+  }
+}
