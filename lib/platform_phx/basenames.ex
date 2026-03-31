@@ -7,6 +7,7 @@ defmodule PlatformPhx.Basenames do
   alias PlatformPhx.Basenames.MintAllowance
   alias PlatformPhx.Basenames.PaymentCredit
   alias PlatformPhx.Ethereum
+  alias PlatformPhx.HttpError
   alias PlatformPhx.Repo
   alias PlatformPhx.RuntimeConfig
 
@@ -69,6 +70,7 @@ defmodule PlatformPhx.Basenames do
   @zero_address "0x0000000000000000000000000000000000000000"
   @base_chain_id 8453
   @ethereum_chain_id 1
+  @max_signature_age_ms 60 * 60 * 1000
 
   def config_payload do
     parent_name = parent_name()
@@ -94,6 +96,7 @@ defmodule PlatformPhx.Basenames do
   end
 
   def allowance_payload(address) do
+    ensure_repo_enabled!()
     normalized = Ethereum.normalize_address(address) || raise ArgumentError, "Invalid address"
     parent_node = parent_node()
 
@@ -117,7 +120,40 @@ defmodule PlatformPhx.Basenames do
     }
   end
 
+  def allowances_payload do
+    ensure_repo_enabled!()
+    current_parent_name = parent_name()
+    current_parent_node = parent_node()
+
+    allowances =
+      from(allowance in MintAllowance,
+        where: allowance.parent_node == ^current_parent_node,
+        order_by: [
+          desc: allowance.snapshot_total,
+          desc: allowance.free_mints_used,
+          asc: allowance.address
+        ],
+        select: %{
+          "address" => allowance.address,
+          "snapshotTotal" => allowance.snapshot_total,
+          "freeMintsUsed" => allowance.free_mints_used
+        }
+      )
+      |> Repo.all()
+      |> Enum.map(fn row ->
+        Map.put(row, "freeMintsRemaining", max(row["snapshotTotal"] - row["freeMintsUsed"], 0))
+      end)
+
+    %{
+      "parentName" => current_parent_name,
+      "parentNode" => current_parent_node,
+      "totalAddresses" => length(allowances),
+      "allowances" => allowances
+    }
+  end
+
   def recent_payload(limit \\ 12) do
+    ensure_repo_enabled!()
     bounded_limit = min(max(limit, 1), 50)
 
     names =
@@ -137,6 +173,7 @@ defmodule PlatformPhx.Basenames do
   end
 
   def owned_payload(address) do
+    ensure_repo_enabled!()
     normalized = Ethereum.normalize_address(address) || raise ArgumentError, "Invalid address"
 
     names =
@@ -165,7 +202,43 @@ defmodule PlatformPhx.Basenames do
     %{"address" => normalized, "names" => names}
   end
 
+  def credits_payload(address) do
+    ensure_repo_enabled!()
+    normalized = Ethereum.normalize_address(address) || raise ArgumentError, "Invalid address"
+    current_parent_name = parent_name()
+    current_parent_node = parent_node()
+
+    credits =
+      from(credit in PaymentCredit,
+        where:
+          credit.parent_node == ^current_parent_node and credit.address == ^normalized and
+            is_nil(credit.consumed_at),
+        order_by: [asc: credit.inserted_at],
+        select: %{
+          "id" => credit.id,
+          "paymentTxHash" => credit.payment_tx_hash,
+          "priceWei" => credit.price_wei,
+          "createdAt" => credit.inserted_at
+        }
+      )
+      |> Repo.all()
+      |> Enum.map(fn row ->
+        row
+        |> Map.update!("priceWei", &Integer.to_string/1)
+        |> iso_datetime_fields(["createdAt"])
+      end)
+
+    %{
+      "parentName" => current_parent_name,
+      "parentNode" => current_parent_node,
+      "address" => normalized,
+      "availableCredits" => length(credits),
+      "credits" => credits
+    }
+  end
+
   def availability_payload(label) do
+    ensure_repo_enabled!()
     validation = validate_label(label)
 
     if validation.is_valid do
@@ -227,6 +300,8 @@ defmodule PlatformPhx.Basenames do
   end
 
   def mint!(params) do
+    ensure_repo_enabled!()
+
     normalized_address =
       Ethereum.normalize_address(params["address"]) || raise ArgumentError, "Invalid address"
 
@@ -237,15 +312,11 @@ defmodule PlatformPhx.Basenames do
     end
 
     if reserved_label?(validation.normalized_label) do
-      raise ArgumentError, "Name is reserved"
+      raise_http(409, "Name is reserved")
     end
 
-    timestamp =
-      case params["timestamp"] do
-        value when is_integer(value) -> value
-        value when is_binary(value) -> String.to_integer(value)
-        _ -> raise ArgumentError, "Missing timestamp"
-      end
+    timestamp = parse_timestamp!(params["timestamp"])
+    validate_signature_age!(timestamp)
 
     signature = trim_binary(params["signature"]) || raise ArgumentError, "Missing signature"
     parent_name = parent_name()
@@ -268,7 +339,7 @@ defmodule PlatformPhx.Basenames do
       |> Repo.one()
 
     if existing do
-      raise ArgumentError, "Name already taken"
+      raise_http(409, "Name already taken")
     end
 
     should_use_credit = truthy?(params["useCredit"])
@@ -295,11 +366,7 @@ defmodule PlatformPhx.Basenames do
         end
 
       tx_hash =
-        Ethereum.synthetic_tx_hash([
-          normalized_address,
-          validation.normalized_label,
-          Integer.to_string(timestamp)
-        ])
+        synthetic_mint_tx_hash(normalized_address, validation.normalized_label, timestamp)
 
       {:ok, mint} =
         %Mint{}
@@ -340,6 +407,9 @@ defmodule PlatformPhx.Basenames do
       {:ok, payload} ->
         payload
 
+      {:error, %HttpError{} = error} ->
+        raise error
+
       {:error, reason} when is_binary(reason) ->
         raise ArgumentError, reason
 
@@ -348,6 +418,167 @@ defmodule PlatformPhx.Basenames do
 
       {:error, reason} ->
         raise ArgumentError, inspect(reason)
+    end
+  end
+
+  def credit!(params) do
+    ensure_repo_enabled!()
+
+    normalized_address =
+      Ethereum.normalize_address(params["address"]) || raise ArgumentError, "Invalid address"
+
+    payment_tx_hash =
+      trim_binary(params["paymentTxHash"]) || raise ArgumentError, "Invalid payment tx hash"
+
+    if not Ethereum.valid_tx_hash?(payment_tx_hash) do
+      raise ArgumentError, "Invalid payment tx hash"
+    end
+
+    payment_chain_id = integer_or_nil(params["paymentChainId"])
+    current_parent_name = parent_name()
+    current_parent_node = parent_node()
+
+    payment =
+      verify_payment!(
+        normalized_address,
+        String.downcase(payment_tx_hash),
+        payment_chain_id
+      )
+
+    existing =
+      from(credit in PaymentCredit,
+        where:
+          credit.payment_tx_hash == ^payment.payment_tx_hash and
+            credit.payment_chain_id == ^payment.payment_chain_id,
+        limit: 1
+      )
+      |> Repo.one()
+
+    credit =
+      if is_nil(existing) do
+        {:ok, inserted} =
+          %PaymentCredit{}
+          |> Ecto.Changeset.change(%{
+            parent_node: current_parent_node,
+            parent_name: current_parent_name,
+            address: normalized_address,
+            payment_tx_hash: payment.payment_tx_hash,
+            payment_chain_id: payment.payment_chain_id,
+            price_wei: payment.price_wei
+          })
+          |> Repo.insert()
+
+        inserted
+      else
+        existing
+      end
+
+    if credit.address != normalized_address do
+      raise_http(400, "Payment tx already registered to another address")
+    end
+
+    if credit.consumed_at do
+      raise_http(409, "Payment already used")
+    end
+
+    %{
+      "ok" => true,
+      "creditId" => credit.id,
+      "paymentTxHash" => payment.payment_tx_hash,
+      "available" => is_nil(credit.consumed_at)
+    }
+  end
+
+  def use!(params) do
+    ensure_repo_enabled!()
+
+    normalized_address =
+      Ethereum.normalize_address(params["address"]) || raise ArgumentError, "Invalid address"
+
+    raw_label = trim_binary(params["label"]) || raise ArgumentError, "Missing label"
+    validation = validate_label(raw_label)
+
+    if not validation.is_valid do
+      raise ArgumentError, validation.reason
+    end
+
+    current_parent_name = parent_name()
+    current_parent_node = parent_node()
+    fqdn = to_subname_fqdn(validation.normalized_label, current_parent_name)
+    node = namehash!(fqdn)
+    is_random = truthy?(params["isRandom"])
+
+    existing =
+      from(mint in Mint,
+        where: mint.node == ^node,
+        limit: 1,
+        select: %{
+          id: mint.id,
+          owner_address: mint.owner_address,
+          fqdn: mint.fqdn,
+          label: mint.label,
+          is_in_use: mint.is_in_use
+        }
+      )
+      |> Repo.one()
+
+    cond do
+      is_random and is_nil(existing) ->
+        tx_hash = synthetic_creator_tx_hash(normalized_address, validation.normalized_label)
+
+        {:ok, mint} =
+          %Mint{}
+          |> Ecto.Changeset.change(%{
+            parent_node: current_parent_node,
+            parent_name: current_parent_name,
+            label: validation.normalized_label,
+            fqdn: fqdn,
+            node: node,
+            owner_address: normalized_address,
+            tx_hash: tx_hash,
+            is_free: true,
+            is_in_use: true
+          })
+          |> Repo.insert()
+
+        %{
+          "ok" => true,
+          "label" => mint.label,
+          "fqdn" => mint.fqdn,
+          "isInUse" => true,
+          "existed" => false
+        }
+
+      is_random and existing.owner_address != normalized_address ->
+        raise_http(409, "Name already claimed")
+
+      is_random ->
+        maybe_mark_in_use(existing.id, existing.is_in_use, normalized_address)
+
+        %{
+          "ok" => true,
+          "label" => existing.label,
+          "fqdn" => existing.fqdn,
+          "isInUse" => true,
+          "existed" => true
+        }
+
+      is_nil(existing) ->
+        raise_http(404, "Name not found")
+
+      existing.owner_address != normalized_address ->
+        raise_http(403, "Name not owned by wallet")
+
+      true ->
+        maybe_mark_in_use(existing.id, existing.is_in_use, normalized_address)
+
+        %{
+          "ok" => true,
+          "label" => existing.label,
+          "fqdn" => existing.fqdn,
+          "isInUse" => true,
+          "existed" => true
+        }
     end
   end
 
@@ -454,7 +685,7 @@ defmodule PlatformPhx.Basenames do
       |> Repo.one()
 
     if is_nil(credit) do
-      raise ArgumentError, "Payment required (no free mints or credits remaining)"
+      raise_http(402, "Payment required (no free mints or credits remaining)")
     end
 
     {count, _} =
@@ -462,7 +693,7 @@ defmodule PlatformPhx.Basenames do
       |> Repo.update_all(set: [consumed_at: DateTime.utc_now()])
 
     if count == 0 do
-      raise ArgumentError, "Payment already used"
+      raise_http(409, "Payment already used")
     end
 
     %{
@@ -512,11 +743,11 @@ defmodule PlatformPhx.Basenames do
       end
 
     if credit.address != address do
-      raise ArgumentError, "Payment tx already registered to another address"
+      raise_http(400, "Payment tx already registered to another address")
     end
 
     if credit.consumed_at do
-      raise ArgumentError, "Payment already used"
+      raise_http(409, "Payment already used")
     end
 
     {count, _} =
@@ -524,7 +755,7 @@ defmodule PlatformPhx.Basenames do
       |> Repo.update_all(set: [consumed_at: DateTime.utc_now()])
 
     if count == 0 do
-      raise ArgumentError, "Payment already used"
+      raise_http(409, "Payment already used")
     end
 
     %{
@@ -539,7 +770,7 @@ defmodule PlatformPhx.Basenames do
   defp verify_payment!(address, payment_tx_hash, payment_chain_id) do
     recipient =
       RuntimeConfig.basenames_payment_recipient() ||
-        raise ArgumentError, "Payment recipient missing"
+        raise_http(503, "Server missing AGENT_BASENAME_PAYMENT_RECIPIENT (paid mints disabled)")
 
     price_wei = String.to_integer(RuntimeConfig.basenames_price_wei())
 
@@ -558,12 +789,12 @@ defmodule PlatformPhx.Basenames do
           ]
 
         _ ->
-          raise ArgumentError, "Unsupported payment chain"
+          raise_http(400, "Unsupported payment chain")
       end
       |> Enum.reject(fn {_chain_id, rpc_url} -> is_nil(rpc_url) end)
 
     if Enum.empty?(targets) do
-      raise ArgumentError, "No RPC URL configured for payment verification"
+      raise_http(500, "Server missing RPC URL(s)")
     end
 
     Enum.find_value(targets, fn {chain_id, rpc_url} ->
@@ -579,16 +810,16 @@ defmodule PlatformPhx.Basenames do
 
         cond do
           from != address ->
-            raise ArgumentError, "Payment tx from does not match"
+            raise_http(400, "Payment tx from does not match")
 
           to != String.downcase(recipient) ->
-            raise ArgumentError, "Payment recipient mismatch"
+            raise_http(400, "Payment recipient mismatch")
 
           value < price_wei ->
-            raise ArgumentError, "Payment amount too low"
+            raise_http(400, "Payment amount too low")
 
           status != "0x1" ->
-            raise ArgumentError, "Payment tx not successful"
+            raise_http(400, "Payment tx not successful")
 
           true ->
             %{
@@ -601,7 +832,52 @@ defmodule PlatformPhx.Basenames do
         {:error, _message} -> nil
         true -> nil
       end
-    end) || raise(ArgumentError, "Payment tx not found on Base or Ethereum")
+    end) || raise_http(400, "Payment tx not found on Base or Ethereum")
+  end
+
+  defp ensure_repo_enabled! do
+    if not repo_enabled?() do
+      raise_http(503, "Server missing DATABASE_URL (basenames DB disabled)")
+    end
+  end
+
+  defp parse_timestamp!(value) when is_integer(value), do: value
+
+  defp parse_timestamp!(value) when is_binary(value) and value != "" do
+    String.to_integer(value)
+  rescue
+    ArgumentError -> raise ArgumentError, "Missing timestamp"
+  end
+
+  defp parse_timestamp!(_value), do: raise(ArgumentError, "Missing timestamp")
+
+  defp validate_signature_age!(timestamp) do
+    now = System.system_time(:millisecond)
+
+    if abs(now - timestamp) > @max_signature_age_ms do
+      raise ArgumentError, "Signature expired"
+    end
+  end
+
+  defp maybe_mark_in_use(_id, true, _address), do: :ok
+
+  defp maybe_mark_in_use(id, false, address) do
+    from(mint in Mint, where: mint.id == ^id and mint.owner_address == ^address)
+    |> Repo.update_all(set: [is_in_use: true])
+
+    :ok
+  end
+
+  defp synthetic_mint_tx_hash(address, label, timestamp) do
+    Ethereum.synthetic_tx_hash("mint:#{address}:#{label}:#{timestamp}")
+  end
+
+  defp synthetic_creator_tx_hash(address, label) do
+    Ethereum.synthetic_tx_hash("creator:#{address}:#{label}")
+  end
+
+  defp raise_http(status, message) do
+    raise HttpError, status: status, message: message
   end
 
   defp resolve_label(label, fqdn) do

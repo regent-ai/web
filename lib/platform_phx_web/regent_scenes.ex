@@ -1,6 +1,8 @@
 defmodule PlatformPhxWeb.RegentScenes do
   @moduledoc false
 
+  alias Regent.SceneSpec
+
   @home_scenes %{
     "techtree" => %{
       "app" => "techtree",
@@ -486,7 +488,7 @@ defmodule PlatformPhxWeb.RegentScenes do
     }
   }
 
-  def home_scene(card_id), do: Map.fetch!(@home_scenes, card_id)
+  def home_scene(card_id), do: @home_scenes |> Map.fetch!(card_id) |> scene_from_entries()
 
   def techtree_focus(focus),
     do: normalize_focus(focus, Map.keys(@techtree_sections), "observatory")
@@ -792,23 +794,15 @@ defmodule PlatformPhxWeb.RegentScenes do
   end
 
   defp base_scene(app, theme, face_id, sigil, nodes, conduits, distance, scene_version) do
-    %{
-      "app" => app,
-      "theme" => theme,
-      "activeFace" => face_id,
-      "sceneVersion" => scene_version,
-      "camera" => %{"type" => "oblique", "angle" => 315, "distance" => distance},
-      "faces" => [
-        %{
-          "id" => face_id,
-          "title" => face_id,
-          "sigil" => sigil,
-          "orientation" => "front",
-          "nodes" => nodes,
-          "conduits" => conduits
-        }
-      ]
-    }
+    {commands, markers} = assemble_face(nodes, conduits)
+
+    face =
+      SceneSpec.face(face_id, face_id, sigil, commands, markers, orientation: "front")
+
+    SceneSpec.scene(app, theme, face_id, face,
+      distance: distance,
+      scene_version: scene_version
+    )
   end
 
   defp focusable_node(
@@ -852,5 +846,193 @@ defmodule PlatformPhxWeb.RegentScenes do
 
   defp normalize_focus(focus, valid_keys, default) do
     if focus in valid_keys, do: focus, else: default
+  end
+
+  defp scene_from_entries(scene) do
+    [face] = Map.fetch!(scene, "faces")
+    {commands, markers} = assemble_face(Map.get(face, "nodes", []), Map.get(face, "conduits", []))
+
+    raw_face =
+      SceneSpec.face(
+        Map.fetch!(face, "id"),
+        Map.get(face, "title", Map.fetch!(face, "id")),
+        Map.get(face, "sigil", "gate"),
+        commands,
+        markers,
+        orientation: Map.get(face, "orientation", "front"),
+        landmark_target_id: Map.get(face, "landmarkTargetId"),
+        meta: Map.get(face, "meta")
+      )
+
+    SceneSpec.scene(
+      Map.get(scene, "app", "platform"),
+      Map.get(scene, "theme", "platform"),
+      Map.get(scene, "activeFace", Map.fetch!(face, "id")),
+      raw_face,
+      distance: get_in(scene, ["camera", "distance"]) || 24,
+      scene_version: Map.get(scene, "sceneVersion", 1),
+      meta: Map.get(scene, "meta")
+    )
+  end
+
+  defp assemble_face(nodes, conduits) do
+    nodes_by_id = Map.new(nodes, &{&1["id"], &1})
+    entries = Enum.map(nodes, &node_entry/1)
+
+    commands =
+      Enum.flat_map(entries, & &1.commands) ++
+        Enum.flat_map(conduits, &conduit_commands(&1, nodes_by_id))
+
+    markers = Enum.map(entries, & &1.marker)
+    {commands, markers}
+  end
+
+  defp node_entry(node) do
+    node_id = node["id"]
+    status = node["status"] || "available"
+    position = node["position"] || [0, 0, 0]
+    size = node["size"] || [1, 1, 1]
+    geometry = node["geometry"] || "cube"
+    target_id = node_id
+    hover_cycle = Map.get(node, "hoverCycle")
+    meta = Map.get(node, "meta", %{})
+
+    marker =
+      SceneSpec.marker(target_id,
+        label: node["label"] || node_id,
+        sigil: node["sigil"],
+        kind: node["kind"],
+        status: status,
+        meta: meta,
+        command_id: "#{node_id}:body"
+      )
+
+    commands =
+      case geometry do
+        "socket" ->
+          [
+            SceneSpec.add_sphere(
+              "#{node_id}:body",
+              SceneSpec.sphere_center(position, size),
+              SceneSpec.sphere_radius(size),
+              style: SceneSpec.node_style(status),
+              hover_cycle: hover_cycle,
+              target_id: target_id,
+              scale: SceneSpec.socket_scale(size, status),
+              scale_origin: [0.5, 1, 0.5]
+            )
+          ]
+
+        "carved_cube" ->
+          [
+            SceneSpec.add_box(
+              "#{node_id}:body",
+              position,
+              size,
+              style: SceneSpec.node_style(status),
+              hover_cycle: hover_cycle,
+              target_id: target_id
+            ),
+            SceneSpec.remove_box(
+              "#{node_id}:carve",
+              SceneSpec.inset_position(position),
+              SceneSpec.inset_size(size),
+              style: SceneSpec.carved_wall_style(status),
+              target_id: target_id
+            )
+          ]
+
+        "ghost" ->
+          [
+            SceneSpec.add_box(
+              "#{node_id}:body",
+              position,
+              size,
+              style: SceneSpec.ghost_style(),
+              opaque: false,
+              hover_cycle: hover_cycle,
+              target_id: target_id
+            )
+          ]
+
+        "reliquary" ->
+          [
+            SceneSpec.add_box(
+              "#{node_id}:body",
+              position,
+              size,
+              style: SceneSpec.node_style(status),
+              hover_cycle: hover_cycle,
+              target_id: target_id,
+              scale: [0.88, 0.92, 0.88],
+              scale_origin: [0.5, 1, 0.5]
+            )
+          ]
+
+        "monolith" ->
+          [
+            SceneSpec.add_box(
+              "#{node_id}:body",
+              position,
+              size,
+              style: SceneSpec.node_style(status),
+              hover_cycle: hover_cycle,
+              target_id: target_id,
+              scale: [0.9, 1, 0.9],
+              scale_origin: [0.5, 1, 0.5]
+            )
+          ]
+
+        _ ->
+          [
+            SceneSpec.add_box(
+              "#{node_id}:body",
+              position,
+              size,
+              style: SceneSpec.node_style(status),
+              opaque: Map.get(node, "opaque"),
+              hover_cycle: hover_cycle,
+              target_id: target_id,
+              scale: SceneSpec.default_scale(node, status),
+              scale_origin: SceneSpec.default_scale_origin(node, status)
+            )
+          ]
+      end
+
+    %{commands: commands, marker: marker}
+  end
+
+  defp conduit_commands(conduit, nodes_by_id) do
+    with from_node when is_map(from_node) <- Map.get(nodes_by_id, conduit["from"]),
+         to_node when is_map(to_node) <- Map.get(nodes_by_id, conduit["to"]) do
+      base =
+        SceneSpec.add_line(
+          "#{conduit["id"]}:line",
+          SceneSpec.anchor(Map.fetch!(from_node, "position"), Map.fetch!(from_node, "size")),
+          SceneSpec.anchor(Map.fetch!(to_node, "position"), Map.fetch!(to_node, "size")),
+          radius: conduit["radius"] || 0.75,
+          shape: conduit["shape"] || "rounded",
+          style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+          hover_cycle: conduit["hoverCycle"]
+        )
+
+      waypoints =
+        conduit
+        |> Map.get("waypoints", [])
+        |> Enum.with_index()
+        |> Enum.map(fn {point, index} ->
+          SceneSpec.add_sphere(
+            "#{conduit["id"]}:waypoint:#{index}",
+            point,
+            0.6,
+            style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+            hover_cycle: conduit["hoverCycle"]
+          )
+        end)
+
+      [base | waypoints]
+    else
+      _ -> []
+    end
   end
 end

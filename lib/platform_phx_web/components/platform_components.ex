@@ -36,7 +36,7 @@ defmodule PlatformPhxWeb.PlatformComponents do
             class={"pp-card-surface pp-surface-single #{@card.theme_class}"}
             scene={@card.scene}
             scene_version={@card.scene_version}
-            selected_node_id={@card.selected_node_id}
+            selected_target_id={@card.selected_target_id}
             theme={@card.theme}
             camera_distance={20}
           />
@@ -127,7 +127,7 @@ defmodule PlatformPhxWeb.PlatformComponents do
           class={"pp-demo-surface pp-surface-single #{@sample.theme_class}"}
           scene={@sample.scene}
           scene_version={@sample.scene_version}
-          selected_node_id={@sample.selected_node_id}
+          selected_target_id={@sample.selected_target_id}
           theme={@sample.theme}
           camera_distance={@sample.camera_distance}
         />

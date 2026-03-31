@@ -28,11 +28,15 @@ defmodule PlatformPhxWeb.Router do
     pipe_through :api
 
     get "/basenames/config", Api.BasenamesController, :config
+    get "/basenames/allowances", Api.BasenamesController, :allowances
     get "/basenames/allowance", Api.BasenamesController, :allowance
     get "/basenames/availability", Api.BasenamesController, :availability
+    get "/basenames/credits", Api.BasenamesController, :credits
     get "/basenames/owned", Api.BasenamesController, :owned
     get "/basenames/recent", Api.BasenamesController, :recent
+    post "/basenames/credit", Api.BasenamesController, :credit
     post "/basenames/mint", Api.BasenamesController, :mint
+    post "/basenames/use", Api.BasenamesController, :use
 
     get "/agentlaunch/auctions", Api.AgentLaunchController, :auctions
     get "/opensea", Api.OpenseaController, :index

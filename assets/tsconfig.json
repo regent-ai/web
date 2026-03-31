@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

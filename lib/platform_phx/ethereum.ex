@@ -46,9 +46,11 @@ defmodule PlatformPhx.Ethereum do
       raise ArgumentError, message: inspect(reason)
   end
 
-  def synthetic_tx_hash(parts) when is_list(parts) do
-    payload = Enum.join(parts, ":")
-    "0x" <> Base.encode16(:crypto.hash(:sha256, payload), case: :lower)
+  def synthetic_tx_hash(parts) when is_list(parts),
+    do: parts |> Enum.join(":") |> synthetic_tx_hash()
+
+  def synthetic_tx_hash(payload) when is_binary(payload) do
+    run_cast!(["keccak", payload])
   end
 
   def json_rpc(url, method, params) do

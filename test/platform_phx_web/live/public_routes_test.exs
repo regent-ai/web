@@ -25,15 +25,21 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert dashboard_html =~ "curl -fsSL https://regents.sh/skill.md"
 
     {:ok, _demo, demo_html} = live(conn, "/heerich-demo")
-    assert demo_html =~ "Heerich HoverCycle Lab"
+    assert demo_html =~ "Heerich 0.5.0 Lab"
     assert demo_html =~ "platform-heerich-demo-shell"
     assert demo_html =~ "platform-heerich-demo-surface-default-primitive"
     assert demo_html =~ "platform-heerich-demo-surface-explode-cluster"
+    assert demo_html =~ "platform-heerich-demo-surface-scaled-voxels"
+    assert demo_html =~ "platform-procedural-demo-where"
+    assert demo_html =~ "platform-procedural-demo-style"
+    assert demo_html =~ "platform-procedural-demo-scale"
     assert demo_html =~ "hoverCycle: true"
     assert demo_html =~ "includeMarker"
     assert demo_html =~ "includePolygons"
     assert demo_html =~ "loopDelayMs"
     assert demo_html =~ "demo-explode-cluster"
+    assert demo_html =~ "addWhere"
+    assert demo_html =~ "styleBox / styleLine"
 
     {:ok, _techtree, techtree_html} = live(conn, "/techtree")
     assert techtree_html =~ "platform-techtree-surface"

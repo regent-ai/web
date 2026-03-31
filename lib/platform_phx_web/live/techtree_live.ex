@@ -58,7 +58,7 @@ defmodule PlatformPhxWeb.TechtreeLive do
               class="pp-route-surface rg-regent-theme-techtree"
               scene={@regent_scene}
               scene_version={@regent_scene_version}
-              selected_node_id={@regent_selected_node_id}
+              selected_target_id={@regent_selected_target_id}
               theme="techtree"
               camera_distance={26}
             >
@@ -157,7 +157,7 @@ defmodule PlatformPhxWeb.TechtreeLive do
     socket
     |> assign(:bridge_focus, focus)
     |> assign(:bridge_content, RegentScenes.techtree_content(focus))
-    |> assign(:regent_selected_node_id, "techtree:#{focus}")
+    |> assign(:regent_selected_target_id, "techtree:#{focus}")
     |> assign(:regent_scene_version, next_version)
     |> assign(:regent_scene, RegentScenes.techtree_bridge(focus, next_version))
   end

@@ -16,14 +16,14 @@ defmodule PlatformPhxWeb.RegentScenesTest do
     assert {"Past board", "9"} in content.table
   end
 
-  test "bridge scenes focus the selected node" do
+  test "bridge scenes focus the selected target" do
     techtree_scene = RegentScenes.techtree_bridge("review", 3)
     autolaunch_scene = RegentScenes.autolaunch_bridge(2, 7, "settlement", 5)
     dashboard_scene = RegentScenes.dashboard_header("guardrails", 8)
 
-    assert focused_node_id(techtree_scene) == "techtree:review"
-    assert focused_node_id(autolaunch_scene) == "autolaunch:settlement"
-    assert focused_node_id(dashboard_scene) == "platform:guardrails"
+    assert focused_target_id(techtree_scene) == "techtree:review"
+    assert focused_target_id(autolaunch_scene) == "autolaunch:settlement"
+    assert focused_target_id(dashboard_scene) == "platform:guardrails"
   end
 
   test "home scenes expose hover cycle primitives for single nodes and grouped shapes" do
@@ -31,35 +31,35 @@ defmodule PlatformPhxWeb.RegentScenesTest do
     autolaunch_scene = RegentScenes.home_scene("autolaunch")
     dashboard_scene = RegentScenes.home_scene("dashboard")
 
-    assert hover_cycle_for_node(techtree_scene, "techtree:root")["mode"] == "collapse"
-    assert hover_cycle_for_node(dashboard_scene, "platform:gate")["mode"] == "phase"
+    assert hover_cycle_for_target(techtree_scene, "techtree:root")["mode"] == "collapse"
+    assert hover_cycle_for_target(dashboard_scene, "platform:gate")["mode"] == "phase"
 
-    autolaunch_group = hover_cycle_for_node(autolaunch_scene, "autolaunch:crucible")["group"]
+    autolaunch_group = hover_cycle_for_target(autolaunch_scene, "autolaunch:crucible")["group"]
 
     assert autolaunch_group == "autolaunch-home-cluster"
 
-    assert hover_cycle_for_node(autolaunch_scene, "autolaunch:market")["group"] ==
+    assert hover_cycle_for_target(autolaunch_scene, "autolaunch:market")["group"] ==
              autolaunch_group
 
     assert hover_cycle_for_conduit(autolaunch_scene, "autolaunch:edge:1")["group"] ==
              autolaunch_group
   end
 
-  defp focused_node_id(%{"faces" => [%{"nodes" => nodes} | _rest]}) do
-    nodes
-    |> Enum.find(fn node -> node["status"] == "focused" end)
+  defp focused_target_id(%{"faces" => [%{"markers" => markers} | _rest]}) do
+    markers
+    |> Enum.find(fn marker -> marker["status"] == "focused" end)
     |> Map.fetch!("id")
   end
 
-  defp hover_cycle_for_node(%{"faces" => [%{"nodes" => nodes} | _rest]}, id) do
-    nodes
-    |> Enum.find(fn node -> node["id"] == id end)
+  defp hover_cycle_for_target(%{"faces" => [%{"commands" => commands} | _rest]}, id) do
+    commands
+    |> Enum.find(fn command -> command["targetId"] == id end)
     |> Map.fetch!("hoverCycle")
   end
 
-  defp hover_cycle_for_conduit(%{"faces" => [%{"conduits" => conduits} | _rest]}, id) do
-    conduits
-    |> Enum.find(fn conduit -> conduit["id"] == id end)
+  defp hover_cycle_for_conduit(%{"faces" => [%{"commands" => commands} | _rest]}, id) do
+    commands
+    |> Enum.find(fn command -> command["id"] == "#{id}:line" end)
     |> Map.fetch!("hoverCycle")
   end
 end

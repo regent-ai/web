@@ -98,7 +98,7 @@ defmodule PlatformPhxWeb.DashboardLive do
             class="pp-dashboard-header-surface pp-surface-single rg-regent-theme-platform"
             scene={@regent_scene}
             scene_version={@regent_scene_version}
-            selected_node_id={@regent_selected_node_id}
+            selected_target_id={@regent_selected_target_id}
             theme="platform"
             camera_distance={24}
           />
@@ -135,7 +135,7 @@ defmodule PlatformPhxWeb.DashboardLive do
     socket
     |> assign(:bridge_focus, focus)
     |> assign(:dashboard_content, RegentScenes.dashboard_content(focus))
-    |> assign(:regent_selected_node_id, "platform:#{focus}")
+    |> assign(:regent_selected_target_id, "platform:#{focus}")
     |> assign(:regent_scene_version, next_version)
     |> assign(:regent_scene, RegentScenes.dashboard_header(focus, next_version))
   end

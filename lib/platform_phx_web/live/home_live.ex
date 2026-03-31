@@ -152,15 +152,15 @@ defmodule PlatformPhxWeb.HomeLive do
       card
       |> Map.put(:scene, scene)
       |> Map.put(:scene_version, scene["sceneVersion"] || 1)
-      |> Map.put(:selected_node_id, scene_selected_node_id(scene))
+      |> Map.put(:selected_target_id, scene_selected_target_id(scene))
     end)
   end
 
-  defp scene_selected_node_id(%{
-         "faces" => [%{"nodes" => [%{"id" => id} | _node_rest]} | _face_rest]
+  defp scene_selected_target_id(%{
+         "faces" => [%{"markers" => [%{"id" => id} | _marker_rest]} | _face_rest]
        })
        when is_binary(id),
        do: id
 
-  defp scene_selected_node_id(_scene), do: nil
+  defp scene_selected_target_id(_scene), do: nil
 end

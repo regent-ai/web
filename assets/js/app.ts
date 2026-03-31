@@ -1,11 +1,12 @@
 import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket, type HooksOptions } from "phoenix_live_view";
+import { Heerich } from "heerich";
 import topbar from "../vendor/topbar.cjs";
 import { mountDashboardRoot, unmountDashboardRoot } from "./dashboard/root";
 import {
   hooks as regentHooks,
-  installPinnedHeerich,
+  installHeerich,
 } from "../../../../packages/regent_ui/assets/js/regent";
 import {
   mountBridgeReveal,
@@ -14,6 +15,7 @@ import {
   mountHomeReveal,
   revertAnimation,
 } from "./animations";
+import { mountProceduralHeerichDemo } from "./heerich_demo";
 
 type HookContext = {
   el: Element;
@@ -54,11 +56,19 @@ const HomeRevealHook = createRevealHook(mountHomeReveal);
 const BridgeRevealHook = createRevealHook(mountBridgeReveal);
 const DashboardRevealHook = createRevealHook(mountDashboardReveal);
 const DemoRevealHook = createRevealHook(mountDemoReveal);
+const HeerichProceduralDemoHook = {
+  mounted(this: HookContext) {
+    mountProceduralHeerichDemo(this.el as HTMLElement);
+  },
+  updated(this: HookContext) {
+    mountProceduralHeerichDemo(this.el as HTMLElement);
+  },
+};
 
 const csrfToken =
   document.querySelector("meta[name='csrf-token']")?.getAttribute("content") ?? "";
 
-installPinnedHeerich();
+installHeerich(Heerich);
 
 const hooks: HooksOptions = {
   ...regentHooks,
@@ -68,6 +78,7 @@ const hooks: HooksOptions = {
   AutolaunchReveal: BridgeRevealHook,
   DashboardReveal: DashboardRevealHook,
   DemoReveal: DemoRevealHook,
+  HeerichProceduralDemo: HeerichProceduralDemoHook,
 };
 
 const liveSocket = new LiveSocket("/live", Socket, {
