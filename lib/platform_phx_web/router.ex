@@ -18,10 +18,19 @@ defmodule PlatformPhxWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
+    live "/demo", DemoLive
     live "/heerich-demo", HeerichDemoLive
-    live "/dashboard", DashboardLive
-    live "/techtree", TechtreeLive
-    live "/autolaunch", AutolaunchLive
+
+    live_session :platform_app do
+      live "/overview", OverviewLive
+      live "/logos", LogosLive
+      live "/services", DashboardLive
+      live "/bug-report", BugReportLive
+      live "/techtree", TechtreeLive
+      live "/autolaunch", AutolaunchLive
+      live "/regent-cli", RegentCliLive
+      live "/token-info", TokenInfoLive
+    end
   end
 
   scope "/api", PlatformPhxWeb do
@@ -37,6 +46,8 @@ defmodule PlatformPhxWeb.Router do
     post "/basenames/credit", Api.BasenamesController, :credit
     post "/basenames/mint", Api.BasenamesController, :mint
     post "/basenames/use", Api.BasenamesController, :use
+    post "/bug-report", Api.ReportController, :bug
+    post "/security-report", Api.ReportController, :security
 
     get "/agentlaunch/auctions", Api.AgentLaunchController, :auctions
     get "/opensea", Api.OpenseaController, :index

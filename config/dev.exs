@@ -3,16 +3,47 @@ import Config
 pg_username = System.get_env("PGUSER") || System.get_env("USER") || "postgres"
 pg_password = System.get_env("PGPASSWORD")
 pg_hostname = System.get_env("PGHOST") || "localhost"
+database_url = System.get_env("DATABASE_URL")
+
+ssl_enabled =
+  case database_url do
+    value when is_binary(value) ->
+      case URI.parse(value) do
+        %URI{query: query} when is_binary(query) ->
+          params = URI.decode_query(query)
+          ssl = params["ssl"] |> to_string() |> String.trim() |> String.downcase()
+          sslmode = params["sslmode"] |> to_string() |> String.trim() |> String.downcase()
+          ssl in ~w(1 true yes on) or sslmode in ~w(require verify-ca verify-full)
+
+        _other ->
+          false
+      end
+
+    _other ->
+      false
+  end
 
 # Configure your database
-config :platform_phx, PlatformPhx.Repo,
-  username: pg_username,
-  password: pg_password,
-  hostname: pg_hostname,
-  database: "platform_phx_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+config :platform_phx,
+       PlatformPhx.Repo,
+       if(is_binary(database_url) and String.trim(database_url) != "",
+         do: [
+           ssl: ssl_enabled,
+           url: database_url,
+           stacktrace: true,
+           show_sensitive_data_on_connection_error: true,
+           pool_size: 10
+         ],
+         else: [
+           username: pg_username,
+           password: pg_password,
+           hostname: pg_hostname,
+           database: "platform_phx_dev",
+           stacktrace: true,
+           show_sensitive_data_on_connection_error: true,
+           pool_size: 10
+         ]
+       )
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -47,13 +47,13 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
         <main id="platform-heerich-demo" class="pp-demo-stage" aria-label="Heerich hover cycle demos">
           <section class="pp-demo-hero" data-demo-block>
             <div class="space-y-4">
-              <p class="pp-home-kicker">Heerich 0.5.0 Lab</p>
+              <p class="pp-home-kicker">Heerich 0.6.4 Lab</p>
               <div class="space-y-3">
                 <h1 class="pp-home-title">
                   Shared Regent surfaces, raw Heerich commands, and direct procedural scenes.
                 </h1>
                 <p class="pp-home-copy">
-                  This page now covers the full Heerich 0.5.0 path inside `platform_phx`: shared Regent surfaces driven by raw commands, carved wall styling, voxel scaling, restyling, and a direct JS-only gallery for procedural shapes that do not belong in Phoenix scene JSON.
+                  This page now covers the full Heerich 0.6.4 path inside the `/web` app: shared Regent surfaces driven by raw commands, carved wall styling, voxel scaling, restyling, and a direct JS-only gallery for procedural shapes that do not belong in Phoenix scene JSON.
                 </p>
               </div>
             </div>
@@ -82,53 +82,57 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
                 </p>
               </div>
 
-              <table class="rg-table pp-demo-atlas-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Control</th>
-                    <th scope="col">What it changes</th>
-                    <th scope="col">Seen on</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <%= for {label, meaning, example} <- @knob_rows do %>
+              <div class="pp-table-scroll">
+                <table class="rg-table pp-demo-atlas-table">
+                  <thead>
                     <tr>
-                      <th scope="row">{label}</th>
-                      <td>{meaning}</td>
-                      <td>{example}</td>
+                      <th scope="col">Control</th>
+                      <th scope="col">What it changes</th>
+                      <th scope="col">Seen on</th>
                     </tr>
-                  <% end %>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <%= for {label, meaning, example} <- @knob_rows do %>
+                      <tr>
+                        <th scope="row">{label}</th>
+                        <td>{meaning}</td>
+                        <td>{example}</td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
             </article>
 
             <article class="pp-demo-panel">
               <div class="space-y-3">
-                <p class="pp-home-kicker">Heerich 0.5 additions</p>
+                <p class="pp-home-kicker">Heerich 0.6.4 additions</p>
                 <h2 class="pp-route-panel-title">What the raw command path unlocks</h2>
                 <p class="pp-panel-copy">
                   These are the new features this upgrade is using directly, either in the shipped Regent scenes or in the demos on this page.
                 </p>
               </div>
 
-              <table class="rg-table pp-demo-atlas-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Feature</th>
-                    <th scope="col">What it changes</th>
-                    <th scope="col">Where it shows up</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <%= for {label, meaning, example} <- @feature_rows do %>
+              <div class="pp-table-scroll">
+                <table class="rg-table pp-demo-atlas-table">
+                  <thead>
                     <tr>
-                      <th scope="row">{label}</th>
-                      <td>{meaning}</td>
-                      <td>{example}</td>
+                      <th scope="col">Feature</th>
+                      <th scope="col">What it changes</th>
+                      <th scope="col">Where it shows up</th>
                     </tr>
-                  <% end %>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    <%= for {label, meaning, example} <- @feature_rows do %>
+                      <tr>
+                        <th scope="row">{label}</th>
+                        <td>{meaning}</td>
+                        <td>{example}</td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
             </article>
 
             <article class="pp-demo-panel">
@@ -174,24 +178,24 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
                 Procedural shapes that stay outside Phoenix scene JSON
               </h2>
               <p class="pp-panel-copy">
-                These three examples are rendered directly in the browser with the real Heerich runtime. They use `addWhere`, functional style, and functional scale, which stay on the JS side by design instead of crossing the LiveView boundary.
+                These three examples are rendered directly in the browser with the real Heerich runtime. They use `applyGeometry(type: "fill")`, functional style, and functional scale, which stay on the JS side by design instead of crossing the LiveView boundary.
               </p>
             </div>
 
             <div class="pp-procedural-grid">
               <article class="pp-procedural-card">
                 <div class="space-y-2">
-                  <p class="pp-home-kicker">addWhere</p>
+                  <p class="pp-home-kicker">applyGeometry(type: "fill")</p>
                   <h3 class="pp-route-panel-title">Procedural torus shell</h3>
                   <p class="pp-panel-copy">
                     A shape defined entirely by a test function over `(x, y, z)`, not by boxes or spheres.
                   </p>
                 </div>
                 <div
-                  id="platform-procedural-demo-where"
+                  id="platform-procedural-demo-fill"
                   class="pp-procedural-canvas"
                   phx-hook="HeerichProceduralDemo"
-                  data-demo-kind="where"
+                  data-demo-kind="fill"
                 >
                 </div>
               </article>

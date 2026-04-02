@@ -18,10 +18,14 @@ defmodule PlatformPhxWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <div class={[
-      @theme_class,
-      "pp-platform-layout min-h-screen bg-[radial-gradient(circle_at_12%_14%,color-mix(in_oklch,var(--accent)_18%,transparent),transparent_34%),radial-gradient(circle_at_84%_16%,color-mix(in_oklch,var(--chart-3)_12%,transparent),transparent_32%),linear-gradient(180deg,color-mix(in_oklch,var(--background)_88%,var(--brand-paper)_12%),var(--background))]"
-    ]}>
+    <div
+      id="platform-layout-root"
+      class={[
+        @theme_class,
+        "pp-platform-layout min-h-screen"
+      ]}
+      phx-hook="ColorModeToggle"
+    >
       <a
         href="#main-content"
         class="sr-only rounded-xl bg-[color:var(--background)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50"
@@ -31,57 +35,133 @@ defmodule PlatformPhxWeb.Layouts do
 
       <%= if @chrome == :app do %>
         <div class="mx-auto flex min-h-screen max-w-[1600px] gap-3 p-3 lg:p-4">
-          <aside class="hidden w-72 shrink-0 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--sidebar)_86%,transparent)] p-5 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)] lg:flex lg:flex-col">
-            <div class="space-y-3">
-              <.link navigate={~p"/"} class="flex items-center gap-3 text-[color:var(--foreground)]">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_92%,transparent)]">
-                  <img src={~p"/images/logo.svg"} alt="Regent" class="h-7 w-7" />
-                </div>
-                <div>
-                  <p class="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
-                    Phoenix Twin
-                  </p>
-                  <p class="font-display text-xl">Regent</p>
-                </div>
-              </.link>
-              <p class="max-w-xs text-sm leading-6 text-[color:var(--muted-foreground)]">
-                Identity, launch, and redeem surfaces rebuilt in Phoenix with a smaller navigation shell.
-              </p>
-            </div>
+          <.background_grid
+            id="platform-app-background"
+            class={["pp-route-background-grid", app_background_theme_class(@active_nav)]}
+            cube_width={40}
+            cube_height={40}
+            cube_depth={1}
+            hide_cursor={true}
+            data-suppress-selector="[data-background-suppress]"
+            data-trail-ms="880"
+          />
 
-            <nav class="mt-8 space-y-2" aria-label="Primary">
-              <.nav_link current={@active_nav == "dashboard"} href={~p"/dashboard"} label="Dashboard" />
-              <.nav_link current={@active_nav == "techtree"} href={~p"/techtree"} label="Techtree" />
-              <.nav_link
-                current={@active_nav == "autolaunch"}
-                href={~p"/autolaunch"}
-                label="Autolaunch"
-              />
-            </nav>
-
-            <div class="mt-auto rounded-[1.5rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_72%,transparent)] p-4">
-              <p class="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
-                Hard cutover
-              </p>
-              <p class="mt-3 text-sm leading-6 text-[color:var(--muted-foreground)]">
-                This app only keeps the four retained public routes. The rest of the old site is intentionally absent here.
-              </p>
-            </div>
-          </aside>
-
-          <div class="flex min-w-0 flex-1 flex-col rounded-[1.75rem] border border-[color:var(--border)] bg-[linear-gradient(180deg,color-mix(in_oklch,var(--card)_82%,transparent),color-mix(in_oklch,var(--card)_94%,var(--background)_6%)),radial-gradient(circle_at_top,color-mix(in_oklch,var(--accent)_14%,transparent),transparent_46%)] shadow-[0_26px_70px_-44px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
-            <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-5 py-4">
-              <div>
-                <p class="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
-                  Regent Platform
-                </p>
-                <h1 class="font-display text-2xl">Phoenix Surface</h1>
+          <div class="pp-sidebar-column hidden w-72 shrink-0 self-stretch lg:flex lg:flex-col">
+            <aside
+              data-background-suppress
+              class="pp-sidebar-shell relative isolate z-10 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--sidebar)] p-5 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]"
+            >
+              <div class="pp-sidebar-brand-row">
+                <.link navigate={~p"/"} class="flex items-center gap-3 text-[color:var(--foreground)]">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)]">
+                    <img
+                      src={~p"/images/regents-logo.png"}
+                      alt="Regent"
+                      class="h-9 w-9 rounded-xl object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p class="font-display text-[1.7rem] font-black leading-none">Regents Home</p>
+                  </div>
+                </.link>
               </div>
-              <div class="flex items-center gap-2 lg:hidden">
+
+              <nav class="mt-8 space-y-2" aria-label="Primary">
+                <.nav_link current={@active_nav == "overview"} href={~p"/overview"} label="Overview" />
+                <.nav_link
+                  current={@active_nav == "token-info"}
+                  href={~p"/token-info"}
+                  label="Platform Token"
+                />
+                <.nav_link
+                  current={@active_nav == "services"}
+                  href={~p"/services"}
+                  label="Services"
+                />
+                <.nav_link current={@active_nav == "techtree"} href={~p"/techtree"} label="Techtree" />
+                <.nav_link
+                  current={@active_nav == "autolaunch"}
+                  href={~p"/autolaunch"}
+                  label="Autolaunch"
+                />
+                <.nav_link
+                  current={@active_nav == "regent-cli"}
+                  href={~p"/regent-cli"}
+                  label="Regent CLI"
+                />
+                <.nav_link
+                  current={@active_nav == "bug-report"}
+                  href={~p"/bug-report"}
+                  label="Bug Report"
+                />
+                <.external_nav_link
+                  href="https://news.regents.sh"
+                  label="News"
+                />
+                <.external_nav_link
+                  href="https://github.com/orgs/regent-ai/repositories"
+                  label="Github"
+                />
+                <div id="sidebar-community" class="pp-sidebar-community" phx-hook="SidebarCommunity">
+                  <button
+                    type="button"
+                    class="pp-sidebar-community-toggle"
+                    data-community-toggle
+                    aria-expanded="false"
+                    aria-controls="sidebar-community-drawer"
+                  >
+                    <span>Community</span>
+                    <span aria-hidden="true" data-community-icon>↓</span>
+                  </button>
+
+                  <div
+                    id="sidebar-community-drawer"
+                    class="pp-sidebar-community-drawer"
+                    data-community-panel
+                    hidden
+                  >
+                    <div class="pp-sidebar-community-grid">
+                      <.community_links />
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </aside>
+          </div>
+
+          <div class={[
+            "pp-platform-content-shell flex min-w-0 flex-1 flex-col rounded-[1.75rem] border border-[color:var(--border)] shadow-[0_26px_70px_-44px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]",
+            @active_nav == "token-info" && "pp-platform-content-shell--token"
+          ]}>
+            <header
+              data-background-suppress
+              class="flex flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-4 py-4 sm:px-5"
+            >
+              <div>
+                <p class="pp-chrome-eyebrow">
+                  {chrome_eyebrow(@active_nav)}
+                </p>
+                <h1 class="pp-chrome-title">{chrome_title(@active_nav)}</h1>
+              </div>
+              <div
+                data-background-suppress
+                class="flex w-full items-center gap-2 overflow-x-auto pb-1 pr-1 lg:hidden"
+                aria-label="Quick navigation"
+              >
                 <.nav_chip
-                  current={@active_nav == "dashboard"}
-                  href={~p"/dashboard"}
-                  label="Dashboard"
+                  current={@active_nav == "overview"}
+                  href={~p"/overview"}
+                  label="Overview"
+                />
+                <.nav_chip
+                  current={@active_nav == "services"}
+                  href={~p"/services"}
+                  label="Services"
+                />
+                <.nav_chip
+                  current={@active_nav == "token-info"}
+                  href={~p"/token-info"}
+                  label="Platform Token"
                 />
                 <.nav_chip current={@active_nav == "techtree"} href={~p"/techtree"} label="Techtree" />
                 <.nav_chip
@@ -89,16 +169,35 @@ defmodule PlatformPhxWeb.Layouts do
                   href={~p"/autolaunch"}
                   label="Autolaunch"
                 />
+                <.nav_chip
+                  current={@active_nav == "regent-cli"}
+                  href={~p"/regent-cli"}
+                  label="Regent CLI"
+                />
+                <.nav_chip
+                  current={@active_nav == "bug-report"}
+                  href={~p"/bug-report"}
+                  label="Bug Report"
+                />
               </div>
             </header>
 
             <main
               id="main-content"
+              data-background-suppress
               class={["min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6", @content_class]}
               tabindex="-1"
             >
               {render_slot(@inner_block)}
             </main>
+
+            <footer
+              data-background-suppress
+              class="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--border)] px-5 py-4 text-sm text-[color:var(--muted-foreground)]"
+            >
+              <p>&copy; Regents Labs 2026</p>
+              <.footer_social_links />
+            </footer>
           </div>
         </div>
       <% else %>
@@ -127,9 +226,9 @@ defmodule PlatformPhxWeb.Layouts do
       class={[
         "flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition",
         @current &&
-          "border-[color:var(--ring)] bg-[color:color-mix(in_oklch,var(--sidebar-accent)_80%,transparent)] text-[color:var(--foreground)] shadow-[0_16px_36px_-28px_color-mix(in_oklch,var(--brand-ink)_60%,transparent)]",
+          "border-[color:var(--ring)] bg-[color:var(--sidebar-accent)] text-[color:var(--foreground)] shadow-[0_16px_36px_-28px_color-mix(in_oklch,var(--brand-ink)_60%,transparent)]",
         !@current &&
-          "border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_58%,transparent)] text-[color:var(--muted-foreground)] hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
+          "border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--muted-foreground)] hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
       ]}
     >
       <span>{@label}</span>
@@ -147,15 +246,192 @@ defmodule PlatformPhxWeb.Layouts do
     <.link
       navigate={@href}
       class={[
-        "rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.16em] transition",
+        "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.16em] transition",
         @current &&
-          "border-[color:var(--ring)] bg-[color:color-mix(in_oklch,var(--accent)_28%,transparent)] text-[color:var(--foreground)]",
+          "border-[color:var(--ring)] bg-[color:var(--sidebar-accent)] text-[color:var(--foreground)]",
         !@current &&
-          "border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_72%,transparent)] text-[color:var(--muted-foreground)]"
+          "border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--muted-foreground)]"
       ]}
     >
       {@label}
     </.link>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+
+  defp external_nav_link(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      target="_blank"
+      rel="noreferrer"
+      class="flex items-center justify-between rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] px-4 py-3 text-sm text-[color:var(--muted-foreground)] transition hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
+    >
+      <span>{@label}</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    """
+  end
+
+  defp app_background_theme_class("techtree"), do: "rg-regent-theme-techtree"
+  defp app_background_theme_class("autolaunch"), do: "rg-regent-theme-autolaunch"
+  defp app_background_theme_class(_active_nav), do: "rg-regent-theme-platform"
+
+  defp community_links(assigns) do
+    ~H"""
+    <a
+      href="https://x.com/regents_sh"
+      target="_blank"
+      rel="noreferrer"
+      class="pp-sidebar-community-link"
+      aria-label="Regents Labs on X"
+      title="Regents Labs on X"
+    >
+      <img src={~p"/images/xicon.png"} alt="" class="pp-home-footer-icon-image" />
+    </a>
+
+    <a
+      href="https://farcaster.xyz/regent"
+      target="_blank"
+      rel="noreferrer"
+      class="pp-sidebar-community-link"
+      aria-label="Regent on Farcaster"
+      title="Regent on Farcaster"
+    >
+      <img src={~p"/images/farcastericon.png"} alt="" class="pp-home-footer-icon-image" />
+    </a>
+
+    <a
+      href="https://discord.gg/regents"
+      target="_blank"
+      rel="noreferrer"
+      class="pp-sidebar-community-link"
+      aria-label="Regents on Discord"
+      title="Regents on Discord"
+    >
+      <img src={~p"/images/discordicon.png"} alt="" class="pp-home-footer-icon-image" />
+    </a>
+
+    <a
+      href="https://github.com/orgs/regent-ai/repositories"
+      target="_blank"
+      rel="noreferrer"
+      class="pp-sidebar-community-link"
+      aria-label="Regents Labs GitHub"
+      title="Regents Labs GitHub"
+    >
+      <.github_mark class="size-5" />
+    </a>
+    """
+  end
+
+  def footer_social_links(assigns) do
+    ~H"""
+    <div class="pp-home-footer-links" aria-label="Regents Labs footer social links">
+      <button
+        id="platform-footer-voxel-classic"
+        type="button"
+        class="pp-home-footer-link pp-footer-voxel-toggle"
+        phx-hook="FooterVoxel"
+        data-color-mode-cycle
+        data-background-suppress
+        aria-label="Toggle light and dark mode"
+        aria-pressed="false"
+        title="Toggle light and dark mode"
+      >
+        <span class="pp-footer-voxel-scene" data-footer-voxel-scene aria-hidden="true"></span>
+      </button>
+
+      <a
+        href="https://x.com/regents_sh"
+        target="_blank"
+        rel="noreferrer"
+        class="pp-home-footer-link"
+        data-background-suppress
+        aria-label="Regents Labs on X"
+        title="Regents Labs on X"
+      >
+        <img src={~p"/images/xicon.png"} alt="" class="pp-home-footer-icon-image" />
+      </a>
+
+      <a
+        href="https://farcaster.xyz/regent"
+        target="_blank"
+        rel="noreferrer"
+        class="pp-home-footer-link"
+        data-background-suppress
+        aria-label="Regent on Farcaster"
+        title="Regent on Farcaster"
+      >
+        <img src={~p"/images/farcastericon.png"} alt="" class="pp-home-footer-icon-image" />
+      </a>
+
+      <a
+        href="https://discord.gg/regents"
+        target="_blank"
+        rel="noreferrer"
+        class="pp-home-footer-link"
+        data-background-suppress
+        aria-label="Regents on Discord"
+        title="Regents on Discord"
+      >
+        <img src={~p"/images/discordicon.png"} alt="" class="pp-home-footer-icon-image" />
+      </a>
+
+      <a
+        href="https://github.com/orgs/regent-ai/repositories"
+        target="_blank"
+        rel="noreferrer"
+        class="pp-home-footer-link"
+        data-background-suppress
+        aria-label="Regents Labs GitHub"
+        title="Regents Labs GitHub"
+      >
+        <.github_mark class="size-5" />
+      </a>
+
+      <a
+        href="https://www.geckoterminal.com/base/pools/0x4ed3b69ac263ad86482f609b2c2105f64bcfd3a7e02e8e078ec9fec1f0324bed"
+        target="_blank"
+        rel="noreferrer"
+        class="pp-home-footer-link"
+        data-background-suppress
+        aria-label="View $REGENT on GeckoTerminal"
+        title="View $REGENT on GeckoTerminal"
+      >
+        <img src={~p"/images/geckoterminallogo.png"} alt="" class="pp-home-footer-icon-image" />
+      </a>
+    </div>
+    """
+  end
+
+  defp chrome_eyebrow("overview"), do: "Regents Overview"
+  defp chrome_eyebrow("services"), do: "Services and Docs"
+  defp chrome_eyebrow("bug-report"), do: "Public Operator Ledger"
+  defp chrome_eyebrow("techtree"), do: "Shared Research and Eval Tree"
+  defp chrome_eyebrow("autolaunch"), do: "Raise agent capital"
+  defp chrome_eyebrow("regent-cli"), do: "Local Operator Surface"
+  defp chrome_eyebrow("token-info"), do: "Platform revenue token"
+  defp chrome_eyebrow(_), do: "Regents Labs"
+
+  defp chrome_title("overview"), do: "Overview"
+  defp chrome_title("services"), do: "Services"
+  defp chrome_title("bug-report"), do: "Bug Report Ledger"
+  defp chrome_title("techtree"), do: "Techtree"
+  defp chrome_title("autolaunch"), do: "Autolaunch"
+  defp chrome_title("regent-cli"), do: "Regent CLI"
+  defp chrome_title("token-info"), do: "Agent economies"
+  defp chrome_title(_), do: "Regents Home"
+
+  attr :class, :string, default: nil
+
+  defp github_mark(assigns) do
+    ~H"""
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class={@class}>
+      <path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.31 6.84 9.66.5.1.68-.22.68-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .08 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.08 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05A9.35 9.35 0 0 1 12 6.84c.85 0 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.64 1.03 2.76 0 3.95-2.34 4.81-4.58 5.07.36.32.68.95.68 1.91 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.24 10.24 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z" />
+    </svg>
     """
   end
 

@@ -55,12 +55,14 @@ defmodule PlatformPhx.AgentLaunchTest do
       notes: "closed"
     })
 
-    split = AgentLaunch.split_auctions(AgentLaunch.list_auctions())
+    auctions = AgentLaunch.list_auctions()
+    split = AgentLaunch.split_auctions(auctions)
 
     assert Enum.map(split.current, & &1.agent_name) == ["current.regent.eth"]
     assert Enum.map(split.past, & &1.agent_name) == ["past.regent.eth"]
 
-    payload = AgentLaunch.generated_payload()
+    payload = AgentLaunch.generated_payload(auctions)
+
     assert length(payload.auctions) == 2
     assert Enum.any?(payload.auctions, &(&1.agent_name == "current.regent.eth"))
   end

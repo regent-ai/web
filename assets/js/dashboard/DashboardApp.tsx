@@ -23,6 +23,7 @@ import {
   type CollectionKey,
 } from "./redeem-constants";
 import {
+  hasPrivySessionWallet,
   resolvePrivyChainId,
   usePrivyWalletClient,
   type PrivyEthereumWalletLike,
@@ -32,6 +33,7 @@ import {
   isTrackedRequestCurrent,
   startTrackedRequest,
 } from "./requests";
+import { attemptWalletCancel } from "./tx-cancel";
 import type {
   AllowanceResponse,
   AvailabilityResponse,
@@ -68,6 +70,7 @@ type ClaimDialogState = {
   status: "pending" | "success";
   fqdn: string | null;
   ensFqdn: string | null;
+  paymentTxHash: `0x${string}` | null;
 };
 
 type BasenameValidation = {
@@ -172,62 +175,173 @@ export function DashboardApp({ config }: { config: DashboardConfig }) {
         authenticated={authenticated}
         privyReady={privyReady}
         onConnect={() => login()}
-        onDisconnect={() => logout()}
+        onDisconnect={() => {
+          void logout();
+        }}
       />
 
-      <RedeemSection
-        config={config}
-        account={account}
-        chainId={chainId}
-        wallet={wallet}
-        walletClient={walletClient}
-        authenticated={authenticated}
-        privyReady={privyReady}
-        onConnect={() => login()}
-      />
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)]">
+        <RedeemSection
+          config={config}
+          account={account}
+          chainId={chainId}
+          wallet={wallet}
+          walletClient={walletClient}
+          authenticated={authenticated}
+          privyReady={privyReady}
+          onConnect={() => login()}
+        />
 
-      <NamesSection
-        config={config}
-        account={account}
-        chainId={chainId}
-        walletClient={walletClient}
-        authenticated={authenticated}
-        privyReady={privyReady}
-        onConnect={() => login()}
-      />
+        <NamesSection
+          config={config}
+          account={account}
+          chainId={chainId}
+          wallet={wallet}
+          walletClient={walletClient}
+          authenticated={authenticated}
+          privyReady={privyReady}
+          onConnect={() => login()}
+        />
+      </div>
     </div>
   );
 }
 
 function WalletStatus({
   account,
-  chainId,
   authenticated,
   privyReady,
   onConnect,
   onDisconnect,
 }: WalletSectionProps) {
-  const chainLabel =
-    chainId === base.id ? "Base" : chainId === mainnet.id ? "Ethereum" : "Not selected";
+  const [copiedAccount, setCopiedAccount] = React.useState(false);
+  const checkIconRef = React.useRef<HTMLSpanElement | null>(null);
+  const hasSessionWallet = hasPrivySessionWallet({ authenticated, account });
+
+  React.useEffect(() => {
+    if (!copiedAccount || !checkIconRef.current || prefersReducedMotion()) return;
+
+    animate(checkIconRef.current, {
+      opacity: [0, 1, 0],
+      scale: [0.72, 1, 0.88],
+      duration: 900,
+      ease: "outQuart",
+      onComplete: () => setCopiedAccount(false),
+    });
+  }, [copiedAccount]);
+
+  React.useEffect(() => {
+    if (!copiedAccount && checkIconRef.current) {
+      checkIconRef.current.style.opacity = "0";
+      checkIconRef.current.style.transform = "scale(0.72)";
+    }
+  }, [copiedAccount]);
 
   return (
-    <section className="rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_82%,transparent)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
+    <section className="rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
+      <div className="flex flex-col items-start gap-4">
+        <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
-            Shared Session
+            onchain account
           </p>
-          <h3 className="font-display text-2xl text-[color:var(--foreground)] sm:text-3xl">
-            One wallet powers both sections
-          </h3>
-          <p className="max-w-3xl text-sm leading-6 text-[color:var(--muted-foreground)]">
-            Redeem stays first. Name Claim stays second. Both use the same Privy session
-            so you do not reconnect between actions.
-          </p>
+          {hasSessionWallet ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <p className="break-all text-sm leading-6 text-[color:var(--foreground)]">
+                {account}
+              </p>
+              <button
+                type="button"
+                aria-label="Copy wallet address"
+                title="Copy wallet address"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[color:var(--icon-ink)] transition hover:text-[color:var(--foreground)]"
+                onClick={() => {
+                  void copyText(account!)
+                    .then(() => setCopiedAccount(true))
+                    .catch(() => setCopiedAccount(false));
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="relative inline-flex h-4 w-4 items-center justify-center"
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    className={[
+                      "absolute h-4 w-4 fill-none stroke-current transition-opacity duration-150",
+                      copiedAccount ? "opacity-0" : "opacity-100"
+                    ].join(" ")}
+                  >
+                    <rect
+                      x="5.25"
+                      y="2.25"
+                      width="8.5"
+                      height="10.5"
+                      rx="1.25"
+                      strokeWidth="1.25"
+                    />
+                    <path
+                      d="M3.25 10.75H2.75c-.83 0-1.5-.67-1.5-1.5v-7c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5v.5"
+                      strokeWidth="1.25"
+                      strokeLinecap="square"
+                    />
+                  </svg>
+                  <span
+                    ref={checkIconRef}
+                    className={[
+                      "absolute inline-flex opacity-0",
+                      copiedAccount ? "text-[color:var(--positive)]" : ""
+                    ].join(" ")}
+                    style={{ transform: "scale(0.72)" }}
+                  >
+                    <svg viewBox="0 0 16 16" className="h-4 w-4 fill-none stroke-current">
+                      <path
+                        d="m3.5 8.5 2.4 2.4L12.5 4.8"
+                        strokeWidth="1.7"
+                        strokeLinecap="square"
+                        strokeLinejoin="miter"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </button>
+              <a
+                href={`https://basescan.org/address/${account!}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="View wallet on Basescan"
+                title="View wallet on Basescan"
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[color:var(--icon-ink)] transition hover:bg-[color:color-mix(in_oklch,var(--icon-ink)_10%,transparent)] hover:text-[color:var(--foreground)]"
+              >
+                <img
+                  src="/images/baselogo.jpeg"
+                  alt=""
+                  className="h-4 w-4 rounded-full object-cover"
+                />
+              </a>
+              <a
+                href={`https://etherscan.io/address/${account!}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="View wallet on Etherscan"
+                title="View wallet on Etherscan"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:color-mix(in_oklch,var(--border)_88%,white_12%)] bg-[color:color-mix(in_oklch,var(--card)_92%,white_8%)] text-[color:var(--icon-ink)] shadow-[0_8px_18px_-14px_color-mix(in_oklch,var(--brand-ink)_40%,transparent)] transition hover:bg-[color:color-mix(in_oklch,var(--icon-ink)_8%,var(--card)_92%)] hover:text-[color:var(--foreground)]"
+              >
+                <img
+                  src="/images/ethereumlogo.png"
+                  alt=""
+                  className="h-[13px] w-[13px] object-contain"
+                />
+              </a>
+            </div>
+          ) : (
+            <p className="mt-2 break-all text-sm leading-6 text-[color:var(--foreground)]">
+              No wallet connected
+            </p>
+          )}
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          {account ? (
+        <div className="flex shrink-0 flex-wrap justify-start gap-3">
+          {hasSessionWallet ? (
             <Button tone="secondary" onClick={onDisconnect}>
               Disconnect
             </Button>
@@ -237,20 +351,10 @@ function WalletStatus({
               onClick={onConnect}
               tone="primary"
             >
-              {privyReady ? "Connect wallet" : "Loading wallet"}
+              {privyReady ? "Connect Account" : "Loading wallet"}
             </Button>
           )}
         </div>
-      </div>
-
-      <div className="mt-6 grid gap-3 md:grid-cols-3">
-        <MetricTile
-          label="Wallet"
-          value={account ? shortenAddress(account) : authenticated ? "Waiting" : "Not connected"}
-          copy={account ? "Shared across dashboard sections" : "Connect to unlock write actions"}
-        />
-        <MetricTile label="Network" value={chainLabel} copy="Redeem requires Base" />
-        <MetricTile label="Session" value={authenticated ? "Signed in" : "Guest"} copy="Privy is the wallet layer of record" />
       </div>
     </section>
   );
@@ -786,28 +890,54 @@ function RedeemSection({
   }, [connectedAccount, holdings, holdingsFetched, publicClient, source, tokenId]);
 
   return (
-    <section className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_82%,transparent)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
+    <section className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
           <p className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
             Redeem
           </p>
           <h3 className="font-display text-2xl text-[color:var(--foreground)] sm:text-3xl">
-            Redeem Animata passes for REGENT
+            Redeem Animata Pass for $REGENT
           </h3>
           <p className="max-w-3xl text-sm leading-6 text-[color:var(--muted-foreground)]">
-            Connect on Base, pick an Animata token, approve once, and redeem into the
-            7-day REGENT stream. This section stays first on the page by design.
+            Steps: Connect wallet on Base. Choose an Animata token you own from{" "}
+            <a
+              href="https://opensea.io/collection/animata"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
+            >
+              Collection I
+            </a>{" "}
+            or{" "}
+            <a
+              href="https://opensea.io/collection/regent-animata-ii"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
+            >
+              Collection II
+            </a>
+            . Approve the Animata transfer, and approve 80 USDC transfer. Redeem your
+            NFT with the USDC to receive 5 million $REGENT streamed over 7 days, as
+            well as an{" "}
+            <a
+              href="https://opensea.io/collection/animata-pass"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
+            >
+              Animata membership
+            </a>{" "}
+            collectible.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <ActionLink href="https://docs.regents.sh" label="Docs" />
-          <ActionLink href="https://docs.regents.sh/faq" label="FAQ" />
           {!connectedAccount ? (
-            <Button disabled={!privyReady} onClick={onConnect} tone="primary">
-              {privyReady ? "Connect wallet" : "Loading wallet"}
-            </Button>
+            <span className="text-sm text-[color:var(--muted-foreground)]">
+              Connect an account above to start redeeming.
+            </span>
           ) : null}
           {connectedAccount && !isOnBase && wallet ? (
             <Button onClick={() => void switchToChain(wallet, base, config.baseRpcUrl)} tone="secondary">
@@ -855,14 +985,26 @@ function RedeemSection({
           </div>
           <div className="grid gap-4 pt-2 sm:grid-cols-2">
             <LabelBlock label="Source collection">
-              <select
-                className="w-full rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
-                value={source}
-                onChange={(event) => setSource(event.currentTarget.value as SourceKey)}
-              >
-                <option value="ANIMATA1">Animata I</option>
-                <option value="ANIMATA2">Animata II</option>
-              </select>
+              <div className="relative">
+                <select
+                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-14 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)] sm:min-w-[16rem]"
+                  value={source}
+                  onChange={(event) => setSource(event.currentTarget.value as SourceKey)}
+                >
+                  <option value="ANIMATA1">Animata I</option>
+                  <option value="ANIMATA2">Animata II</option>
+                </select>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[color:var(--muted-foreground)]">
+                  <svg viewBox="0 0 16 16" className="h-4 w-4 fill-none stroke-current">
+                    <path
+                      d="m4.25 6.5 3.75 3.75 3.75-3.75"
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                      strokeLinejoin="miter"
+                    />
+                  </svg>
+                </span>
+              </div>
             </LabelBlock>
 
             <LabelBlock label="Token ID (1-999)">
@@ -940,12 +1082,7 @@ function RedeemSection({
               </div>
             </div>
           ) : (
-            <ConnectHint
-              authenticated={authenticated}
-              privyReady={privyReady}
-              onConnect={onConnect}
-              message="Connect a wallet to load holdings and redeem."
-            />
+            <ConnectHint message="Connect an account above to load holdings and redeem." />
           )}
         </SurfaceBlock>
       </div>
@@ -1027,15 +1164,7 @@ function RedeemSection({
           </SurfaceBlock>
 
           <SurfaceBlock title="Regent Animata Access Pass">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="text-sm text-[color:var(--muted-foreground)]">
-                  Base contract {shortenAddress(COLLECTION3)}
-                </div>
-                <p className="text-sm text-[color:var(--muted-foreground)]">
-                  Holdings are loaded directly through the new Phoenix helper.
-                </p>
-              </div>
+            <div className="flex flex-wrap items-start justify-end gap-3">
               <div className="flex flex-wrap gap-2">
                 <Button
                   disabled={isFetchingAccessPassHoldings}
@@ -1096,8 +1225,8 @@ function RedeemSection({
             <span className="text-[color:var(--foreground)]">
               {successTotal !== null ? formatRegentRounded2(successTotal) : "---"} REGENT
             </span>{" "}
-            streaming over 7 days. Claim any unlocked amount from the panel behind this
-            dialog.
+            streaming over 7 days. Claim any part of your unlocked amount early, and
+            after 7 days the full amount is available to claim.
           </p>
           <div className="mt-6 flex flex-wrap justify-end gap-3">
             <Button
@@ -1143,7 +1272,7 @@ function RedeemSection({
                 : "---"}{" "}
               REGENT
             </span>
-            . The rest of the stream unlocks across the 7-day schedule.
+            . The remainder of the stream unlocks after 7 days.
           </p>
           <div className="mt-6 flex justify-end">
             <Button
@@ -1168,6 +1297,7 @@ function NamesSection({
   config,
   account,
   chainId,
+  wallet,
   walletClient,
   authenticated,
   privyReady,
@@ -1176,6 +1306,7 @@ function NamesSection({
   config: DashboardConfig;
   account: `0x${string}` | null;
   chainId: number | null;
+  wallet: PrivyEthereumWalletLike | null;
   walletClient: WalletClient | null;
   authenticated: boolean;
   privyReady: boolean;
@@ -1199,6 +1330,7 @@ function NamesSection({
     status: "pending",
     fqdn: null,
     ensFqdn: null,
+    paymentTxHash: null,
   });
   const [mintStatus, setMintStatus] = React.useState<"idle" | "free" | "paid">("idle");
   const [copiedName, setCopiedName] = React.useState<string | null>(null);
@@ -1219,6 +1351,7 @@ function NamesSection({
   const allowanceRequestRef = React.useRef(0);
   const ownedNamesRequestRef = React.useRef(0);
   const recentNamesRequestRef = React.useRef(0);
+  const claimDialogDismissedRef = React.useRef(false);
 
   React.useEffect(() => {
     return () => {
@@ -1380,6 +1513,16 @@ function NamesSection({
   const freeMintsRemaining = allowance?.freeMintsRemaining ?? 0;
   const snapshotTotal = allowance?.snapshotTotal ?? 0;
   const isPhase1Eligible = snapshotTotal > 0;
+  const showPhase1Picker = Boolean(account) && canFreeMint;
+  const hasOwnedNames = ownedNames.length > 0;
+  const renderedOwnedNames = React.useMemo(
+    () =>
+      ownedNames.map((item) => ({
+        ...item,
+        displayFqdn: item.ensFqdn ?? toSubnameFqdn(item.label, ensParentName),
+      })),
+    [ensParentName, ownedNames],
+  );
   const freeCtaReady =
     Boolean(account && walletClient) &&
     phase1State.validation.isValid &&
@@ -1459,22 +1602,64 @@ function NamesSection({
     phase2State,
   ]);
 
+  const resetClaimDialog = React.useCallback(() => {
+    setClaimDialog({
+      open: false,
+      status: "pending",
+      fqdn: null,
+      ensFqdn: null,
+      paymentTxHash: null,
+    });
+  }, []);
+
   const finalizeMintSuccess = React.useCallback(
     async (result: MintResponse) => {
       setNotice({
         tone: "success",
         message: `Claimed ${result.fqdn}.`,
       });
-      setClaimDialog({
-        open: true,
-        status: "success",
-        fqdn: result.fqdn,
-        ensFqdn: result.ensFqdn ?? null,
-      });
+      if (!claimDialogDismissedRef.current) {
+        setClaimDialog({
+          open: true,
+          status: "success",
+          fqdn: result.fqdn,
+          ensFqdn: result.ensFqdn ?? null,
+          paymentTxHash: null,
+        });
+      }
+      claimDialogDismissedRef.current = false;
       await reloadNamesData();
     },
     [reloadNamesData],
   );
+
+  const closeClaimDialog = React.useCallback(() => {
+    if (!claimDialog.open) return;
+
+    const isPending = claimDialog.status === "pending";
+    const paymentTxHash = claimDialog.paymentTxHash;
+
+    claimDialogDismissedRef.current = isPending;
+    resetClaimDialog();
+
+    if (!isPending) return;
+
+    void attemptWalletCancel({ wallet, txHash: paymentTxHash }).then((result) => {
+      if (result === "unsupported" || result === "unavailable") {
+        setNotice({
+          tone: "info",
+          message:
+            "Closed the claim window. If your wallet still shows a pending action, cancel it there.",
+        });
+      }
+    });
+  }, [
+    claimDialog.open,
+    claimDialog.paymentTxHash,
+    claimDialog.status,
+    resetClaimDialog,
+    wallet,
+  ]);
 
   const mintName = React.useCallback(
     async (
@@ -1513,6 +1698,7 @@ function NamesSection({
 
   const performFreeClaim = React.useCallback(async () => {
     if (!canPhase1Claim) return;
+    claimDialogDismissedRef.current = false;
     setNotice(null);
     setPhase1ConfirmOpen(false);
     setMintStatus("free");
@@ -1521,6 +1707,7 @@ function NamesSection({
       status: "pending",
       fqdn: phase1State.fqdn,
       ensFqdn: phase1State.ensFqdn,
+      paymentTxHash: null,
     });
 
     try {
@@ -1528,10 +1715,12 @@ function NamesSection({
       setPhase1Label("");
       await finalizeMintSuccess(result);
     } catch (error) {
-      setClaimDialog((current) => ({ ...current, open: false }));
+      resetClaimDialog();
       setNotice({
         tone: "error",
-        message: getErrorMessage(error, "Free claim failed."),
+        message: isUserRejectionError(error)
+          ? "Claim cancelled."
+          : getErrorMessage(error, "Free claim failed."),
       });
     } finally {
       setMintStatus("idle");
@@ -1549,6 +1738,7 @@ function NamesSection({
       return;
     }
 
+    claimDialogDismissedRef.current = false;
     setNotice(null);
     setMintStatus("paid");
     setClaimDialog({
@@ -1556,6 +1746,7 @@ function NamesSection({
       status: "pending",
       fqdn: phase2State.fqdn,
       ensFqdn: phase2State.ensFqdn,
+      paymentTxHash: null,
     });
 
     try {
@@ -1593,6 +1784,7 @@ function NamesSection({
         to: paymentRecipient,
         value: priceWei,
       });
+      setClaimDialog((current) => ({ ...current, paymentTxHash: txHash }));
 
       const paymentClient = createPublicClient({
         chain: paymentChain,
@@ -1625,7 +1817,7 @@ function NamesSection({
       setPhase2Label("");
       await finalizeMintSuccess(result);
     } catch (error) {
-      setClaimDialog((current) => ({ ...current, open: false }));
+      resetClaimDialog();
       setNotice({
         tone: "error",
         message: isUserRejectionError(error)
@@ -1647,12 +1839,14 @@ function NamesSection({
     paymentRecipient,
     phase2State,
     priceWei,
+    resetClaimDialog,
     walletClient,
   ]);
 
   const phase2DisabledReason = React.useMemo(() => {
     if (mintStatus === "paid" || canPhase2Mint) return null;
-    if (!account || !walletClient) return "Connect a wallet to claim.";
+    if (!account) return "Connect a wallet to claim.";
+    if (!walletClient) return "Preparing your wallet signer...";
     if (!isOnPaymentChain) return "Switch to Base or Ethereum to pay.";
     if (!hasPaymentRecipient) return "Paid claims are temporarily unavailable.";
     if (!phase2Label.trim()) return "Enter a name to continue.";
@@ -1677,7 +1871,7 @@ function NamesSection({
   ]);
 
   return (
-    <section className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_82%,transparent)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
+    <section className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
       <div className="space-y-3">
         <p className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
           Name Claim
@@ -1686,8 +1880,9 @@ function NamesSection({
           Claim your Regent identity
         </h3>
         <p className="max-w-3xl text-sm leading-6 text-[color:var(--muted-foreground)]">
-          Claim the same Regent subname on Ethereum ENS and Base basenames. Free claims
-          remain reserved for the Phase 1 snapshot. Public claims stay below them.
+          Claim a Regent subname on Ethereum ENS for 0.0025 eth. These can be used by
+          your agent within the Techtree and Autolaunch apps, and display as a unique
+          color.
         </p>
       </div>
 
@@ -1731,9 +1926,9 @@ function NamesSection({
               </div>
               {ownedNamesNotice ? <InlineNotice notice={ownedNamesNotice} className="mt-3" /> : null}
               {account ? (
-                ownedNames.length ? (
+                hasOwnedNames ? (
                   <div className="mt-3 flex flex-wrap gap-3">
-                    {ownedNames.map((item) => (
+                    {renderedOwnedNames.map((item) => (
                       <div
                         key={item.fqdn}
                         className="min-w-[11rem] rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_74%,transparent)] px-4 py-3"
@@ -1742,14 +1937,16 @@ function NamesSection({
                           {item.label}.
                         </div>
                         <div className="mt-1 break-all text-xs text-[color:var(--muted-foreground)]">
-                          {item.fqdn}
+                          {item.displayFqdn}
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <Button
-                            onClick={() => void copyText(item.fqdn).then(() => setCopiedName(item.fqdn))}
+                            onClick={() =>
+                              void copyText(item.displayFqdn).then(() => setCopiedName(item.displayFqdn))
+                            }
                             tone="ghost"
                           >
-                            {copiedName === item.fqdn ? "Copied" : "Copy"}
+                            {copiedName === item.displayFqdn ? "Copied" : "Copy"}
                           </Button>
                           {item.ensFqdn ? (
                             <ActionLink
@@ -1773,18 +1970,13 @@ function NamesSection({
                   </div>
                 )
               ) : (
-                <ConnectHint
-                  authenticated={authenticated}
-                  privyReady={privyReady}
-                  onConnect={onConnect}
-                  message="Connect a wallet to view your claimed names."
-                />
+                <ConnectHint message="Connect an account above to view your claimed names." />
               )}
             </div>
           </div>
         </SurfaceBlock>
 
-        <SurfaceBlock title="Phase 1 (Animata snapshot)" className="lg:col-span-2">
+        <SurfaceBlock title="Phase 1: Animata Snapshot" className="lg:col-span-2">
           <div className="space-y-5">
             <div className="grid gap-3 md:grid-cols-3">
               <MetricTile
@@ -1802,53 +1994,56 @@ function NamesSection({
 
             {allowanceNotice ? <InlineNotice notice={allowanceNotice} /> : null}
             {!account ? (
-              <ConnectHint
-                authenticated={authenticated}
-                privyReady={privyReady}
-                onConnect={onConnect}
-                message="Connect a wallet to check free-claim eligibility."
-              />
+              <ConnectHint message="Connect an account above to check free-claim eligibility." />
             ) : !isPhase1Eligible ? (
               <p className="text-sm text-[color:var(--muted-foreground)]">
                 This wallet is not on the Phase 1 allowlist.
               </p>
             ) : null}
 
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
-                <span className="rounded-full border border-[color:var(--border)] px-3 py-1">1. Pick name</span>
-                <span className="rounded-full border border-[color:var(--border)] px-3 py-1">2. Check availability</span>
-                <span className="rounded-full border border-[color:var(--border)] px-3 py-1">3. Sign and claim</span>
-              </div>
+            {showPhase1Picker ? (
+              <>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
+                    <span className="rounded-full border border-[color:var(--border)] px-3 py-1">1. Pick name</span>
+                    <span className="rounded-full border border-[color:var(--border)] px-3 py-1">2. Check availability</span>
+                    <span className="rounded-full border border-[color:var(--border)] px-3 py-1">3. Sign and claim</span>
+                  </div>
 
-              <input
-                ref={phase1InputRef}
-                value={phase1Label}
-                onChange={(event) => setPhase1Label(event.currentTarget.value)}
-                placeholder="alice"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                className="w-full max-w-md rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
-              />
+                  <input
+                    ref={phase1InputRef}
+                    value={phase1Label}
+                    onChange={(event) => setPhase1Label(event.currentTarget.value)}
+                    placeholder="alice"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="w-full max-w-md rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
+                  />
 
-              {phase1State.isLabelInvalid && phase1State.labelError ? (
-                <p className="text-sm text-[color:#a6574f]">{phase1State.labelError}</p>
-              ) : null}
+                  {phase1State.isLabelInvalid && phase1State.labelError ? (
+                    <p className="text-sm text-[color:#a6574f]">{phase1State.labelError}</p>
+                  ) : null}
 
-              <AvailabilityBadges state={phase1State} />
-            </div>
+                  <AvailabilityBadges state={phase1State} />
+                </div>
 
-            <Button
-              ref={freeButtonRef}
-              disabled={!canPhase1Claim}
-              onClick={() => setPhase1ConfirmOpen(true)}
-              tone="primary"
-            >
-              {mintStatus === "free"
-                ? "Claiming..."
-                : "Claim free ENS and Basename"}
-            </Button>
+                <Button
+                  ref={freeButtonRef}
+                  disabled={!canPhase1Claim}
+                  onClick={() => setPhase1ConfirmOpen(true)}
+                  tone="primary"
+                >
+                  {mintStatus === "free"
+                    ? "Claiming..."
+                    : "Claim free ENS and Basename"}
+                </Button>
+              </>
+            ) : account && isPhase1Eligible ? (
+              <p className="text-sm text-[color:var(--muted-foreground)]">
+                This wallet has already used its full Phase 1 allocation.
+              </p>
+            ) : null}
           </div>
         </SurfaceBlock>
 
@@ -1940,15 +2135,7 @@ function NamesSection({
       {claimDialog.open ? (
         <OverlayCard
           title={claimDialog.status === "success" ? "Success" : "Claiming your subname"}
-          onClose={() => {
-            if (claimDialog.status !== "success") return;
-            setClaimDialog({
-              open: false,
-              status: "pending",
-              fqdn: null,
-              ensFqdn: null,
-            });
-          }}
+          onClose={closeClaimDialog}
         >
           {claimDialog.status === "success" ? (
             <p className="text-sm leading-6 text-[color:var(--muted-foreground)]">
@@ -1974,17 +2161,7 @@ function NamesSection({
 
           {claimDialog.status === "success" ? (
             <div className="mt-6 flex justify-end">
-              <Button
-                onClick={() =>
-                  setClaimDialog({
-                    open: false,
-                    status: "pending",
-                    fqdn: null,
-                    ensFqdn: null,
-                  })
-                }
-                tone="primary"
-              >
+              <Button onClick={closeClaimDialog} tone="primary">
                 Continue
               </Button>
             </div>
@@ -2008,7 +2185,6 @@ function AvailabilityBadges({ state }: { state: NameAvailabilityState }) {
       {!state.isReservedLabel && state.isAvailable === false ? (
         <Pill tone="error">Taken</Pill>
       ) : null}
-      {state.fqdn ? <Pill tone="outline">{state.fqdn}</Pill> : null}
       {state.ensFqdn ? <Pill tone="outline">{state.ensFqdn}</Pill> : null}
     </div>
   );
@@ -2023,11 +2199,20 @@ function ChecklistItem({
   status: boolean | null;
   detail?: string;
 }) {
+  const isMet = status === true;
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_72%,transparent)] px-4 py-3 text-sm">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_94%,var(--card)_6%)] px-4 py-3 text-sm">
       <div className="flex items-center gap-2">
-        <span aria-hidden="true">
-          {status === true ? "●" : status === false ? "▲" : "○"}
+        <span
+          aria-hidden="true"
+          className={classNames(
+            "inline-block h-3.5 w-3.5 rounded-full border transition",
+            isMet
+              ? "border-[color:var(--positive)] bg-[color:var(--positive)] shadow-[0_0_12px_color-mix(in_oklch,var(--positive)_70%,transparent)]"
+              : "border-[color:var(--muted-foreground)] bg-transparent",
+          )}
+        >
         </span>
         <span>{label}</span>
       </div>
@@ -2050,7 +2235,7 @@ function SurfaceBlock({
   className?: string;
 }) {
   return (
-    <section className={classNames("rounded-[1.5rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_68%,transparent)] p-5", className)}>
+    <section className={classNames("rounded-[1.5rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_94%,var(--card)_6%)] p-5", className)}>
       <div className="mb-4">
         <h4 className="font-display text-xl text-[color:var(--foreground)]">{title}</h4>
       </div>
@@ -2069,7 +2254,7 @@ function MetricTile({
   copy: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_74%,transparent)] p-4">
+    <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_94%,var(--card)_6%)] p-4">
       <div className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">
         {label}
       </div>
@@ -2082,24 +2267,13 @@ function MetricTile({
 }
 
 function ConnectHint({
-  authenticated,
-  privyReady,
-  onConnect,
   message,
 }: {
-  authenticated: boolean;
-  privyReady: boolean;
-  onConnect: () => void;
   message: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_74%,transparent)] p-4">
+    <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_94%,var(--card)_6%)] p-4">
       <p className="text-sm leading-6 text-[color:var(--muted-foreground)]">{message}</p>
-      <div className="mt-3">
-        <Button disabled={!privyReady} onClick={onConnect} tone="primary">
-          {authenticated ? "Reconnect wallet" : privyReady ? "Connect wallet" : "Loading wallet"}
-        </Button>
-      </div>
     </div>
   );
 }
@@ -2122,9 +2296,9 @@ const buttonBase =
 
 const buttonTones: Record<"primary" | "secondary" | "ghost", string> = {
   primary:
-    "border-[color:var(--brand-ink)] bg-[color:var(--brand-ink)] text-[color:var(--background)] hover:opacity-90",
+    "border-[color:var(--button-primary-bg)] bg-[color:var(--button-primary-bg)] text-[color:var(--button-primary-fg)] hover:opacity-90",
   secondary:
-    "border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_82%,transparent)] text-[color:var(--foreground)] hover:border-[color:var(--ring)]",
+    "border-[color:var(--border)] bg-[color:var(--button-secondary-bg)] text-[color:var(--foreground)] hover:border-[color:var(--ring)]",
   ghost:
     "border-[color:var(--border)] bg-transparent text-[color:var(--foreground)] hover:border-[color:var(--ring)]",
 };
@@ -2212,16 +2386,76 @@ function OverlayCard({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  const backdropRef = React.useRef<HTMLDivElement | null>(null);
+  const cardRef = React.useRef<HTMLDivElement | null>(null);
+  const titleId = React.useId();
+
+  React.useEffect(() => {
+    if (!backdropRef.current || !cardRef.current || prefersReducedMotion()) return;
+
+    backdropRef.current.style.opacity = "0";
+    cardRef.current.style.opacity = "0";
+    cardRef.current.style.transform = "translateY(12px) scale(0.985)";
+
+    animate(backdropRef.current, {
+      opacity: [0, 1],
+      duration: 160,
+      ease: "outQuad",
+    });
+
+    animate(cardRef.current, {
+      opacity: [0, 1],
+      translateY: [12, 0],
+      scale: [0.985, 1],
+      duration: 220,
+      ease: "outQuart",
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-[color:color-mix(in_oklch,var(--background)_68%,transparent)] backdrop-blur-sm"
-        onClick={onClose}
-        aria-label="Close dialog"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+      onClick={onClose}
+    >
+      <div
+        ref={backdropRef}
+        className="absolute inset-0 bg-[color:color-mix(in_oklch,var(--background)_26%,transparent)] backdrop-blur-[1.5px]"
+        aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-lg rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--card)] p-6 shadow-[0_32px_90px_-44px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
-        <h4 className="font-display text-2xl text-[color:var(--foreground)]">{title}</h4>
+      <div
+        ref={cardRef}
+        className="relative z-10 w-full max-w-lg rounded-[1.75rem] border border-[color:color-mix(in_oklch,var(--border)_78%,var(--brand-ink)_22%)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_32px_90px_-44px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="absolute right-4 top-4 text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+          onClick={onClose}
+          aria-label="Close dialog"
+        >
+          Close
+        </button>
+        <h4
+          id={titleId}
+          className="font-display text-2xl text-[color:var(--foreground)]"
+        >
+          {title}
+        </h4>
         <div className="mt-4">{children}</div>
       </div>
     </div>

@@ -23,13 +23,14 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
        "Monoliths, reliquaries, and the scaled keystone demo."},
       {"scaleOrigin", "Decide where that shrink anchors inside the voxel cell.",
        "Bottom-anchored towers and tapered procedural stacks."},
-      {"removeBox / removeSphere",
+      {"removeGeometry(type: box / sphere)",
        "Carve real negative space and optionally tint the exposed walls.",
        "Carved archive chamber demo."},
-      {"styleBox / styleLine",
+      {"applyStyle(type: box / line)",
        "Restyle existing geometry after placement without rebuilding the whole form.",
        "Restyled launch rail demo."},
-      {"addWhere", "Define procedural shapes directly from an `(x, y, z)` test function.",
+      {"addGeometry(type: fill)",
+       "Define procedural shapes directly from an `(x, y, z)` test function.",
        "Client-owned procedural gallery."},
       {"functional style", "Color voxels from position instead of a single static palette.",
        "Client-owned spectral block."},
@@ -674,7 +675,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "scaled-voxels",
       %{
-        eyebrow: "Heerich 0.5 / voxel scale",
+        eyebrow: "Heerich 0.6.4 / voxel scale",
         title: "Anchored voxel scaling",
         description:
           "These boxes are still ordinary Regent targets, but their voxel mass is compressed and pinned from the floor so the marker and the body stay visually married.",
@@ -737,7 +738,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "carved-walls",
       %{
-        eyebrow: "Heerich 0.5 / carved walls",
+        eyebrow: "Heerich 0.6.4 / carved walls",
         title: "Styled negative space",
         description:
           "The subtraction commands now tint the newly exposed walls, so carved geometry reads as a deliberate chamber instead of an empty deletion.",
@@ -747,8 +748,8 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
         theme_class: "rg-regent-theme-techtree",
         camera_distance: 21,
         settings: [
-          {"removeBox", "dark violet carved walls"},
-          {"removeSphere", "cool observatory dome cut"},
+          {"removeGeometry(type: box)", "dark violet carved walls"},
+          {"removeGeometry(type: sphere)", "cool observatory dome cut"},
           {"Result", "Negative space feels intentional"}
         ]
       },
@@ -823,7 +824,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "restyled-geometry",
       %{
-        eyebrow: "Heerich 0.5 / restyling",
+        eyebrow: "Heerich 0.6.4 / restyling",
         title: "Restyle after placement",
         description:
           "The base geometry goes down once, then later commands repaint the top plate and the rail. That keeps the scene editable without rebuilding the structure.",
@@ -833,8 +834,8 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
         theme_class: "rg-regent-theme-autolaunch",
         camera_distance: 20,
         settings: [
-          {"styleBox", "top plate turns hot"},
-          {"styleLine", "rail updates in place"},
+          {"applyStyle(type: box)", "top plate turns hot"},
+          {"applyStyle(type: line)", "rail updates in place"},
           {"scale", "sealed state stays compressed"}
         ]
       },
@@ -874,7 +875,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
 
   defp raw_scene(theme, sigil, commands, markers, opts) do
     face =
-      SceneSpec.face("demo", "Heerich 0.5 demo", sigil, commands, markers, orientation: "front")
+      SceneSpec.face("demo", "Heerich 0.6.4 demo", sigil, commands, markers, orientation: "front")
 
     SceneSpec.scene(theme, theme, "demo", face,
       distance: Keyword.get(opts, :distance, 20),
@@ -938,143 +939,166 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     target_id = node_id
     hover_cycle = Map.get(node, "hoverCycle")
     meta = Map.get(node, "meta", %{})
+    command_id = node["commandId"] || "#{node_id}:body"
+    custom_commands = Map.get(node, "commands")
+    intent = node["intent"]
 
     marker =
       SceneSpec.marker(target_id,
         label: node["label"] || node_id,
+        action_label: node["actionLabel"],
         sigil: node["sigil"],
         kind: node["kind"],
         status: status,
+        intent: intent,
+        back_target_id: node["backTargetId"],
+        history_key: node["historyKey"],
+        group_role: node["groupRole"],
+        click_tone: node["clickTone"],
         meta: meta,
-        command_id: "#{node_id}:body"
+        command_id: command_id
       )
 
+    intent_style = SceneSpec.intent_style(SceneSpec.node_style(status), intent)
+
     commands =
-      case geometry do
-        "socket" ->
-          [
-            SceneSpec.add_sphere(
-              "#{node_id}:body",
-              SceneSpec.sphere_center(position, size),
-              SceneSpec.sphere_radius(size),
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: SceneSpec.socket_scale(size, status),
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+      if is_list(custom_commands) do
+        custom_commands
+      else
+        case geometry do
+          "socket" ->
+            [
+              SceneSpec.add_sphere(
+                command_id,
+                SceneSpec.sphere_center(position, size),
+                SceneSpec.sphere_radius(size),
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || SceneSpec.socket_scale(size, status),
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        "carved_cube" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id
-            ),
-            SceneSpec.remove_box(
-              "#{node_id}:carve",
-              SceneSpec.inset_position(position),
-              SceneSpec.inset_size(size),
-              style: SceneSpec.carved_wall_style(status),
-              target_id: target_id
-            )
-          ]
+          "carved_cube" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id
+              ),
+              SceneSpec.remove_box(
+                "#{node_id}:carve",
+                SceneSpec.inset_position(position),
+                SceneSpec.inset_size(size),
+                style: SceneSpec.carved_wall_style(status),
+                target_id: target_id
+              )
+            ]
 
-        "ghost" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.ghost_style(),
-              opaque: false,
-              hover_cycle: hover_cycle,
-              target_id: target_id
-            )
-          ]
+          "ghost" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: SceneSpec.ghost_style(),
+                opaque: false,
+                hover_cycle: hover_cycle,
+                target_id: target_id
+              )
+            ]
 
-        "reliquary" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: [0.88, 0.92, 0.88],
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+          "reliquary" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || [0.88, 0.92, 0.88],
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        "monolith" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: [0.9, 1, 0.9],
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+          "monolith" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || [0.9, 1, 0.9],
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        _ ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              opaque: Map.get(node, "opaque"),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: SceneSpec.default_scale(node, status),
-              scale_origin: SceneSpec.default_scale_origin(node, status)
-            )
-          ]
+          _ ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                opaque: Map.get(node, "opaque"),
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: SceneSpec.default_scale(node, status),
+                scale_origin: SceneSpec.default_scale_origin(node, status)
+              )
+            ]
+        end
       end
 
     %{commands: commands, marker: marker}
   end
 
   defp conduit_commands(conduit, nodes_by_id) do
-    with from_node when is_map(from_node) <- Map.get(nodes_by_id, conduit["from"]),
-         to_node when is_map(to_node) <- Map.get(nodes_by_id, conduit["to"]) do
-      base =
-        SceneSpec.add_line(
-          "#{conduit["id"]}:line",
-          SceneSpec.anchor(Map.fetch!(from_node, "position"), Map.fetch!(from_node, "size")),
-          SceneSpec.anchor(Map.fetch!(to_node, "position"), Map.fetch!(to_node, "size")),
-          radius: conduit["radius"] || 0.75,
-          shape: conduit["shape"] || "rounded",
-          style: SceneSpec.conduit_style(conduit["state"] || "visible"),
-          hover_cycle: conduit["hoverCycle"]
-        )
+    custom_commands = Map.get(conduit, "commands")
 
-      waypoints =
-        conduit
-        |> Map.get("waypoints", [])
-        |> Enum.with_index()
-        |> Enum.map(fn {point, index} ->
-          SceneSpec.add_sphere(
-            "#{conduit["id"]}:waypoint:#{index}",
-            point,
-            0.6,
-            style: SceneSpec.conduit_style(conduit["state"] || "visible"),
-            hover_cycle: conduit["hoverCycle"]
-          )
-        end)
+    cond do
+      is_list(custom_commands) ->
+        custom_commands
 
-      [base | waypoints]
-    else
-      _ -> []
+      true ->
+        with from_node when is_map(from_node) <- Map.get(nodes_by_id, conduit["from"]),
+             to_node when is_map(to_node) <- Map.get(nodes_by_id, conduit["to"]) do
+          base =
+            SceneSpec.add_line(
+              "#{conduit["id"]}:line",
+              SceneSpec.anchor(Map.fetch!(from_node, "position"), Map.fetch!(from_node, "size")),
+              SceneSpec.anchor(Map.fetch!(to_node, "position"), Map.fetch!(to_node, "size")),
+              radius: conduit["radius"] || 0.75,
+              shape: conduit["shape"] || "rounded",
+              style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+              hover_cycle: conduit["hoverCycle"]
+            )
+
+          waypoints =
+            conduit
+            |> Map.get("waypoints", [])
+            |> Enum.with_index()
+            |> Enum.map(fn {point, index} ->
+              SceneSpec.add_sphere(
+                "#{conduit["id"]}:waypoint:#{index}",
+                point,
+                0.6,
+                style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+                hover_cycle: conduit["hoverCycle"]
+              )
+            end)
+
+          [base | waypoints]
+        else
+          _ -> []
+        end
     end
   end
 end

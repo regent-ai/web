@@ -5,15 +5,14 @@ defmodule PlatformPhx.BasenamesTest do
   alias PlatformPhx.Basenames.Mint
   alias PlatformPhx.Basenames.MintAllowance
   alias PlatformPhx.Basenames.PaymentCredit
-  alias PlatformPhx.HttpError
   alias PlatformPhx.Repo
 
-  @private_key "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
   @owner_address "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  @other_address "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
   @payment_tx_hash "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
   test "availability flags reserved labels" do
-    payload = Basenames.availability_payload("regent")
+    assert {:ok, payload} = Basenames.availability_payload("regent")
 
     assert payload["reserved"] == true
     assert payload["available"] == false
@@ -23,7 +22,7 @@ defmodule PlatformPhx.BasenamesTest do
   test "free claim consumes allowance and stores the mint" do
     insert_allowance!(@owner_address, 1)
 
-    result = mint_label!("alpha")
+    assert {:ok, result} = mint_label("alpha")
 
     assert result["ok"] == true
     assert result["isFree"] == true
@@ -40,7 +39,7 @@ defmodule PlatformPhx.BasenamesTest do
 
     mint =
       Repo.get_by!(Mint,
-        node: Basenames.availability_payload("alpha")["node"]
+        node: availability_node!("alpha")
       )
 
     assert mint.is_free == true
@@ -60,7 +59,7 @@ defmodule PlatformPhx.BasenamesTest do
       price_wei: 2_500_000_000_000_000
     })
 
-    result = mint_label!("beta", %{"useCredit" => true})
+    assert {:ok, result} = mint_label("beta", %{"useCredit" => true})
 
     assert result["ok"] == true
     assert result["isFree"] == false
@@ -79,34 +78,147 @@ defmodule PlatformPhx.BasenamesTest do
   test "duplicate name claim is rejected" do
     insert_allowance!(@owner_address, 2)
 
-    _ = mint_label!("gamma")
-
-    assert_raise HttpError, "Name already taken", fn ->
-      mint_label!("gamma")
-    end
+    assert {:ok, _result} = mint_label("gamma")
+    assert {:error, {:conflict, "Name already taken"}} = mint_label("gamma")
   end
 
-  defp mint_label!(label, extra_params \\ %{}) do
+  test "credit registration reuses the existing tx for the same wallet" do
+    insert_allowance!(@owner_address, 0)
+    insert_credit!(@owner_address, @payment_tx_hash, nil)
+
+    assert {:ok, response} =
+             Basenames.register_credit(%{
+               "address" => @owner_address,
+               "paymentTxHash" => @payment_tx_hash,
+               "paymentChainId" => 1
+             })
+
+    assert response["paymentTxHash"] == @payment_tx_hash
+    assert response["available"] == true
+  end
+
+  test "mark in use enforces ownership" do
+    insert_allowance!(@owner_address, 1)
+    assert {:ok, _result} = mint_label("zeta")
+
+    assert {:error, {:forbidden, "Name not owned by wallet"}} =
+             Basenames.mark_in_use(%{
+               "address" => @other_address,
+               "label" => "zeta"
+             })
+  end
+
+  test "mint changeset rejects duplicate node with a controlled error" do
+    attrs = %{
+      parent_node: Basenames.parent_node(),
+      parent_name: Basenames.parent_name(),
+      label: "alpha",
+      fqdn: "alpha.#{Basenames.parent_name()}",
+      node: availability_node!("alpha"),
+      owner_address: @owner_address,
+      tx_hash: "0x#{String.duplicate("1", 64)}",
+      is_free: true,
+      is_in_use: false
+    }
+
+    assert {:ok, _mint} = %Mint{} |> Mint.changeset(attrs) |> Repo.insert()
+    assert {:error, changeset} = %Mint{} |> Mint.changeset(attrs) |> Repo.insert()
+    assert {"has already been taken", _opts} = changeset.errors[:node]
+  end
+
+  test "payment credit changeset rejects duplicate tx with a controlled error" do
+    attrs = %{
+      parent_node: Basenames.parent_node(),
+      parent_name: Basenames.parent_name(),
+      address: @owner_address,
+      payment_tx_hash: @payment_tx_hash,
+      payment_chain_id: 1,
+      price_wei: 2_500_000_000_000_000
+    }
+
+    assert {:ok, _credit} = %PaymentCredit{} |> PaymentCredit.changeset(attrs) |> Repo.insert()
+
+    assert {:error, changeset} =
+             %PaymentCredit{} |> PaymentCredit.changeset(attrs) |> Repo.insert()
+
+    assert {"has already been taken", _opts} = changeset.errors[:payment_tx_hash]
+  end
+
+  test "concurrent mint attempts allow exactly one winner", %{sandbox_owner: sandbox_owner} do
+    insert_allowance!(@owner_address, 2)
+    params = mint_params("theta")
+
+    results =
+      1..2
+      |> Task.async_stream(
+        fn _ ->
+          Ecto.Adapters.SQL.Sandbox.allow(Repo, sandbox_owner, self())
+          Basenames.mint_name(params)
+        end,
+        max_concurrency: 2,
+        ordered: false
+      )
+      |> Enum.map(fn {:ok, result} -> result end)
+
+    assert Enum.count(results, &match?({:ok, _}, &1)) == 1
+    assert Enum.count(results, &match?({:error, {:conflict, "Name already taken"}}, &1)) == 1
+  end
+
+  test "concurrent credit consumption allows exactly one winner", %{sandbox_owner: sandbox_owner} do
+    insert_credit!(@owner_address, @payment_tx_hash, nil)
+
+    params =
+      mint_params("iota", %{
+        "useCredit" => true,
+        "paymentTxHash" => @payment_tx_hash,
+        "paymentChainId" => 1
+      })
+
+    results =
+      1..2
+      |> Task.async_stream(
+        fn _ ->
+          Ecto.Adapters.SQL.Sandbox.allow(Repo, sandbox_owner, self())
+          Basenames.mint_name(params)
+        end,
+        max_concurrency: 2,
+        ordered: false
+      )
+      |> Enum.map(fn {:ok, result} -> result end)
+
+    assert Enum.count(results, &match?({:ok, _}, &1)) == 1
+
+    assert Enum.count(results, fn
+             {:error, {:conflict, "Payment already used"}} -> true
+             {:error, {:conflict, "Name already taken"}} -> true
+             _ -> false
+           end) == 1
+  end
+
+  defp mint_label(label, extra_params \\ %{}) do
+    Basenames.mint_name(mint_params(label, extra_params))
+  end
+
+  defp mint_params(label, extra_params \\ %{}) do
     timestamp = System.system_time(:millisecond)
     fqdn = "#{label}.#{Basenames.parent_name()}"
     message = Basenames.create_mint_message(@owner_address, fqdn, 8453, timestamp)
     signature = sign_message!(message)
 
-    Basenames.mint!(
-      Map.merge(
-        %{
-          "address" => @owner_address,
-          "label" => label,
-          "signature" => signature,
-          "timestamp" => timestamp
-        },
-        extra_params
-      )
+    Map.merge(
+      %{
+        "address" => @owner_address,
+        "label" => label,
+        "signature" => signature,
+        "timestamp" => timestamp
+      },
+      extra_params
     )
   end
 
   defp insert_allowance!(address, snapshot_total) do
-    Repo.insert!(%MintAllowance{
+    %MintAllowance{}
+    |> MintAllowance.changeset(%{
       parent_node: Basenames.parent_node(),
       parent_name: Basenames.parent_name(),
       address: address,
@@ -114,14 +226,29 @@ defmodule PlatformPhx.BasenamesTest do
       snapshot_total: snapshot_total,
       free_mints_used: 0
     })
+    |> Repo.insert!()
+  end
+
+  defp insert_credit!(address, payment_tx_hash, consumed_at) do
+    %PaymentCredit{}
+    |> PaymentCredit.changeset(%{
+      parent_node: Basenames.parent_node(),
+      parent_name: Basenames.parent_name(),
+      address: address,
+      payment_tx_hash: payment_tx_hash,
+      payment_chain_id: 1,
+      price_wei: 2_500_000_000_000_000,
+      consumed_at: consumed_at
+    })
+    |> Repo.insert!()
   end
 
   defp sign_message!(message) do
-    {signature, 0} =
-      System.cmd("cast", ["wallet", "sign", "--private-key", @private_key, message],
-        stderr_to_stdout: true
-      )
+    PlatformPhx.TestEthereumAdapter.sign_message(@owner_address, message)
+  end
 
-    String.trim(signature)
+  defp availability_node!(label) do
+    assert {:ok, payload} = Basenames.availability_payload(label)
+    payload["node"]
   end
 end

@@ -49,99 +49,128 @@ defmodule PlatformPhxWeb.TechtreeLive do
         class="pp-route-shell rg-regent-theme-techtree"
         phx-hook="BridgeReveal"
       >
-        <.background_grid id="platform-techtree-background" class="rg-regent-theme-techtree" />
-
         <div class="pp-route-stage">
-          <section id="platform-techtree-bridge" class="pp-route-surface-wrap" data-bridge-block>
-            <.surface
-              id="platform-techtree-surface"
-              class="pp-route-surface rg-regent-theme-techtree"
-              scene={@regent_scene}
-              scene_version={@regent_scene_version}
-              selected_target_id={@regent_selected_target_id}
-              theme="techtree"
-              camera_distance={26}
-            >
-              <:chamber>
-                <.chamber
-                  id="platform-techtree-chamber"
-                  title={@bridge_content.title}
-                  subtitle={@bridge_content.subtitle}
-                  summary={@bridge_content.summary}
+          <section class="pp-route-grid" data-bridge-block>
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Agent Skill</p>
+              <div class="pp-route-panel-heading">
+                <h2 class="pp-route-panel-title">
+                  For your Openclaw or Hermes agent:
+                </h2>
+                <button
+                  id="platform-techtree-skill-copy"
+                  type="button"
+                  phx-hook="ClipboardCopy"
+                  class="pp-copy-chip pp-copy-chip--prompt"
+                  aria-label="Copy Techtree agent prompt"
+                  title="Copy Techtree agent prompt"
+                  data-copy-text="[Techtree skill.md coming soon]"
                 >
-                  <div class="pp-tag-row" aria-label="Techtree bridge tags">
-                    <%= for tag <- @bridge_content.tags do %>
-                      <span class="pp-tag">{tag}</span>
-                    <% end %>
-                  </div>
+                  <span class="pp-copy-chip-label">Copy prompt</span>
+                  <span class="pp-copy-chip-icon" aria-hidden="true">
+                    <.icon name="hero-document-duplicate" class="size-4" />
+                  </span>
+                </button>
+              </div>
+              <blockquote class="pp-route-quote">
+                [Techtree skill.md coming soon]
+              </blockquote>
+            </article>
 
-                  <div class="pp-link-row">
-                    <a
-                      href="https://techtree.sh"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="pp-link-button"
-                    >
-                      Open techtree.sh <span aria-hidden="true">↗</span>
-                    </a>
-                    <a
-                      href="https://docs.regents.sh"
-                      target="_blank"
-                      rel="noreferrer"
-                      class="pp-link-button pp-link-button-ghost"
-                    >
-                      Read docs <span aria-hidden="true">↗</span>
-                    </a>
-                  </div>
-                </.chamber>
-              </:chamber>
-
-              <:ledger>
-                <.ledger
-                  id="platform-techtree-ledger"
-                  title="Bridge rules"
-                  subtitle="This route stays explanatory and explicit while the research graph lives on the external surface."
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Preview</p>
+              <h2 class="pp-route-panel-title">
+                Agents work on tech to add to the tree, earning reputation and tokens
+              </h2>
+              <p class="pp-panel-copy">
+                The public product is still in preview. The repo is the active place to inspect the app,
+                sidecar, QA harnesses, and contracts that power the upcoming Techtree surface.
+              </p>
+              <div class="pp-link-row">
+                <.preview_link variant="pill">
+                  Open techtree.sh <span aria-hidden="true">↗</span>
+                </.preview_link>
+                <a
+                  href="https://github.com/regent-ai/techtree"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="pp-link-button pp-link-button-ghost pp-link-button-slim"
                 >
-                  <table class="rg-table">
-                    <tbody>
-                      <%= for {label, value} <- @bridge_content.table do %>
-                        <tr>
-                          <th scope="row">{label}</th>
-                          <td>{value}</td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-                </.ledger>
-              </:ledger>
-            </.surface>
-          </section>
-
-          <section data-bridge-block>
-            <.cli_bootstrap
-              title="Start local, then step into Techtree"
-              summary="Boot a local Regent shell first, then pull the Techtree skill so the research handoff stays explicit and the live tree remains external."
-              skill_label="2. Load Techtree skill"
-              skill_command="curl -fsSL https://techtree.sh/skill.md"
-              skill_note="Use the Techtree skill when you want the research loop, benchmark path, and reusable skill flow instead of the plain platform shell."
-            />
+                  Browse GitHub repo <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </article>
           </section>
 
           <section class="pp-route-grid" data-bridge-block>
-            <article class="pp-route-panel">
-              <p class="pp-home-kicker">Live research loop</p>
-              <h2 class="pp-route-panel-title">Keep the benchmark work on the real tree.</h2>
+            <article class="pp-route-panel pp-product-panel pp-product-panel--feature">
+              <p class="pp-home-kicker">Purpose</p>
+              <h2 class="pp-route-panel-title">
+                Techtree gives agents a public graph for open autoresearch.
+              </h2>
               <p class="pp-panel-copy">
-                The CLI block above handles local setup. After that, use the live Techtree surface for benchmark runs, reusable skill publishing, and the proof trail that compounds over time.
+                Techtree treats the notebook, eval, harness, skill, trace, and rerunnable result as the research artifact.
+              </p>
+              <p class="pp-panel-copy">
+                The pilot tree is building on the BBH-Train dataset from <a
+                  href="https://edisonscientific.com/articles/accelerating-science-at-scale"
+                  target="_blank"
+                  rel="noreferrer"
+                >Edison Scientific and Nvidia</a>, challenging agents to create better “capsule” evals and then use better
+                harnesses and skills to score higher on capsule runs.
+              </p>
+              <p class="pp-panel-copy">
+                Techtree combines replicable Python notebooks on marimo.io, open data and code on IPFS, and provenance and
+                payments onchain.
+              </p>
+              <p class="pp-panel-copy">
+                The goal is to let any agent hill-climb any wall of science, research, or skills in the open.
               </p>
             </article>
 
-            <article class="pp-route-panel">
-              <p class="pp-home-kicker">Why this route exists</p>
-              <h2 class="pp-route-panel-title">Techtree stays external on purpose.</h2>
-              <p class="pp-panel-copy">
-                This page keeps the brand, the scene language, and the handoff readable inside `platform_phx`, but the real research graph, benchmark loop, and reusable artifact flow remain on the live Techtree product.
-              </p>
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Tech stack</p>
+              <h2 class="pp-route-panel-title">
+                Linked tools, runtimes, research surfaces, and platforms behind Techtree.
+              </h2>
+              <div class="pp-product-stack-grid">
+                <%= for section <- techtree_stack_sections() do %>
+                  <section class="pp-product-stack-card">
+                    <p class="pp-home-kicker">{section.title}</p>
+                    <ul class="pp-product-link-list">
+                      <%= for item <- section.items do %>
+                        <li>
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            class="pp-preview-link-list"
+                          >
+                            {item.label}
+                          </a>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </section>
+                <% end %>
+              </div>
+            </article>
+          </section>
+
+          <section class="pp-route-grid" data-bridge-block>
+            <article class="pp-route-panel pp-product-panel pp-route-panel-span">
+              <p class="pp-home-kicker">CLI rails</p>
+              <h2 class="pp-route-panel-title">
+                Real Regent commands that drop into Techtree workflows.
+              </h2>
+              <div class="pp-product-cli-grid pp-product-cli-grid--two-up">
+                <%= for command <- techtree_cli_examples() do %>
+                  <section class="pp-product-cli-card">
+                    <code class="pp-product-cli-command">{command.command}</code>
+                    <p class="pp-panel-copy">{command.description}</p>
+                  </section>
+                <% end %>
+              </div>
             </article>
           </section>
         </div>
@@ -160,5 +189,80 @@ defmodule PlatformPhxWeb.TechtreeLive do
     |> assign(:regent_selected_target_id, "techtree:#{focus}")
     |> assign(:regent_scene_version, next_version)
     |> assign(:regent_scene, RegentScenes.techtree_bridge(focus, next_version))
+  end
+
+  defp techtree_stack_sections do
+    [
+      %{
+        title: "Agent stack",
+        items: [
+          %{label: "Openclaw", href: "https://openclaw.sh"},
+          %{label: "Hermes", href: "https://hermes.ac"},
+          %{label: "ENSIP-25", href: "https://ens.domains/blog/post/ensip-25"},
+          %{label: "ERC-8004", href: "https://8004scan.io/"},
+          %{label: "x402", href: "https://www.x402.org/"},
+          %{label: "MPP", href: "https://stripe.com/blog/machine-payments-protocol"}
+        ]
+      },
+      %{
+        title: "Backend",
+        items: [
+          %{label: "Elixir", href: "https://elixir-lang.org"},
+          %{label: "Ecto", href: "https://hexdocs.pm/ecto/Ecto.html"},
+          %{label: "Oban", href: "https://hexdocs.pm/oban/Oban.html"},
+          %{label: "Redix", href: "https://hexdocs.pm/redix/Redix.html"},
+          %{label: "Dragonfly", href: "https://www.dragonflydb.io/"},
+          %{label: "Privy", href: "https://privy.io"},
+          %{label: "IPFS", href: "https://ipfs.io"},
+          %{label: "Ethereum", href: "https://ethereum.org"},
+          %{label: "Base", href: "https://base.org"}
+        ]
+      },
+      %{
+        title: "Frontend",
+        items: [
+          %{label: "Phoenix Framework", href: "https://www.phoenixframework.org"},
+          %{label: "Phoenix LiveView", href: "https://hexdocs.pm/phoenix_live_view/welcome.html"},
+          %{label: "TypeScript", href: "https://www.typescriptlang.org"},
+          %{label: "Deck.gl", href: "https://deck.gl"},
+          %{label: "Heerich", href: "https://www.npmjs.com/package/heerich"},
+          %{label: "Phoenix HTML", href: "https://hexdocs.pm/phoenix_html/Phoenix.HTML.html"}
+        ]
+      }
+    ]
+  end
+
+  defp techtree_cli_examples do
+    [
+      %{
+        command: "regent techtree start",
+        description: "Bootstraps the local operator path and guided Techtree onboarding."
+      },
+      %{
+        command: "regent techtree search",
+        description:
+          "Searches the planned tree when you need to find nodes, work, or context quickly."
+      },
+      %{
+        command: "regent techtree nodes list",
+        description: "Lists public nodes so an operator or agent can browse the current graph."
+      },
+      %{
+        command: "regent techtree node create",
+        description: "Publishes a new research node, including richer payload paths when needed."
+      },
+      %{
+        command: "regent techtree autoskill publish skill",
+        description: "Ships a reusable skill into the autoskill rail."
+      },
+      %{
+        command: "regent techtree bbh capsules list",
+        description: "Pulls available BBH capsules for benchmark and challenge work."
+      },
+      %{
+        command: "regent techtree review list",
+        description: "Shows open review work for reviewer and certificate flows."
+      }
+    ]
   end
 end

@@ -1,0 +1,662 @@
+openapi: 3.1.0
+info:
+  title: PlatformPhx API
+  version: 0.1.0
+  description: HTTP contract for the platform_phx product APIs.
+servers:
+  - url: /
+paths:
+  /api/basenames/config:
+    get:
+      operationId: basenamesConfig
+      responses:
+        '200':
+          description: Basenames client configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesConfig'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+  /api/basenames/allowances:
+    get:
+      operationId: basenamesAllowances
+      responses:
+        '200':
+          description: Snapshot allowance table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesAllowances'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/allowance:
+    get:
+      operationId: basenamesAllowance
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Free-mint allowance for one wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesAllowance'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/availability:
+    get:
+      operationId: basenamesAvailability
+      parameters:
+        - name: label
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Name availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesAvailability'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/credits:
+    get:
+      operationId: basenamesCredits
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Available payment credits for one wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesCredits'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/owned:
+    get:
+      operationId: basenamesOwned
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Names owned by a wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesOwned'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/recent:
+    get:
+      operationId: basenamesRecent
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Recent minted names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesRecent'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/basenames/credit:
+    post:
+      operationId: basenamesRegisterCredit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, paymentTxHash]
+              properties:
+                address:
+                  type: string
+                paymentTxHash:
+                  type: string
+                paymentChainId:
+                  type: integer
+      responses:
+        '200':
+          description: Payment credit registered or reused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesCreditRegistration'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '409':
+          $ref: '#/components/responses/StatusMessage409'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+  /api/basenames/mint:
+    post:
+      operationId: basenamesMint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, label, signature, timestamp]
+              properties:
+                address:
+                  type: string
+                label:
+                  type: string
+                signature:
+                  type: string
+                timestamp:
+                  oneOf:
+                    - type: integer
+                    - type: string
+                useCredit:
+                  oneOf:
+                    - type: boolean
+                    - type: string
+                paymentTxHash:
+                  type: string
+                paymentChainId:
+                  type: integer
+      responses:
+        '200':
+          description: Name minted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesMintResponse'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '402':
+          $ref: '#/components/responses/StatusMessage402'
+        '409':
+          $ref: '#/components/responses/StatusMessage409'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+  /api/basenames/use:
+    post:
+      operationId: basenamesMarkInUse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, label]
+              properties:
+                address:
+                  type: string
+                label:
+                  type: string
+                isRandom:
+                  oneOf:
+                    - type: boolean
+                    - type: string
+      responses:
+        '200':
+          description: Name marked in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasenamesUseResponse'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '403':
+          $ref: '#/components/responses/StatusMessage403'
+        '404':
+          $ref: '#/components/responses/StatusMessage404'
+        '409':
+          $ref: '#/components/responses/StatusMessage409'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+  /api/agentlaunch/auctions:
+    get:
+      operationId: agentLaunchAuctions
+      responses:
+        '200':
+          description: Current auction payload
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [auctions, generatedAt]
+                properties:
+                  auctions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentLaunchAuction'
+                  generatedAt:
+                    type: string
+                    format: date-time
+  /api/bug-report:
+    post:
+      operationId: createBugReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BugReportRequest'
+      responses:
+        '200':
+          description: Bug report stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BugReportResponse'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+  /api/security-report:
+    post:
+      operationId: createSecurityReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityReportRequest'
+      responses:
+        '200':
+          description: Security report stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityReportResponse'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+  /api/opensea:
+    get:
+      operationId: openSeaHoldings
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: collection
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [animata, regent-animata-ii, animata-pass]
+      responses:
+        '200':
+          description: OpenSea holdings for supported collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenSeaHoldings'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+components:
+  responses:
+    StatusMessage400:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage402:
+      description: Payment required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage404:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage409:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage502:
+      description: Upstream dependency failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage503:
+      description: Missing server configuration or unavailable dependency
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+  schemas:
+    StatusMessage:
+      type: object
+      required: [statusMessage]
+      properties:
+        statusMessage:
+          type: string
+    ReportingAgent:
+      type: object
+      required: [wallet_address, chain_id, registry_address, token_id]
+      properties:
+        wallet_address: {type: string}
+        chain_id: {type: integer}
+        registry_address: {type: string}
+        token_id: {type: string}
+        label: {type: [string, 'null']}
+    ReportStatus:
+      type: string
+      enum: [pending, fixed, won't fix, duplicate]
+    BugReportRequest:
+      type: object
+      required: [summary, details, reporting_agent]
+      properties:
+        summary: {type: string}
+        details: {type: string}
+        reporting_agent:
+          $ref: '#/components/schemas/ReportingAgent'
+    SecurityReportRequest:
+      type: object
+      required: [summary, details, contact, reporting_agent]
+      properties:
+        summary: {type: string}
+        details: {type: string}
+        contact: {type: string}
+        reporting_agent:
+          $ref: '#/components/schemas/ReportingAgent'
+    BugReportRecord:
+      type: object
+      required: [report_id, summary, details, status, reporting_agent, created_at]
+      properties:
+        report_id: {type: string}
+        summary: {type: string}
+        details: {type: string}
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+        reporting_agent:
+          $ref: '#/components/schemas/ReportingAgent'
+        created_at: {type: string, format: date-time}
+    SecurityReportRecord:
+      type: object
+      required: [report_id, summary, details, contact, reporting_agent, created_at]
+      properties:
+        report_id: {type: string}
+        summary: {type: string}
+        details: {type: string}
+        contact: {type: string}
+        reporting_agent:
+          $ref: '#/components/schemas/ReportingAgent'
+        created_at: {type: string, format: date-time}
+    BugReportResponse:
+      type: object
+      required: [ok, message, public_url, report]
+      properties:
+        ok: {type: boolean}
+        message: {type: string}
+        public_url: {type: string}
+        report:
+          $ref: '#/components/schemas/BugReportRecord'
+    SecurityReportResponse:
+      type: object
+      required: [ok, message, report]
+      properties:
+        ok: {type: boolean}
+        message: {type: string}
+        report:
+          $ref: '#/components/schemas/SecurityReportRecord'
+    BasenamesConfig:
+      type: object
+      required:
+        - chainId
+        - parentName
+        - parentNode
+        - registryAddress
+        - l2ResolverAddress
+        - ensChainId
+        - ensParentName
+        - ensParentNode
+        - ensRegistryAddress
+        - ensResolverAddress
+        - priceWei
+        - dbEnabled
+        - mintingEnabled
+        - ensMintingEnabled
+      properties:
+        chainId: {type: integer}
+        parentName: {type: string}
+        parentNode: {type: string}
+        registryAddress: {type: string}
+        l2ResolverAddress: {type: string}
+        ensChainId: {type: integer}
+        ensParentName: {type: string}
+        ensParentNode: {type: string}
+        ensRegistryAddress: {type: string}
+        ensResolverAddress: {type: string}
+        priceWei: {type: string}
+        paymentRecipient: {type: [string, 'null']}
+        dbEnabled: {type: boolean}
+        mintingEnabled: {type: boolean}
+        ensMintingEnabled: {type: boolean}
+    BasenamesAllowance:
+      type: object
+      required: [parentName, parentNode, address, snapshotTotal, freeMintsUsed, freeMintsRemaining]
+      properties:
+        parentName: {type: string}
+        parentNode: {type: string}
+        address: {type: string}
+        snapshotTotal: {type: integer}
+        freeMintsUsed: {type: integer}
+        freeMintsRemaining: {type: integer}
+    BasenamesAllowances:
+      type: object
+      required: [parentName, parentNode, totalAddresses, allowances]
+      properties:
+        parentName: {type: string}
+        parentNode: {type: string}
+        totalAddresses: {type: integer}
+        allowances:
+          type: array
+          items:
+            $ref: '#/components/schemas/BasenamesAllowance'
+    BasenamesAvailability:
+      type: object
+      required:
+        - parentName
+        - label
+        - fqdn
+        - node
+        - owner
+        - available
+        - basenamesAvailable
+        - ensParentName
+        - ensFqdn
+        - ensNode
+        - ensOwner
+        - ensAvailable
+        - reserved
+      properties:
+        parentName: {type: string}
+        label: {type: string}
+        fqdn: {type: string}
+        node: {type: string}
+        owner: {type: string}
+        available: {type: boolean}
+        basenamesAvailable: {type: boolean}
+        ensParentName: {type: string}
+        ensFqdn: {type: string}
+        ensNode: {type: string}
+        ensOwner: {type: string}
+        ensAvailable: {type: boolean}
+        reserved: {type: boolean}
+    BasenamesOwned:
+      type: object
+      required: [address, names]
+      properties:
+        address: {type: string}
+        names:
+          type: array
+          items:
+            type: object
+            required: [label, fqdn, isFree, isInUse, createdAt]
+            properties:
+              label: {type: string}
+              fqdn: {type: string}
+              ensFqdn: {type: [string, 'null']}
+              ensTxHash: {type: [string, 'null']}
+              isFree: {type: boolean}
+              isInUse: {type: boolean}
+              createdAt: {type: string, format: date-time}
+    BasenamesRecent:
+      type: object
+      required: [names]
+      properties:
+        names:
+          type: array
+          items:
+            type: object
+            required: [label, fqdn, createdAt]
+            properties:
+              label: {type: string}
+              fqdn: {type: string}
+              createdAt: {type: string, format: date-time}
+    BasenamesCredits:
+      type: object
+      required: [parentName, parentNode, address, availableCredits, credits]
+      properties:
+        parentName: {type: string}
+        parentNode: {type: string}
+        address: {type: string}
+        availableCredits: {type: integer}
+        credits:
+          type: array
+          items:
+            type: object
+            required: [id, paymentTxHash, priceWei, createdAt]
+            properties:
+              id: {type: integer}
+              paymentTxHash: {type: string}
+              priceWei: {type: string}
+              createdAt: {type: string, format: date-time}
+    BasenamesCreditRegistration:
+      type: object
+      required: [ok, creditId, paymentTxHash, available]
+      properties:
+        ok: {type: boolean}
+        creditId: {type: integer}
+        paymentTxHash: {type: string}
+        available: {type: boolean}
+    BasenamesMintResponse:
+      type: object
+      required: [ok, fqdn, ensFqdn, label, txHash, ensTxHash, isFree, priceWei]
+      properties:
+        ok: {type: boolean}
+        fqdn: {type: string}
+        ensFqdn: {type: string}
+        label: {type: string}
+        txHash: {type: string}
+        ensTxHash: {type: [string, 'null']}
+        isFree: {type: boolean}
+        priceWei: {type: string}
+    BasenamesUseResponse:
+      type: object
+      required: [ok, label, fqdn, isInUse, existed]
+      properties:
+        ok: {type: boolean}
+        label: {type: string}
+        fqdn: {type: string}
+        isInUse: {type: boolean}
+        existed: {type: boolean}
+    AgentLaunchAuction:
+      type: object
+      required:
+        - id
+        - agentId
+        - agentName
+        - ownerAddress
+        - auctionAddress
+        - network
+        - status
+        - startedAt
+        - bidders
+        - raisedCurrency
+        - targetCurrency
+        - progressPercent
+      properties:
+        id: {type: string}
+        agentId: {type: string}
+        agentName: {type: string}
+        ownerAddress: {type: string}
+        auctionAddress: {type: string}
+        tokenAddress: {type: [string, 'null']}
+        network: {type: string}
+        status: {type: string}
+        startedAt: {type: [string, 'null'], format: date-time}
+        endsAt: {type: [string, 'null'], format: date-time}
+        claimAt: {type: [string, 'null'], format: date-time}
+        bidders: {type: integer}
+        raisedCurrency: {type: string}
+        targetCurrency: {type: string}
+        progressPercent: {type: integer}
+        notes: {type: [string, 'null']}
+        uniswapUrl: {type: [string, 'null']}
+    OpenSeaHoldings:
+      type: object
+      required: [address, animata1, animata2, animataPass]
+      properties:
+        address: {type: string}
+        animata1:
+          type: array
+          items: {type: integer}
+        animata2:
+          type: array
+          items: {type: integer}
+        animataPass:
+          type: array
+          items: {type: integer}

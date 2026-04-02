@@ -60,7 +60,6 @@ defmodule PlatformPhx.MixProject do
        depth: 1},
       {:swoosh, "~> 1.16"},
       {:req, "~> 0.5"},
-      {:regent_ui, path: "../../packages/regent_ui"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},
@@ -78,15 +77,21 @@ defmodule PlatformPhx.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "regent.sync", "assets.build"],
+      setup: [
+        "deps.get",
+        "ecto.setup",
+        "assets.setup",
+        "public.sync",
+        "assets.build"
+      ],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test --max-cases 8"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "regent.sync": [&sync_regent_assets/1],
-      "assets.build": ["compile", "regent.sync", "tailwind platform_phx", "esbuild platform_phx"],
+      "public.sync": [&sync_public_assets/1],
+      "assets.build": ["compile", "public.sync", "tailwind platform_phx", "esbuild platform_phx"],
       "assets.deploy": [
-        "regent.sync",
+        "public.sync",
         "tailwind platform_phx --minify",
         "esbuild platform_phx --minify",
         "phx.digest"
@@ -95,19 +100,25 @@ defmodule PlatformPhx.MixProject do
     ]
   end
 
-  defp sync_regent_assets(_args) do
-    source = Path.expand("../../packages/regent_ui/priv/static/regent", __DIR__)
-    destination = Path.expand("priv/static/regent", __DIR__)
+  defp sync_public_assets(_args) do
+    source = Path.expand("assets/public", __DIR__)
+    destination = Path.expand("priv/static/images", __DIR__)
 
-    File.rm_rf!(destination)
-    File.mkdir_p!(Path.dirname(destination))
+    File.mkdir_p!(destination)
 
-    case File.cp_r(source, destination) do
-      {:ok, _copied} ->
-        :ok
+    Enum.each(File.ls!(source), fn entry ->
+      source_path = Path.join(source, entry)
+      destination_path = Path.join(destination, entry)
 
-      {:error, reason, file} ->
-        Mix.raise("Failed to sync Regent assets from #{file}: #{inspect(reason)}")
-    end
+      File.rm_rf!(destination_path)
+
+      case File.cp_r(source_path, destination_path) do
+        {:ok, _copied} ->
+          :ok
+
+        {:error, reason, file} ->
+          Mix.raise("Failed to sync public assets from #{file}: #{inspect(reason)}")
+      end
+    end)
   end
 end

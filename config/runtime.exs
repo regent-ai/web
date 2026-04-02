@@ -1,5 +1,7 @@
 import Config
 
+alias PlatformPhx.DatabaseUrl
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -20,8 +22,9 @@ if System.get_env("PHX_SERVER") do
   config :platform_phx, PlatformPhxWeb.Endpoint, server: true
 end
 
-config :platform_phx, PlatformPhxWeb.Endpoint,
-  http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+port = String.to_integer(System.get_env("PORT", "4000"))
+
+config :platform_phx, PlatformPhxWeb.Endpoint, http: [port: port]
 
 if config_env() == :prod do
   database_url =
@@ -34,7 +37,7 @@ if config_env() == :prod do
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :platform_phx, PlatformPhx.Repo,
-    # ssl: true,
+    ssl: DatabaseUrl.ssl_enabled?(database_url),
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     # For machines with several cores, consider starting multiple pools of `pool_size`
@@ -53,7 +56,21 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("PHX_HOST") || "127.0.0.1"
+
+  check_origin =
+    case System.get_env("PHX_HOST") do
+      value when is_binary(value) and value != "" ->
+        ["//#{value}", "//#{value}:#{port}"]
+
+      _other ->
+        [
+          "//127.0.0.1",
+          "//127.0.0.1:#{port}",
+          "//localhost",
+          "//localhost:#{port}"
+        ]
+    end
 
   config :platform_phx, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
@@ -66,6 +83,7 @@ if config_env() == :prod do
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
+    check_origin: check_origin,
     secret_key_base: secret_key_base
 
   # ## SSL Support

@@ -7,6 +7,28 @@
     <.live_title default="Regent Platform" suffix="">
       {assigns[:page_title]}
     </.live_title>
+    <script>
+      (() => {
+        const prefersDark = () => {
+          try {
+            return window.matchMedia("(prefers-color-scheme: dark)").matches;
+          } catch {
+            return false;
+          }
+        };
+
+        try {
+          const savedMode = window.localStorage.getItem("pp-color-mode");
+          const mode = savedMode === "dark" || savedMode === "light"
+            ? savedMode
+            : (prefersDark() ? "dark" : "light");
+
+          document.documentElement.dataset.colorMode = mode;
+        } catch {
+          document.documentElement.dataset.colorMode = prefersDark() ? "dark" : "light";
+        }
+      })();
+    </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>

@@ -5,6 +5,13 @@ This is a web application written using the Phoenix web framework.
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
 
+## TODO
+
+- Replace the stale fallback Autolaunch auction sample data so fresh environments do not show out-of-date launches as current.
+- Break the dashboard browser app into smaller pieces so it stops behaving like a second frontend living inside Phoenix.
+- Move the bug report ledger toward LiveView streams so loading older reports does not keep growing one large in-memory list.
+- Add a clear contract-validation workflow so the OpenAPI file stays the real source of truth and project docs stop looking like stock Phoenix defaults.
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
@@ -42,6 +49,9 @@ custom classes must fully style the input
 - Implement **subtle micro-interactions** (e.g., button hover effects, and smooth transitions)
 - Ensure **clean typography, spacing, and layout balance** for a refined, premium look
 - Focus on **delightful details** like hover effects, loading states, and smooth page transitions
+- Any user-facing visual change must work in both light mode and dark mode. Do not ship one-sided styling.
+- Treat light and dark mode as first-class themes, not simple inversion. Check contrast, surfaces, borders, and interactive states in both.
+- When adding a new component, route, or interaction, wire it into the shared color-mode system and verify it remains readable and usable in both themes.
 
 
 <!-- usage-rules-start -->

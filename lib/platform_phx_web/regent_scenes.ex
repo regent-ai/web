@@ -29,12 +29,12 @@ defmodule PlatformPhxWeb.RegentScenes do
               "hoverCycle" => %{
                 "mode" => "collapse",
                 "durationMs" => 960,
-                "fill" => "rgba(212, 177, 91, 0.3)",
-                "stroke" => "#6f5314",
+                "fill" => "rgba(111, 174, 157, 0.34)",
+                "stroke" => "#0a5a70",
                 "opacity" => 0.16,
                 "scale" => 0.68,
                 "translate" => 8,
-                "shadow" => "drop-shadow(0 0 14px rgba(212, 177, 91, 0.42))"
+                "shadow" => "drop-shadow(0 0 14px rgba(111, 174, 157, 0.4))"
               },
               "meta" => %{"navigate" => "/techtree"}
             },
@@ -130,13 +130,13 @@ defmodule PlatformPhxWeb.RegentScenes do
                 "group" => "autolaunch-home-cluster",
                 "mode" => "explode",
                 "durationMs" => 920,
-                "fill" => "rgba(217, 119, 6, 0.3)",
-                "stroke" => "#8f3d16",
+                "fill" => "rgba(126, 217, 87, 0.34)",
+                "stroke" => "#4faf63",
                 "opacity" => 0.18,
                 "scale" => 1.08,
                 "translate" => 14,
                 "staggerMs" => 24,
-                "shadow" => "drop-shadow(0 0 16px rgba(217, 119, 6, 0.36))"
+                "shadow" => "drop-shadow(0 0 16px rgba(126, 217, 87, 0.36))"
               },
               "meta" => %{"navigate" => "/autolaunch"}
             },
@@ -153,13 +153,13 @@ defmodule PlatformPhxWeb.RegentScenes do
                 "group" => "autolaunch-home-cluster",
                 "mode" => "explode",
                 "durationMs" => 920,
-                "fill" => "rgba(217, 119, 6, 0.3)",
-                "stroke" => "#8f3d16",
+                "fill" => "rgba(126, 217, 87, 0.34)",
+                "stroke" => "#4faf63",
                 "opacity" => 0.18,
                 "scale" => 1.08,
                 "translate" => 14,
                 "staggerMs" => 24,
-                "shadow" => "drop-shadow(0 0 16px rgba(217, 119, 6, 0.36))"
+                "shadow" => "drop-shadow(0 0 16px rgba(126, 217, 87, 0.36))"
               },
               "meta" => %{"navigate" => "/autolaunch"}
             },
@@ -200,14 +200,14 @@ defmodule PlatformPhxWeb.RegentScenes do
                 "group" => "autolaunch-home-cluster",
                 "mode" => "explode",
                 "durationMs" => 920,
-                "fill" => "rgba(217, 119, 6, 0.24)",
-                "stroke" => "#8f3d16",
+                "fill" => "rgba(126, 217, 87, 0.26)",
+                "stroke" => "#4faf63",
                 "opacity" => 0.22,
                 "scale" => 1.04,
                 "translate" => 12,
                 "staggerMs" => 18,
                 "includeMarker" => false,
-                "shadow" => "drop-shadow(0 0 14px rgba(217, 119, 6, 0.28))"
+                "shadow" => "drop-shadow(0 0 14px rgba(126, 217, 87, 0.3))"
               }
             },
             %{
@@ -264,7 +264,7 @@ defmodule PlatformPhxWeb.RegentScenes do
                 "translate" => 10,
                 "shadow" => "drop-shadow(0 0 14px rgba(212, 167, 86, 0.34))"
               },
-              "meta" => %{"navigate" => "/dashboard"}
+              "meta" => %{"navigate" => "/services"}
             },
             %{
               "id" => "platform:inspect",
@@ -275,7 +275,7 @@ defmodule PlatformPhxWeb.RegentScenes do
               "status" => "active",
               "position" => [-1, 4, 0],
               "size" => [2, 2, 2],
-              "meta" => %{"navigate" => "/dashboard"}
+              "meta" => %{"navigate" => "/services"}
             },
             %{
               "id" => "platform:seal",
@@ -286,7 +286,7 @@ defmodule PlatformPhxWeb.RegentScenes do
               "status" => "complete",
               "position" => [5, 1, 2],
               "size" => [2, 2, 2],
-              "meta" => %{"navigate" => "/dashboard"}
+              "meta" => %{"navigate" => "/services"}
             },
             %{
               "id" => "platform:guardrail",
@@ -298,7 +298,7 @@ defmodule PlatformPhxWeb.RegentScenes do
               "position" => [10, -2, 0],
               "size" => [2, 2, 2],
               "opaque" => false,
-              "meta" => %{"navigate" => "/dashboard"}
+              "meta" => %{"navigate" => "/services"}
             }
           ],
           "conduits" => [
@@ -340,8 +340,8 @@ defmodule PlatformPhxWeb.RegentScenes do
       title: "Dependency observatory",
       subtitle: "Seed-first bridge",
       summary:
-        "Techtree stays the research loop. The bridge page keeps the public purpose, the reuse pattern, and the handoff path readable before you move to the external surface.",
-      tags: ["Live public frontier", "Research-first", "Bridge page"],
+        "Techtree stays the research loop. The bridge page keeps the public purpose, the reuse pattern, and the handoff path readable before you move to the upcoming external surface.",
+      tags: ["Public preview", "Research-first", "Bridge page"],
       table: [
         {"Best for", "Research loops and reusable work"},
         {"Surface tone", "Parchment, cobalt, brass"},
@@ -369,14 +369,14 @@ defmodule PlatformPhxWeb.RegentScenes do
       table: [
         {"Artifacts", "Skills, runs, linked proofs"},
         {"Node style", "Structural and archival"},
-        {"Primary action", "Open the live research surface"}
+        {"Primary action", "Preview the research surface"}
       ]
     },
     "gate" => %{
       title: "Open Techtree",
       subtitle: "Explicit handoff",
       summary:
-        "This route is intentionally a bridge, not a mirror. The external surface owns the full research graph and benchmark workflow, and the outbound links stay explicit.",
+        "This route is intentionally a bridge, not a mirror. The upcoming external surface is meant to own the full research graph and benchmark workflow, and the outbound links stay explicit.",
       tags: ["External handoff", "No cloned graph", "Bridge only"],
       table: [
         {"Homepage role", "Chooser and explainer"},
@@ -391,7 +391,7 @@ defmodule PlatformPhxWeb.RegentScenes do
       title: "Auction forge",
       subtitle: "Fuse-first launch control",
       summary:
-        "Autolaunch owns the hotter market workflow. This bridge page keeps the live board visible, shows what is current versus settled, and sends people out to the real auction surface for action.",
+        "Autolaunch owns the hotter market workflow. This bridge page keeps the preview board visible, shows what is current versus settled, and points people toward the upcoming auction surface.",
       tags: ["Market-first", "Fuse conduits", "Bridge page"],
       table: [
         {"Best for", "Launches, bidding, settlement"},
@@ -400,7 +400,7 @@ defmodule PlatformPhxWeb.RegentScenes do
       ]
     },
     "market" => %{
-      title: "Live market board",
+      title: "Preview market board",
       subtitle: "Readable velocity",
       summary:
         "The scene keeps urgency symbolic, but the bridge route still explains current and past market state in plain English. Financial actions remain explicit and outbound.",
@@ -408,7 +408,7 @@ defmodule PlatformPhxWeb.RegentScenes do
       table: [
         {"Current board", "__CURRENT__"},
         {"Past board", "__PAST__"},
-        {"Operator move", "Open the live market"}
+        {"Operator move", "Preview the market"}
       ]
     },
     "settlement" => %{
@@ -445,7 +445,7 @@ defmodule PlatformPhxWeb.RegentScenes do
         "The dashboard keeps the operator shell quieter than the product twins. It shows the session, the retained onchain flows, and the guardrails, but the actual work stays in readable panels and the React mount below.",
       tags: ["Operator-grade", "Quiet shell", "Phoenix-owned"],
       table: [
-        {"Current route", "/dashboard"},
+        {"Current route", "/services"},
         {"Primary flows", "Redeem and name claim"},
         {"Interaction rule", "Readable first"}
       ]
@@ -488,7 +488,117 @@ defmodule PlatformPhxWeb.RegentScenes do
     }
   }
 
+  @home_logo_style %{
+    "default" => %{"fill" => "#f5ecd7", "stroke" => "#d4c2a0"},
+    "top" => %{"fill" => "#fff8e9"},
+    "left" => %{"fill" => "#e7d9ba"},
+    "right" => %{"fill" => "#efe1c4"},
+    "bottom" => %{"fill" => "#d8c6a1"}
+  }
+
+  @dashboard_logo_hover %{
+    "mode" => "phase",
+    "durationMs" => 1020,
+    "fill" => "rgba(9, 75, 117, 0.24)",
+    "stroke" => "#094b75",
+    "opacity" => 0.28,
+    "scale" => 0.9,
+    "translate" => 10,
+    "shadow" => "drop-shadow(0 0 14px rgba(9, 75, 117, 0.32))"
+  }
+
+  @techtree_logo_hover %{
+    "mode" => "collapse",
+    "durationMs" => 960,
+    "fill" => "rgba(0, 97, 0, 0.24)",
+    "stroke" => "#006100",
+    "opacity" => 0.16,
+    "scale" => 0.68,
+    "translate" => 8,
+    "shadow" => "drop-shadow(0 0 14px rgba(0, 97, 0, 0.28))"
+  }
+
+  @autolaunch_logo_hover %{
+    "group" => "autolaunch-home-cluster",
+    "mode" => "explode",
+    "durationMs" => 920,
+    "fill" => "rgba(11, 66, 61, 0.28)",
+    "stroke" => "#0b423d",
+    "opacity" => 0.18,
+    "scale" => 1.08,
+    "translate" => 14,
+    "staggerMs" => 24,
+    "shadow" => "drop-shadow(0 0 16px rgba(11, 66, 61, 0.3))"
+  }
+
+  def home_scene("dashboard"),
+    do:
+      home_logo_scene(
+        "platform",
+        "platform",
+        "Ops citadel",
+        "gate",
+        "platform:home-logo",
+        "Canonical Regent mark",
+        "Open dashboard",
+        "/services",
+        regent_split_home_commands("platform:home-logo"),
+        20
+      )
+
+  def home_scene("techtree"),
+    do:
+      home_logo_scene(
+        "techtree",
+        "techtree",
+        "Dependency observatory",
+        "seed",
+        "techtree:home-logo",
+        "Canonical Techtree mark",
+        "Open Techtree",
+        "/techtree",
+        techtree_ledger_home_commands("techtree:home-logo"),
+        20
+      )
+
+  def home_scene("autolaunch"),
+    do:
+      home_logo_scene(
+        "autolaunch",
+        "autolaunch",
+        "Auction forge",
+        "fuse",
+        "autolaunch:home-logo",
+        "Canonical Autolaunch mark",
+        "Open Autolaunch",
+        "/autolaunch",
+        autolaunch_claim_home_commands("autolaunch:home-logo"),
+        20
+      )
+
   def home_scene(card_id), do: @home_scenes |> Map.fetch!(card_id) |> scene_from_entries()
+
+  def overview_human_scene do
+    overview_logo_scene(
+      "Human workstation",
+      "gate",
+      "platform:overview-human",
+      "Open laptop landmark",
+      overview_human_commands("platform:overview-human"),
+      18
+    )
+  end
+
+  def overview_agent_scene do
+    overview_logo_scene(
+      "Agent operator",
+      "seal",
+      "platform:overview-agent",
+      "Robot landmark",
+      overview_agent_commands("platform:overview-agent"),
+      18
+    )
+  end
 
   def techtree_focus(focus),
     do: normalize_focus(focus, Map.keys(@techtree_sections), "observatory")
@@ -514,6 +624,289 @@ defmodule PlatformPhxWeb.RegentScenes do
   end
 
   def dashboard_content(focus), do: Map.fetch!(@dashboard_sections, dashboard_focus(focus))
+
+  defp home_logo_scene(
+         app,
+         theme,
+         title,
+         sigil,
+         target_id,
+         label,
+         action_label,
+         path,
+         commands,
+         distance
+       ) do
+    marker =
+      SceneSpec.marker(target_id,
+        label: label,
+        action_label: action_label,
+        sigil: sigil,
+        kind: "portal",
+        status: "focused",
+        intent: "navigate",
+        group_role: "landmark",
+        command_id: "#{target_id}:0",
+        meta: %{"navigate" => path}
+      )
+
+    face = SceneSpec.face("entry", title, sigil, commands, [marker], orientation: "front")
+
+    SceneSpec.scene(app, theme, "entry", face, distance: distance, scene_version: 2)
+  end
+
+  defp overview_logo_scene(title, sigil, target_id, label, commands, distance) do
+    marker =
+      SceneSpec.marker(target_id,
+        label: label,
+        sigil: sigil,
+        kind: "landmark",
+        status: "focused",
+        intent: "status_only",
+        group_role: "landmark",
+        command_id: "#{target_id}:0"
+      )
+
+    face = SceneSpec.face("entry", title, sigil, commands, [marker], orientation: "front")
+
+    SceneSpec.scene("platform", "platform", "entry", face,
+      distance: distance,
+      scene_version: 2
+    )
+  end
+
+  defp regent_split_home_commands(target_id) do
+    %{outer_size: 11, inner_size: 6, inner_offset_x: 2, inner_offset_y: 3}
+    |> regent_elbow_cells(
+      outer_thickness: 2,
+      outer_crook_cells: [{2, 2}, {2, 3}, {3, 3}],
+      inner_crook_cells: [{1, 1}]
+    )
+    |> reflect_diagonal_cells()
+    |> place_quadrant_cells(2)
+    |> rotate_quadrants()
+    |> centered_cells()
+    |> voxel_boxes(0, 3)
+    |> build_box_commands(target_id, [0.705, 0.705, 0.66], @dashboard_logo_hover)
+  end
+
+  defp techtree_ledger_home_commands(target_id) do
+    alpha = techtree_t_cells({0, 0}, 4, 4, 5)
+    beta = shift_cells(alpha, 5, 6)
+    [alpha, beta] = centered_layer_sets([alpha, beta])
+
+    (voxel_boxes(alpha, 0, 2) ++ voxel_boxes(beta, 2, 2))
+    |> build_box_commands(target_id, [0.95, 0.95, 0.92], @techtree_logo_hover)
+  end
+
+  defp autolaunch_claim_home_commands(target_id) do
+    [
+      vertical_cells(0, 0, 4),
+      horizontal_cells(4, 0, 5),
+      rect_cells(2, 2, 2, 1),
+      rect_cells(4, 1, 2, 1),
+      rect_cells(6, 0, 2, 1)
+    ]
+    |> List.flatten()
+    |> uniq_cells()
+    |> centered_cells()
+    |> voxel_boxes(0, 3)
+    |> build_box_commands(target_id, [0.83, 0.83, 0.88], @autolaunch_logo_hover)
+  end
+
+  defp overview_human_commands(target_id) do
+    screen =
+      horizontal_cells(0, 2, 8) ++
+        vertical_cells(2, 1, 5) ++
+        vertical_cells(8, 1, 5) ++
+        horizontal_cells(6, 3, 7)
+
+    deck =
+      rect_cells(0, 8, 11, 1) ++
+        rect_cells(1, 9, 9, 1) ++
+        rect_cells(3, 10, 5, 1)
+
+    hinge = rect_cells(4, 7, 3, 1)
+    keyboard = rect_cells(3, 9, 5, 1)
+
+    [screen, hinge, deck, keyboard] = centered_layer_sets([screen, hinge, deck, keyboard])
+
+    (voxel_boxes(screen, 2, 3) ++
+       voxel_boxes(hinge, 1, 2) ++
+       voxel_boxes(deck, 0, 2) ++
+       voxel_boxes(keyboard, 0, 1))
+    |> build_box_commands(target_id, [0.8, 0.8, 0.76], @dashboard_logo_hover)
+  end
+
+  defp overview_agent_commands(target_id) do
+    antenna = horizontal_cells(0, 5, 5) ++ vertical_cells(5, -2, -1)
+
+    head =
+      horizontal_cells(1, 2, 8) ++
+        vertical_cells(2, 2, 8) ++
+        vertical_cells(8, 2, 8) ++
+        horizontal_cells(8, 3, 7) ++
+        rect_cells(1, 3, 1, 3) ++
+        rect_cells(9, 3, 1, 3)
+
+    brow = horizontal_cells(3, 3, 7)
+    eyes = rect_cells(3, 4, 1, 2) ++ rect_cells(7, 4, 1, 2)
+    mouth = horizontal_cells(7, 4, 6)
+
+    [antenna, head, brow, eyes, mouth] =
+      centered_layer_sets([antenna, head, brow, eyes, mouth])
+
+    (voxel_boxes(antenna, 2, 2) ++
+       voxel_boxes(head, 0, 3) ++
+       voxel_boxes(brow, 1, 2) ++
+       voxel_boxes(eyes, 1, 2) ++
+       voxel_boxes(mouth, 1, 2))
+    |> build_box_commands(target_id, [0.8, 0.8, 0.76], @dashboard_logo_hover)
+  end
+
+  defp build_box_commands(boxes, target_id, scale, hover_cycle) do
+    Enum.with_index(boxes)
+    |> Enum.map(fn {{position, size}, index} ->
+      SceneSpec.add_box(
+        "#{target_id}:#{index}",
+        position,
+        size,
+        style: @home_logo_style,
+        target_id: target_id,
+        scale: scale,
+        scale_origin: [0.5, 0.5, 0.5],
+        hover_cycle: hover_cycle
+      )
+    end)
+  end
+
+  defp voxel_boxes(cells, z, depth) do
+    Enum.map(cells, fn {x, y} -> {[x, y, z], [1, 1, depth]} end)
+  end
+
+  defp centered_layer_sets(layers) do
+    all_cells = Enum.flat_map(layers, & &1)
+    {offset_x, offset_y} = center_offsets(all_cells)
+
+    Enum.map(layers, fn layer ->
+      Enum.map(layer, fn {x, y} -> {x - offset_x, y - offset_y} end)
+    end)
+  end
+
+  defp centered_cells(cells) do
+    {offset_x, offset_y} = center_offsets(cells)
+    Enum.map(cells, fn {x, y} -> {x - offset_x, y - offset_y} end)
+  end
+
+  defp center_offsets(cells) do
+    xs = Enum.map(cells, &elem(&1, 0))
+    ys = Enum.map(cells, &elem(&1, 1))
+    {div(Enum.min(xs) + Enum.max(xs), 2), div(Enum.min(ys) + Enum.max(ys), 2)}
+  end
+
+  defp rotate_quadrants(cells) do
+    cells
+    |> Enum.flat_map(fn cell ->
+      [
+        rotate_quarter_turns(cell, 0),
+        rotate_quarter_turns(cell, 1),
+        rotate_quarter_turns(cell, 2),
+        rotate_quarter_turns(cell, 3)
+      ]
+    end)
+    |> uniq_cells()
+  end
+
+  defp rotate_quarter_turns({x, y}, turns) do
+    normalized_turns = Integer.mod(turns, 4)
+
+    if normalized_turns == 0 do
+      {x, y}
+    else
+      Enum.reduce(1..normalized_turns, {x, y}, fn _, {cx, cy} ->
+        {-cy, cx}
+      end)
+    end
+  end
+
+  defp place_quadrant_cells(cells, gap) do
+    max_y = cells |> Enum.map(&elem(&1, 1)) |> Enum.max()
+    Enum.map(cells, fn {x, y} -> {x + gap, y - (max_y + gap)} end)
+  end
+
+  defp regent_elbow_cells(config, opts) do
+    outer =
+      diagonal_symmetric_elbow_cells(
+        config.outer_size,
+        Keyword.get(opts, :outer_thickness, 1),
+        Keyword.get(opts, :outer_crook_cells, [])
+      )
+      |> flip_horizontal_cells(config.outer_size)
+
+    inner =
+      diagonal_symmetric_elbow_cells(
+        config.inner_size,
+        Keyword.get(opts, :inner_thickness, 1),
+        Keyword.get(opts, :inner_crook_cells, [])
+      )
+      |> flip_vertical_cells(config.inner_size)
+      |> shift_cells(config.inner_offset_x, config.inner_offset_y)
+
+    uniq_cells(outer ++ inner)
+  end
+
+  defp diagonal_symmetric_elbow_cells(size, thickness, crook_cells) do
+    seed =
+      0..(thickness - 1)
+      |> Enum.flat_map(fn row_index -> horizontal_cells(row_index, thickness, size - 1) end)
+
+    uniq_cells(
+      seed ++
+        Enum.map(seed, fn {x, y} -> {y, x} end) ++
+        crook_cells ++ Enum.map(crook_cells, fn {x, y} -> {y, x} end)
+    )
+  end
+
+  defp techtree_t_cells({base_x, base_y}, left_arm, right_arm, stem) do
+    mid_y = base_y + 1
+    center_x = base_x + 1
+
+    uniq_cells(
+      node_block_cells(base_x, base_y, 3) ++
+        horizontal_cells(mid_y, base_x - left_arm, base_x - 1) ++
+        horizontal_cells(mid_y, base_x + 3, base_x + 2 + right_arm) ++
+        vertical_cells(center_x, base_y + 3, base_y + 2 + stem)
+    )
+  end
+
+  defp node_block_cells(base_x, base_y, size) do
+    for x <- base_x..(base_x + size - 1), y <- base_y..(base_y + size - 1), do: {x, y}
+  end
+
+  defp shift_cells(cells, delta_x, delta_y) do
+    Enum.map(cells, fn {x, y} -> {x + delta_x, y + delta_y} end)
+  end
+
+  defp flip_horizontal_cells(cells, size) do
+    Enum.map(cells, fn {x, y} -> {size - 1 - x, y} end)
+  end
+
+  defp flip_vertical_cells(cells, size) do
+    Enum.map(cells, fn {x, y} -> {x, size - 1 - y} end)
+  end
+
+  defp reflect_diagonal_cells(cells) do
+    Enum.map(cells, fn {x, y} -> {y, x} end)
+  end
+
+  defp horizontal_cells(y, start_x, end_x), do: Enum.map(start_x..end_x, &{&1, y})
+  defp vertical_cells(x, start_y, end_y), do: Enum.map(start_y..end_y, &{x, &1})
+
+  defp rect_cells(x, y, width, height) do
+    for px <- x..(x + width - 1), py <- y..(y + height - 1), do: {px, py}
+  end
+
+  defp uniq_cells(cells), do: cells |> Enum.uniq() |> Enum.sort()
 
   def techtree_bridge(focus, scene_version) do
     focus = techtree_focus(focus)
@@ -824,6 +1217,9 @@ defmodule PlatformPhxWeb.RegentScenes do
       "geometry" => geometry,
       "sigil" => sigil,
       "label" => label,
+      "actionLabel" => "Focus #{label}",
+      "intent" => "scene_action",
+      "groupRole" => "landmark",
       "status" => if(active_focus == focus_key, do: "focused", else: default_status),
       "position" => position,
       "size" => size,
@@ -896,143 +1292,190 @@ defmodule PlatformPhxWeb.RegentScenes do
     target_id = node_id
     hover_cycle = Map.get(node, "hoverCycle")
     meta = Map.get(node, "meta", %{})
+    command_id = node["commandId"] || "#{node_id}:body"
+    custom_commands = Map.get(node, "commands")
+    intent = node["intent"] || default_platform_intent(node)
+    action_label = node["actionLabel"] || default_platform_action_label(node)
+    group_role = node["groupRole"] || default_platform_group_role(node)
 
     marker =
       SceneSpec.marker(target_id,
         label: node["label"] || node_id,
+        action_label: action_label,
         sigil: node["sigil"],
         kind: node["kind"],
         status: status,
+        intent: intent,
+        back_target_id: node["backTargetId"],
+        history_key: node["historyKey"],
+        group_role: group_role,
+        click_tone: node["clickTone"],
         meta: meta,
-        command_id: "#{node_id}:body"
+        command_id: command_id
       )
 
+    intent_style = SceneSpec.intent_style(SceneSpec.node_style(status), intent)
+
     commands =
-      case geometry do
-        "socket" ->
-          [
-            SceneSpec.add_sphere(
-              "#{node_id}:body",
-              SceneSpec.sphere_center(position, size),
-              SceneSpec.sphere_radius(size),
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: SceneSpec.socket_scale(size, status),
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+      if is_list(custom_commands) do
+        custom_commands
+      else
+        case geometry do
+          "socket" ->
+            [
+              SceneSpec.add_sphere(
+                command_id,
+                SceneSpec.sphere_center(position, size),
+                SceneSpec.sphere_radius(size),
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || SceneSpec.socket_scale(size, status),
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        "carved_cube" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id
-            ),
-            SceneSpec.remove_box(
-              "#{node_id}:carve",
-              SceneSpec.inset_position(position),
-              SceneSpec.inset_size(size),
-              style: SceneSpec.carved_wall_style(status),
-              target_id: target_id
-            )
-          ]
+          "carved_cube" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id
+              ),
+              SceneSpec.remove_box(
+                "#{node_id}:carve",
+                SceneSpec.inset_position(position),
+                SceneSpec.inset_size(size),
+                style: SceneSpec.carved_wall_style(status),
+                target_id: target_id
+              )
+            ]
 
-        "ghost" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.ghost_style(),
-              opaque: false,
-              hover_cycle: hover_cycle,
-              target_id: target_id
-            )
-          ]
+          "ghost" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: SceneSpec.ghost_style(),
+                opaque: false,
+                hover_cycle: hover_cycle,
+                target_id: target_id
+              )
+            ]
 
-        "reliquary" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: [0.88, 0.92, 0.88],
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+          "reliquary" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || [0.88, 0.92, 0.88],
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        "monolith" ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: [0.9, 1, 0.9],
-              scale_origin: [0.5, 1, 0.5]
-            )
-          ]
+          "monolith" ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: node["scale"] || [0.9, 1, 0.9],
+                scale_origin: node["scaleOrigin"] || [0.5, 1, 0.5]
+              )
+            ]
 
-        _ ->
-          [
-            SceneSpec.add_box(
-              "#{node_id}:body",
-              position,
-              size,
-              style: SceneSpec.node_style(status),
-              opaque: Map.get(node, "opaque"),
-              hover_cycle: hover_cycle,
-              target_id: target_id,
-              scale: SceneSpec.default_scale(node, status),
-              scale_origin: SceneSpec.default_scale_origin(node, status)
-            )
-          ]
+          _ ->
+            [
+              SceneSpec.add_box(
+                command_id,
+                position,
+                size,
+                style: intent_style,
+                opaque: Map.get(node, "opaque"),
+                hover_cycle: hover_cycle,
+                target_id: target_id,
+                scale: SceneSpec.default_scale(node, status),
+                scale_origin: SceneSpec.default_scale_origin(node, status)
+              )
+            ]
+        end
       end
 
     %{commands: commands, marker: marker}
   end
 
   defp conduit_commands(conduit, nodes_by_id) do
-    with from_node when is_map(from_node) <- Map.get(nodes_by_id, conduit["from"]),
-         to_node when is_map(to_node) <- Map.get(nodes_by_id, conduit["to"]) do
-      base =
-        SceneSpec.add_line(
-          "#{conduit["id"]}:line",
-          SceneSpec.anchor(Map.fetch!(from_node, "position"), Map.fetch!(from_node, "size")),
-          SceneSpec.anchor(Map.fetch!(to_node, "position"), Map.fetch!(to_node, "size")),
-          radius: conduit["radius"] || 0.75,
-          shape: conduit["shape"] || "rounded",
-          style: SceneSpec.conduit_style(conduit["state"] || "visible"),
-          hover_cycle: conduit["hoverCycle"]
-        )
+    custom_commands = Map.get(conduit, "commands")
 
-      waypoints =
-        conduit
-        |> Map.get("waypoints", [])
-        |> Enum.with_index()
-        |> Enum.map(fn {point, index} ->
-          SceneSpec.add_sphere(
-            "#{conduit["id"]}:waypoint:#{index}",
-            point,
-            0.6,
-            style: SceneSpec.conduit_style(conduit["state"] || "visible"),
-            hover_cycle: conduit["hoverCycle"]
-          )
-        end)
+    cond do
+      is_list(custom_commands) ->
+        custom_commands
 
-      [base | waypoints]
-    else
-      _ -> []
+      true ->
+        with from_node when is_map(from_node) <- Map.get(nodes_by_id, conduit["from"]),
+             to_node when is_map(to_node) <- Map.get(nodes_by_id, conduit["to"]) do
+          base =
+            SceneSpec.add_line(
+              "#{conduit["id"]}:line",
+              SceneSpec.anchor(Map.fetch!(from_node, "position"), Map.fetch!(from_node, "size")),
+              SceneSpec.anchor(Map.fetch!(to_node, "position"), Map.fetch!(to_node, "size")),
+              radius: conduit["radius"] || 0.75,
+              shape: conduit["shape"] || "rounded",
+              style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+              hover_cycle: conduit["hoverCycle"]
+            )
+
+          waypoints =
+            conduit
+            |> Map.get("waypoints", [])
+            |> Enum.with_index()
+            |> Enum.map(fn {point, index} ->
+              SceneSpec.add_sphere(
+                "#{conduit["id"]}:waypoint:#{index}",
+                point,
+                0.6,
+                style: SceneSpec.conduit_style(conduit["state"] || "visible"),
+                hover_cycle: conduit["hoverCycle"]
+              )
+            end)
+
+          [base | waypoints]
+        else
+          _ -> []
+        end
+    end
+  end
+
+  defp default_platform_intent(node) do
+    meta = Map.get(node, "meta", %{})
+    if is_binary(meta["navigate"]), do: "navigate", else: "scene_action"
+  end
+
+  defp default_platform_action_label(node) do
+    meta = Map.get(node, "meta", %{})
+
+    cond do
+      is_binary(meta["navigate"]) -> "Open route"
+      is_binary(node["label"]) -> "Focus #{node["label"]}"
+      true -> nil
+    end
+  end
+
+  defp default_platform_group_role(node) do
+    case node["geometry"] do
+      geometry when geometry in ["monolith", "reliquary", "carved_cube"] -> "landmark"
+      _ -> nil
     end
   end
 end

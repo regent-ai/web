@@ -6,6 +6,13 @@ defmodule PlatformPhx.AgentLaunch do
   alias PlatformPhx.AgentLaunch.Auction
   alias PlatformPhx.Repo
 
+  @type auction :: map()
+  @type auction_payload :: %{
+          required(:auctions) => [map()],
+          required(:generated_at) => DateTime.t()
+        }
+  @type auction_split :: %{required(:current) => [map()], required(:past) => [map()]}
+
   @default_auctions [
     %{
       "id" => "cca-eth-genesis",
@@ -45,6 +52,7 @@ defmodule PlatformPhx.AgentLaunch do
     }
   ]
 
+  @spec list_auctions() :: [auction()]
   def list_auctions do
     case Repo.all(from auction in Auction, order_by: [asc: auction.ends_at]) do
       [] -> Enum.map(@default_auctions, &normalize_map/1)
@@ -52,6 +60,7 @@ defmodule PlatformPhx.AgentLaunch do
     end
   end
 
+  @spec split_auctions([auction()]) :: auction_split()
   def split_auctions(auctions) do
     now = DateTime.utc_now()
 
@@ -74,15 +83,21 @@ defmodule PlatformPhx.AgentLaunch do
     end)
   end
 
+  @spec generated_payload() :: auction_payload()
   def generated_payload do
-    auctions = list_auctions()
+    list_auctions()
+    |> generated_payload()
+  end
 
+  @spec generated_payload([auction()]) :: auction_payload()
+  def generated_payload(auctions) do
     %{
       auctions: Enum.map(auctions, &public_auction/1),
       generated_at: DateTime.utc_now()
     }
   end
 
+  @spec public_auction(auction()) :: map()
   def public_auction(auction) do
     %{
       id: auction.id,

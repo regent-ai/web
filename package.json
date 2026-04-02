@@ -1,0 +1,8 @@
+{
+  "name": "@regent/platform-phx",
+  "private": true,
+  "scripts": {
+    "check": "cd assets && bun run check",
+    "test:assets": "cd assets && bun run test"
+  }
+}

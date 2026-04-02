@@ -15,7 +15,7 @@
   },
   "include": [
     "js/**/*",
-    "../../../../packages/regent_ui/assets/js/**/*",
-    "../../../../packages/regent_ui/assets/vendor/**/*.d.ts"
+    "regent/js/**/*",
+    "regent/vendor/**/*.d.ts"
   ]
 }

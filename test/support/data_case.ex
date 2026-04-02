@@ -28,16 +28,17 @@ defmodule PlatformPhx.DataCase do
   end
 
   setup tags do
-    PlatformPhx.DataCase.setup_sandbox(tags)
-    :ok
+    {:ok, sandbox_owner: PlatformPhx.DataCase.setup_sandbox(tags)}
   end
 
   @doc """
   Sets up the sandbox based on the test tags.
   """
+  @spec setup_sandbox(map()) :: pid()
   def setup_sandbox(tags) do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(PlatformPhx.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid
   end
 
   @doc """

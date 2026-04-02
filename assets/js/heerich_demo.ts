@@ -1,9 +1,9 @@
-type ProceduralDemoKind = "where" | "style" | "scale";
+type ProceduralDemoKind = "fill" | "style" | "scale";
 
 type HeerichWithProcedural = {
   clear(): void;
-  addWhere(input: Record<string, unknown>): void;
-  addBox(input: Record<string, unknown>): void;
+  addGeometry(input: Record<string, unknown>): void;
+  applyGeometry(input: Record<string, unknown>): void;
   toSVG(input?: Record<string, unknown>): string;
 };
 
@@ -21,8 +21,9 @@ function proceduralEngine(): HeerichWithProcedural | null {
   }) as unknown as HeerichWithProcedural;
 }
 
-function renderWhereDemo(engine: HeerichWithProcedural): void {
-  engine.addWhere({
+function renderFillDemo(engine: HeerichWithProcedural): void {
+  engine.addGeometry({
+    type: "fill",
     bounds: [[-8, -3, -8], [8, 3, 8]],
     test: (x: number, y: number, z: number) => {
       const R = 6;
@@ -38,9 +39,10 @@ function renderWhereDemo(engine: HeerichWithProcedural): void {
 }
 
 function renderStyleDemo(engine: HeerichWithProcedural): void {
-  engine.addBox({
-    position: [0, 0, 0],
-    size: [7, 7, 7],
+  engine.addGeometry({
+    type: "box",
+    center: [3, 3, 3],
+    size: 7,
     style: {
       default: (x: number, y: number, z: number) => {
         const hue = 32 + x * 18 + z * 6;
@@ -55,9 +57,10 @@ function renderStyleDemo(engine: HeerichWithProcedural): void {
 }
 
 function renderScaleDemo(engine: HeerichWithProcedural): void {
-  engine.addBox({
-    position: [0, 0, 0],
-    size: [6, 6, 6],
+  engine.addGeometry({
+    type: "box",
+    center: [2, 2, 2],
+    size: 6,
     style: {
       default: { fill: "rgba(125, 187, 255, 0.82)", stroke: "#315f8f" },
     },
@@ -79,18 +82,18 @@ export function mountProceduralHeerichDemo(root: HTMLElement): void {
     return;
   }
 
-  const kind = (root.dataset.demoKind ?? "where") as ProceduralDemoKind;
+  const kind = (root.dataset.demoKind ?? "fill") as ProceduralDemoKind;
   root.innerHTML = "";
 
   switch (kind) {
+    case "fill":
+      renderFillDemo(engine);
+      break;
     case "style":
       renderStyleDemo(engine);
       break;
     case "scale":
       renderScaleDemo(engine);
-      break;
-    default:
-      renderWhereDemo(engine);
       break;
   }
 

@@ -1,0 +1,696 @@
+:root {
+  --rg-font-display: "GeistPixelCircle", serif;
+  --rg-font-body: "GeistPixelSquare", sans-serif;
+  --rg-bg: #090d15;
+  --rg-panel: rgba(15, 22, 34, 0.84);
+  --rg-panel-border: rgba(160, 181, 224, 0.18);
+  --rg-text: #eff4ff;
+  --rg-muted: #92a5c7;
+  --rg-node-fill: rgba(214, 224, 255, 0.52);
+  --rg-node-stroke: #cad4ef;
+  --rg-node-fill-active: rgba(110, 189, 255, 0.78);
+  --rg-node-stroke-active: #a7d8ff;
+  --rg-node-fill-focused: rgba(147, 114, 255, 0.8);
+  --rg-node-stroke-focused: #d3c1ff;
+  --rg-sigil-color: #0d1524;
+  --rg-sigil-color-active: #08111f;
+  --rg-intent-color-scene-action: #392200;
+  --rg-intent-color-navigate: #08283d;
+  --rg-intent-color-back: #182746;
+  --rg-intent-color-danger: #3e0a10;
+  --rg-intent-stroke-scene-action: #d5a357;
+  --rg-intent-stroke-navigate: #83ccff;
+  --rg-intent-stroke-back: #a6bbdf;
+  --rg-intent-stroke-danger: #ff8f9c;
+  --rg-intent-glow-scene-action: rgba(221, 170, 82, 0.28);
+  --rg-intent-glow-navigate: rgba(104, 199, 255, 0.24);
+  --rg-intent-glow-back: rgba(185, 206, 241, 0.22);
+  --rg-intent-glow-danger: rgba(255, 120, 134, 0.24);
+  --rg-bg-cube-top: rgba(196, 217, 255, 0.07);
+  --rg-bg-cube-left: rgba(88, 103, 134, 0.10);
+  --rg-bg-cube-right: rgba(118, 140, 181, 0.09);
+  --rg-bg-cube-stroke: rgba(172, 191, 235, 0.16);
+  --rg-bg-cube-top-active: rgba(142, 234, 255, 0.62);
+  --rg-bg-cube-left-active: rgba(63, 170, 205, 0.5);
+  --rg-bg-cube-right-active: rgba(94, 195, 235, 0.56);
+  --rg-bg-cube-top-neighbor: rgba(142, 234, 255, 0.2);
+  --rg-bg-cube-left-neighbor: rgba(64, 142, 176, 0.14);
+  --rg-bg-cube-right-neighbor: rgba(96, 168, 208, 0.16);
+  --rg-bg-cube-top-trail: var(--rg-bg-cube-top-active);
+  --rg-bg-cube-left-trail: var(--rg-bg-cube-left-active);
+  --rg-bg-cube-right-trail: var(--rg-bg-cube-right-active);
+  --rg-bg-cube-trail-shadow: rgba(117, 219, 255, 0.12);
+}
+
+html[data-color-mode="dark"] {
+  --rg-bg: #034568;
+  --rg-panel: color-mix(in oklch, #034568 74%, #315569 26%);
+  --rg-panel-border: color-mix(in oklch, #fbf4de 16%, #034568 84%);
+  --rg-text: color-mix(in oklch, #fbf4de 92%, #d4a756 8%);
+  --rg-muted: color-mix(in oklch, #fbf4de 66%, #848078 34%);
+  --rg-node-fill: color-mix(in oklch, #fbf4de 26%, transparent);
+  --rg-node-stroke: color-mix(in oklch, #fbf4de 54%, #034568 46%);
+  --rg-node-fill-active: color-mix(in oklch, #fbf4de 34%, #034568 66%);
+  --rg-node-stroke-active: color-mix(in oklch, #fbf4de 62%, #034568 38%);
+  --rg-node-fill-focused: color-mix(in oklch, #d4a756 28%, #034568 72%);
+  --rg-node-stroke-focused: color-mix(in oklch, #fbf4de 42%, #d4a756 58%);
+  --rg-sigil-color: #fbf4de;
+  --rg-sigil-color-active: color-mix(in oklch, #fbf4de 86%, #d4a756 14%);
+  --rg-bg-cube-top: color-mix(in oklch, #fbf4de 5%, transparent);
+  --rg-bg-cube-left: color-mix(in oklch, #315569 24%, transparent);
+  --rg-bg-cube-right: color-mix(in oklch, #fbf4de 8%, transparent);
+  --rg-bg-cube-stroke: color-mix(in oklch, #fbf4de 13%, transparent);
+  --rg-bg-cube-top-active: color-mix(in oklch, #fbf4de 24%, #034568 76%);
+  --rg-bg-cube-left-active: color-mix(in oklch, #fbf4de 18%, #034568 82%);
+  --rg-bg-cube-right-active: color-mix(in oklch, #fbf4de 20%, #034568 80%);
+  --rg-bg-cube-top-neighbor: color-mix(in oklch, #fbf4de 8%, transparent);
+  --rg-bg-cube-left-neighbor: color-mix(in oklch, #fbf4de 6%, transparent);
+  --rg-bg-cube-right-neighbor: color-mix(in oklch, #fbf4de 7%, transparent);
+  --rg-bg-cube-top-trail: color-mix(in oklch, #fbf4de 20%, #034568 80%);
+  --rg-bg-cube-left-trail: color-mix(in oklch, #fbf4de 16%, #034568 84%);
+  --rg-bg-cube-right-trail: color-mix(in oklch, #fbf4de 18%, #034568 82%);
+  --rg-bg-cube-trail-shadow: color-mix(in oklch, #fbf4de 8%, transparent);
+}
+
+@font-face {
+  font-family: "GeistPixelCircle";
+  src: url("/fonts/GeistPixel-Circle.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GeistPixelSquare";
+  src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: radial-gradient(circle at top left, rgba(71, 109, 207, 0.18), transparent 28%), var(--rg-bg);
+  color: var(--rg-text);
+  font-family: var(--rg-font-body);
+}
+
+.rg-cursor-hidden,
+.rg-cursor-hidden * {
+  cursor: none !important;
+}
+
+.rg-background-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rg-background-grid-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rg-bg-cube {
+  transition: filter 120ms ease, opacity 120ms ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.rg-bg-cube-face {
+  transition:
+    fill 100ms ease,
+    stroke 100ms ease,
+    opacity 100ms ease,
+    transform 100ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.rg-bg-cube-face-top {
+  fill: var(--rg-bg-cube-top);
+  stroke: var(--rg-bg-cube-stroke);
+  stroke-width: 1;
+}
+
+.rg-bg-cube-face-left {
+  fill: var(--rg-bg-cube-left);
+  stroke: var(--rg-bg-cube-stroke);
+  stroke-width: 1;
+}
+
+.rg-bg-cube-face-right {
+  fill: var(--rg-bg-cube-right);
+  stroke: var(--rg-bg-cube-stroke);
+  stroke-width: 1;
+}
+
+.rg-bg-cube.is-neighbor {
+  filter: drop-shadow(0 0 6px rgba(117, 219, 255, 0.08));
+}
+
+.rg-bg-cube.is-neighbor .rg-bg-cube-face-top {
+  fill: var(--rg-bg-cube-top-neighbor);
+}
+
+.rg-bg-cube.is-neighbor .rg-bg-cube-face-left {
+  fill: var(--rg-bg-cube-left-neighbor);
+}
+
+.rg-bg-cube.is-neighbor .rg-bg-cube-face-right {
+  fill: var(--rg-bg-cube-right-neighbor);
+}
+
+.rg-bg-cube.is-active {
+  filter: drop-shadow(0 0 12px rgba(115, 231, 255, 0.24));
+}
+
+.rg-bg-cube.is-active .rg-bg-cube-face-top {
+  fill: var(--rg-bg-cube-top-active);
+}
+
+.rg-bg-cube.is-active .rg-bg-cube-face-left {
+  fill: var(--rg-bg-cube-left-active);
+}
+
+.rg-bg-cube.is-active .rg-bg-cube-face-right {
+  fill: var(--rg-bg-cube-right-active);
+}
+
+.rg-bg-cube.is-trail {
+  filter: drop-shadow(0 0 8px var(--rg-bg-cube-trail-shadow));
+}
+
+.rg-bg-cube.is-trail .rg-bg-cube-face-top {
+  fill: var(--rg-bg-cube-top-trail);
+}
+
+.rg-bg-cube.is-trail .rg-bg-cube-face-left {
+  fill: var(--rg-bg-cube-left-trail);
+}
+
+.rg-bg-cube.is-trail .rg-bg-cube-face-right {
+  fill: var(--rg-bg-cube-right-trail);
+}
+
+.rg-app-shell {
+  position: relative;
+  z-index: 1;
+  font-family: var(--rg-font-body);
+}
+
+.rg-surface {
+  position: relative;
+  display: grid;
+  gap: 0.9rem;
+  color: var(--rg-text);
+  font-family: var(--rg-font-body);
+}
+
+.rg-surface-header {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.85rem;
+  padding: 0.58rem 0.82rem;
+  border: 1px solid var(--rg-panel-border);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--rg-panel) 92%, rgba(255,255,255,0.04) 8%), color-mix(in srgb, var(--rg-panel) 96%, rgba(0,0,0,0.03) 4%)),
+    radial-gradient(circle at top left, rgba(118, 164, 255, 0.08), transparent 32%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 36px rgba(0,0,0,0.14);
+  backdrop-filter: blur(12px);
+}
+
+.rg-surface-body {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 18rem) minmax(0, 1fr) minmax(4.5rem, 18rem);
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.rg-surface-center,
+.rg-surface-main {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.rg-surface-side {
+  position: sticky;
+  top: 5.6rem;
+  z-index: 4;
+  min-height: 32rem;
+}
+
+.rg-surface-side > * {
+  height: 100%;
+}
+
+.rg-surface-side-left {
+  justify-self: start;
+}
+
+.rg-surface-side-right {
+  justify-self: end;
+}
+
+.rg-surface-scene {
+  min-height: 32rem;
+  position: relative;
+  z-index: 1;
+  padding: 1rem;
+  border: 1px solid var(--rg-panel-border);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at top left, rgba(118, 164, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(14, 21, 33, 0.96), rgba(8, 11, 18, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 80px rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+}
+
+.rg-surface-chamber {
+  position: relative;
+  z-index: 3;
+  justify-self: center;
+  width: min(100%, 58rem);
+  margin-top: -8.5rem;
+}
+
+.rg-surface-ledger {
+  position: relative;
+  z-index: 2;
+}
+
+.rg-chamber,
+.rg-ledger {
+  border: 1px solid var(--rg-panel-border);
+  border-radius: 1rem;
+  background: var(--rg-panel);
+  backdrop-filter: blur(14px);
+  overflow: clip;
+}
+
+.rg-chamber {
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.rg-ledger {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+.rg-panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid rgba(160, 181, 224, 0.12);
+}
+
+.rg-panel-title {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin: 0;
+  font-family: var(--rg-font-display);
+  text-transform: uppercase;
+}
+
+.rg-panel-subtitle,
+.rg-panel-summary {
+  color: var(--rg-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  font-family: var(--rg-font-body);
+}
+
+.rg-panel-body {
+  padding: 1rem;
+}
+
+.rg-panel-footer {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 1px solid rgba(160, 181, 224, 0.12);
+}
+
+.rg-scene-error {
+  min-height: 10rem;
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  color: var(--rg-text);
+}
+
+.rg-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.rg-sigil-marker,
+.rg-sigil-marker * {
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rg-sigil-marker.is-focused,
+.rg-sigil-marker:focus-visible {
+  filter: drop-shadow(0 0 8px rgba(193, 224, 255, 0.32));
+}
+
+.rg-sigil-marker[data-intent="scene_action"] {
+  filter: drop-shadow(0 0 5px var(--rg-intent-glow-scene-action));
+}
+
+.rg-sigil-marker[data-intent="navigate"] {
+  filter: drop-shadow(0 0 5px var(--rg-intent-glow-navigate));
+}
+
+.rg-sigil-marker[data-intent="back"] {
+  filter: drop-shadow(0 0 5px var(--rg-intent-glow-back));
+}
+
+.rg-sigil-marker[data-intent="danger"] {
+  filter: drop-shadow(0 0 5px var(--rg-intent-glow-danger));
+}
+
+.rg-sigil-marker.is-pulsing {
+  filter: drop-shadow(0 0 14px rgba(124, 232, 255, 0.55));
+}
+
+.rg-sigil-marker.is-ghosted {
+  opacity: 0.45;
+}
+
+.rg-scene-target.is-dimmed {
+  opacity: 0.22;
+  filter: saturate(0.54);
+}
+
+.rg-scene-target.is-focused {
+  opacity: 1;
+}
+
+.rg-scene-target[data-intent="scene_action"].is-focused {
+  filter: drop-shadow(0 0 12px var(--rg-intent-glow-scene-action));
+}
+
+.rg-scene-target[data-intent="navigate"].is-focused {
+  filter: drop-shadow(0 0 12px var(--rg-intent-glow-navigate));
+}
+
+.rg-scene-target[data-intent="back"].is-focused {
+  filter: drop-shadow(0 0 12px var(--rg-intent-glow-back));
+}
+
+.rg-scene-target[data-intent="danger"].is-focused {
+  filter: drop-shadow(0 0 12px var(--rg-intent-glow-danger));
+}
+
+.rg-surface-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.9rem;
+  padding: 0.38rem 0.68rem;
+  border: 1px solid color-mix(in srgb, var(--rg-panel-border) 78%, rgba(255,255,255,0.12) 22%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rg-panel) 84%, rgba(255,255,255,0.06) 16%);
+  color: var(--rg-text);
+  font-family: var(--rg-font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.rg-surface-back-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.rg-scene-error,
+.rg-table,
+.rg-panel-body,
+.rg-panel-footer {
+  font-family: var(--rg-font-body);
+}
+
+.rg-regent-theme-techtree {
+  --rg-bg: #141109;
+  --rg-panel: color-mix(in srgb, #fbf5e3 86%, #1c1409 14%);
+  --rg-panel-border: rgba(131, 100, 35, 0.22);
+  --rg-text: #14120e;
+  --rg-muted: rgba(48, 39, 24, 0.66);
+  --rg-node-fill: rgba(17, 76, 167, 0.1);
+  --rg-node-stroke: #114ca7;
+  --rg-node-fill-active: rgba(17, 76, 167, 0.18);
+  --rg-node-stroke-active: #05070d;
+  --rg-node-fill-focused: rgba(212, 177, 91, 0.2);
+  --rg-node-stroke-focused: #6f5314;
+  --rg-sigil-color: #17130d;
+  --rg-sigil-color-active: #0f2349;
+  --rg-intent-color-scene-action: #2f1c03;
+  --rg-intent-color-navigate: #12355f;
+  --rg-intent-color-back: #3b2b11;
+  --rg-intent-stroke-scene-action: #c99541;
+  --rg-intent-stroke-navigate: #3d73c8;
+  --rg-intent-stroke-back: #d2b16c;
+  --rg-intent-glow-scene-action: rgba(214, 162, 72, 0.24);
+  --rg-intent-glow-navigate: rgba(55, 106, 193, 0.22);
+  --rg-intent-glow-back: rgba(210, 177, 108, 0.2);
+  --rg-bg-cube-top: rgba(17, 76, 167, 0.08);
+  --rg-bg-cube-left: rgba(109, 82, 33, 0.11);
+  --rg-bg-cube-right: rgba(201, 164, 89, 0.1);
+  --rg-bg-cube-stroke: rgba(103, 86, 50, 0.18);
+  --rg-bg-cube-top-active: rgba(17, 76, 167, 0.28);
+  --rg-bg-cube-left-active: rgba(73, 49, 11, 0.24);
+  --rg-bg-cube-right-active: rgba(212, 177, 91, 0.22);
+  --rg-bg-cube-top-neighbor: rgba(17, 76, 167, 0.12);
+  --rg-bg-cube-left-neighbor: rgba(73, 49, 11, 0.1);
+  --rg-bg-cube-right-neighbor: rgba(212, 177, 91, 0.09);
+}
+
+.rg-regent-theme-platform {
+  --rg-bg: #111615;
+  --rg-panel: color-mix(in srgb, #f7f1e1 84%, #121919 16%);
+  --rg-panel-border: rgba(73, 82, 78, 0.2);
+  --rg-text: #151714;
+  --rg-muted: rgba(33, 40, 39, 0.64);
+  --rg-node-fill: rgba(49, 85, 105, 0.14);
+  --rg-node-stroke: #315569;
+  --rg-node-fill-active: rgba(3, 69, 104, 0.22);
+  --rg-node-stroke-active: #07273b;
+  --rg-node-fill-focused: rgba(212, 167, 86, 0.24);
+  --rg-node-stroke-focused: #7a5e24;
+  --rg-sigil-color: #11140f;
+  --rg-sigil-color-active: #08283d;
+  --rg-bg-cube-top: rgba(49, 85, 105, 0.08);
+  --rg-bg-cube-left: rgba(132, 128, 120, 0.1);
+  --rg-bg-cube-right: rgba(212, 167, 86, 0.1);
+  --rg-bg-cube-stroke: rgba(70, 78, 75, 0.16);
+  --rg-bg-cube-top-active: rgba(49, 85, 105, 0.34);
+  --rg-bg-cube-left-active: rgba(132, 128, 120, 0.28);
+  --rg-bg-cube-right-active: rgba(212, 167, 86, 0.32);
+  --rg-bg-cube-top-neighbor: rgba(49, 85, 105, 0.16);
+  --rg-bg-cube-left-neighbor: rgba(132, 128, 120, 0.16);
+  --rg-bg-cube-right-neighbor: rgba(212, 167, 86, 0.16);
+}
+
+.rg-regent-theme-autolaunch {
+  --rg-bg: #0d1718;
+  --rg-panel: rgba(249, 250, 243, 0.82);
+  --rg-panel-border: rgba(27, 62, 59, 0.16);
+  --rg-text: #0b1516;
+  --rg-muted: rgba(11, 21, 22, 0.62);
+  --rg-node-fill: rgba(15, 118, 110, 0.1);
+  --rg-node-stroke: #0f766e;
+  --rg-node-fill-active: rgba(184, 88, 43, 0.2);
+  --rg-node-stroke-active: #8f3d16;
+  --rg-node-fill-focused: rgba(217, 119, 6, 0.2);
+  --rg-node-stroke-focused: #a24d00;
+  --rg-sigil-color: #081214;
+  --rg-sigil-color-active: #532108;
+  --rg-intent-color-scene-action: #392100;
+  --rg-intent-color-navigate: #0f3028;
+  --rg-intent-color-back: #3f2a13;
+  --rg-intent-stroke-scene-action: #cf7e2e;
+  --rg-intent-stroke-navigate: #2f9d80;
+  --rg-intent-stroke-back: #b69062;
+  --rg-intent-glow-scene-action: rgba(214, 118, 34, 0.24);
+  --rg-intent-glow-navigate: rgba(43, 154, 125, 0.2);
+  --rg-intent-glow-back: rgba(184, 144, 95, 0.2);
+  --rg-bg-cube-top: rgba(15, 118, 110, 0.08);
+  --rg-bg-cube-left: rgba(142, 73, 35, 0.11);
+  --rg-bg-cube-right: rgba(217, 119, 6, 0.1);
+  --rg-bg-cube-stroke: rgba(22, 57, 57, 0.16);
+  --rg-bg-cube-top-active: rgba(15, 118, 110, 0.24);
+  --rg-bg-cube-left-active: rgba(142, 73, 35, 0.23);
+  --rg-bg-cube-right-active: rgba(217, 119, 6, 0.24);
+  --rg-bg-cube-top-neighbor: rgba(15, 118, 110, 0.1);
+  --rg-bg-cube-left-neighbor: rgba(142, 73, 35, 0.1);
+  --rg-bg-cube-right-neighbor: rgba(217, 119, 6, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-bg-cube,
+  .rg-bg-cube-face,
+  .rg-sigil-marker,
+  .rg-sigil-marker * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.rg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rg-table th,
+.rg-table td {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid rgba(160, 181, 224, 0.1);
+}
+
+.rg-table th {
+  color: var(--rg-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(160, 181, 224, 0.18);
+  color: var(--rg-text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rg-sigil-marker.is-focused {
+  filter: drop-shadow(0 0 10px rgba(179, 221, 255, 0.5));
+}
+
+@media (max-width: 1180px) {
+  .rg-surface-body {
+    grid-template-columns: minmax(4.25rem, 14rem) minmax(0, 1fr) minmax(4.25rem, 14rem);
+  }
+}
+
+@media (max-width: 980px) {
+  .rg-surface-header {
+    position: relative;
+    top: auto;
+  }
+
+  .rg-surface-body {
+    grid-template-columns: 1fr;
+  }
+
+  .rg-surface-side {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+
+  .rg-surface-chamber {
+    margin-top: -2rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .rg-surface {
+    gap: 0.75rem;
+  }
+
+  .rg-surface-header {
+    min-height: 3.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 1rem;
+  }
+
+  .rg-surface-body {
+    gap: 0.75rem;
+  }
+
+  .rg-surface-scene {
+    min-height: 24rem;
+    padding: 0.65rem;
+  }
+
+  .rg-surface-side {
+    order: 3;
+  }
+
+  .rg-surface-side-right {
+    order: 4;
+  }
+
+  .rg-surface-side > * {
+    height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-bg-cube,
+  .rg-bg-cube-face,
+  .rg-sigil-marker {
+    transition: none !important;
+  }
+}
+
+
+.rg-surface-defs {
+  display: none;
+}
+
+.rg-sigil-marker {
+  outline: none;
+}
+
+.rg-hover-cycle-target {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity, filter, fill, stroke;
+}
+
+.rg-hover-cycle-target.is-hover-cycling {
+  pointer-events: auto;
+}
+
+.rg-sigil-marker.is-pulsing {
+  animation: rgSigilPulse 1.15s ease-in-out infinite;
+}
+
+.rg-sigil-marker.is-ghosted {
+  opacity: 0.42;
+  filter: drop-shadow(0 0 9px rgba(140, 190, 255, 0.12));
+}
+
+.rg-sigil-marker[data-pulse-state="focus"] {
+  filter: drop-shadow(0 0 12px rgba(175, 219, 255, 0.55));
+}
+
+.rg-sigil-marker[data-pulse-state="warning"] {
+  filter: drop-shadow(0 0 12px rgba(255, 166, 110, 0.55));
+}
+
+@keyframes rgSigilPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}

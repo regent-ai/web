@@ -7,6 +7,9 @@
 # The directory Mix downloads your dependencies sources to.
 /deps/
 
+# Local editor / language server state.
+/.elixir_ls/
+
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc/
 
@@ -31,7 +34,25 @@ platform_phx-*.tar
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
+# Ignore compressed and digested static output. Keep the plain source files.
+/priv/static/**/*.gz
+/priv/static/favicon-[0-9a-f]*.ico
+/priv/static/fonts/*-[0-9a-f]*.woff2
+/priv/static/images/*.png
+/priv/static/images/*.jpeg
+/priv/static/images/*.jpg
+/priv/static/images/*-[0-9a-f]*.png
+/priv/static/images/*-[0-9a-f]*.jpeg
+/priv/static/images/*-[0-9a-f]*.jpg
+/priv/static/images/*-[0-9a-f]*.svg
+/priv/static/regent/*-[0-9a-f]*.svg
+/priv/static/regent/sigils/*-[0-9a-f]*.svg
+/priv/static/robots-[0-9a-f]*.txt
+
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
 /assets/node_modules/
 
+# Local environment files for direnv / cutover work.
+.env.local
+.envrc

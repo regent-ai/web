@@ -3,6 +3,7 @@ defmodule PlatformPhxWeb.Api.AgentLaunchController do
 
   alias PlatformPhx.AgentLaunch
 
+  @spec auctions(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def auctions(conn, _params) do
     payload = AgentLaunch.generated_payload()
 

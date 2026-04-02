@@ -93,6 +93,13 @@ function isEmbeddedPrivyWallet(wallet: PrivyEthereumWalletLike): boolean {
   return wallet.walletClientType === "privy";
 }
 
+export function hasPrivySessionWallet(args: {
+  authenticated: boolean;
+  account: `0x${string}` | null;
+}): boolean {
+  return args.authenticated && typeof args.account === "string";
+}
+
 export function selectPrivyEthereumWallet(args: {
   activeWallet: unknown;
   wallets: readonly unknown[] | null | undefined;

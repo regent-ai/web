@@ -32,7 +32,7 @@ defmodule PlatformPhxWeb.ConnCase do
   end
 
   setup tags do
-    PlatformPhx.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    sandbox_owner = PlatformPhx.DataCase.setup_sandbox(tags)
+    {:ok, conn: Phoenix.ConnTest.build_conn(), sandbox_owner: sandbox_owner}
   end
 end

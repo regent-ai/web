@@ -15,7 +15,11 @@ config :platform_phx, PlatformPhx.Repo,
   hostname: pg_hostname,
   database: "platform_phx_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: 10
+
+config :platform_phx,
+  ethereum_adapter: PlatformPhx.TestEthereumAdapter,
+  opensea_client: PlatformPhx.TestOpenSeaClient
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

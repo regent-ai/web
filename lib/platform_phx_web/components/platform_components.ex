@@ -21,37 +21,69 @@ defmodule PlatformPhxWeb.PlatformComponents do
         @card.theme_class
       ]}
     >
+      <div class="pp-card-depth-stage" data-card-depth-stage>
+        <.surface
+          id={"entry-card-surface-#{@card.id}-#{@variant}"}
+          class={"pp-card-surface pp-surface-single #{@card.theme_class}"}
+          scene={@card.scene}
+          scene_version={@card.scene_version}
+          selected_target_id={@card.selected_target_id}
+          theme={@card.theme}
+          camera_distance={20}
+          hook={if @variant == "home", do: "AnimatedHomeLogoScene", else: "RegentScene"}
+          data-home-logo-sequence={if @variant == "home", do: @card.sequence_index}
+          data-home-logo-count={if @variant == "home", do: @card.sequence_count}
+        />
+      </div>
+
       <div class="pp-entry-card-copy">
-        <div class="space-y-4">
+        <div class="pp-entry-card-text">
+          <p class="pp-entry-eyebrow">{@card.eyebrow}</p>
           <div class="space-y-3">
-            <p class="pp-entry-eyebrow">{@card.eyebrow}</p>
-            <div class="space-y-3">
-              <h2 class="pp-entry-title">{@card.title}</h2>
-              <p class="pp-entry-description">{@card.description}</p>
-            </div>
+            <h2 class="pp-entry-title">{@card.title}</h2>
+            <p :if={Map.has_key?(@card, :description_html)} class="pp-entry-description">
+              {Phoenix.HTML.raw(@card.description_html)}
+            </p>
+            <p :if={!Map.has_key?(@card, :description_html)} class="pp-entry-description">
+              {@card.description}
+            </p>
           </div>
-
-          <.surface
-            id={"entry-card-surface-#{@card.id}-#{@variant}"}
-            class={"pp-card-surface pp-surface-single #{@card.theme_class}"}
-            scene={@card.scene}
-            scene_version={@card.scene_version}
-            selected_target_id={@card.selected_target_id}
-            theme={@card.theme}
-            camera_distance={20}
-          />
-
-          <ul class="pp-entry-bullets">
-            <%= for bullet <- @card.bullets do %>
-              <li>{bullet}</li>
-            <% end %>
-          </ul>
         </div>
 
         <div class="pp-entry-footer">
-          <p class="pp-entry-note">{@card.note}</p>
-          <.link navigate={@card.href} class="pp-entry-link">
-            Open <span aria-hidden="true">→</span>
+          <.link
+            navigate={@card.href}
+            class="pp-entry-link"
+            aria-label={if @variant == "home", do: @card.cta_label, else: nil}
+            title={if @variant == "home", do: @card.cta_label, else: nil}
+            data-home-cta-root={@variant == "home"}
+            data-background-suppress={if @variant == "home", do: true, else: nil}
+          >
+            <span
+              :if={Map.get(@card, :logo_path)}
+              class="pp-entry-link-logo"
+              data-home-cta-logo={@variant == "home"}
+              aria-hidden="true"
+            >
+              <img src={Map.get(@card, :logo_path)} alt="" />
+            </span>
+            <span
+              :if={@variant != "home"}
+              class="pp-entry-link-label"
+              data-home-cta-label={@variant == "home"}
+            >
+              {@card.cta_label}
+            </span>
+            <span :if={@variant == "home"} class="sr-only">
+              {@card.cta_label}
+            </span>
+            <span
+              class="pp-entry-link-arrow"
+              data-home-cta-arrow={@variant == "home"}
+              aria-hidden="true"
+            >
+              →
+            </span>
           </.link>
         </div>
       </div>
@@ -101,6 +133,34 @@ defmodule PlatformPhxWeb.PlatformComponents do
     """
   end
 
+  attr :variant, :string, default: "inline"
+  attr :class, :string, default: nil
+  attr :tooltip, :string, default: "Access Soon"
+  slot :inner_block, required: true
+
+  def preview_link(assigns) do
+    ~H"""
+    <span
+      tabindex="0"
+      role="link"
+      aria-disabled="true"
+      title={@tooltip}
+      data-preview-text={@tooltip}
+      class={[
+        "pp-preview-link",
+        @variant == "pill" && "pp-link-button pp-link-button-slim pp-preview-link-pill",
+        @variant == "pill-ghost" &&
+          "pp-link-button pp-link-button-ghost pp-link-button-slim pp-preview-link-pill",
+        @variant == "inline" && "pp-preview-link-inline",
+        @variant == "list" && "pp-preview-link-list",
+        @class
+      ]}
+    >
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
+
   attr :sample, :map, required: true
 
   def hover_cycle_demo(assigns) do
@@ -144,6 +204,35 @@ defmodule PlatformPhxWeb.PlatformComponents do
         <p class="pp-demo-note">{@sample.note}</p>
       </div>
     </article>
+    """
+  end
+
+  attr :scene_id, :string, required: true
+  attr :theme, :string, required: true
+  attr :theme_class, :string, required: true
+  attr :scene, :map, required: true
+  attr :scene_version, :integer, required: true
+  attr :selected_target_id, :string, default: nil
+  attr :sequence_index, :integer, required: true
+  attr :sequence_count, :integer, required: true
+  attr :camera_distance, :integer, default: 20
+
+  def demo_surface(assigns) do
+    ~H"""
+    <div class={["pp-scene-demo-slot", @theme_class]}>
+      <.surface
+        id={"demo-surface-#{@scene_id}"}
+        class={"pp-scene-demo-surface pp-surface-single #{@theme_class}"}
+        scene={@scene}
+        scene_version={@scene_version}
+        selected_target_id={@selected_target_id}
+        theme={@theme}
+        camera_distance={@camera_distance}
+        hook="AnimatedHomeLogoScene"
+        data-home-logo-sequence={@sequence_index}
+        data-home-logo-count={@sequence_count}
+      />
+    </div>
     """
   end
 end
