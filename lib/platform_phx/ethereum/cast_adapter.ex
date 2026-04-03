@@ -19,7 +19,7 @@ defmodule PlatformPhx.Ethereum.CastAdapter do
     end
   rescue
     error in ErlangError ->
-      {:error, Exception.message(error.original)}
+      {:error, format_system_error(error)}
   catch
     :exit, reason ->
       {:error, inspect(reason)}
@@ -37,9 +37,21 @@ defmodule PlatformPhx.Ethereum.CastAdapter do
     end
   rescue
     error in ErlangError ->
-      {:error, Exception.message(error.original)}
+      {:error, format_system_error(error)}
   catch
     :exit, reason ->
       {:error, inspect(reason)}
+  end
+
+  defp format_system_error(%ErlangError{original: :enoent}) do
+    "cast executable not found on the server"
+  end
+
+  defp format_system_error(%ErlangError{original: original}) when is_atom(original) do
+    Atom.to_string(original)
+  end
+
+  defp format_system_error(%ErlangError{} = error) do
+    Exception.message(error)
   end
 end

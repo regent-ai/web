@@ -507,30 +507,6 @@ defmodule PlatformPhxWeb.RegentScenes do
     "shadow" => "drop-shadow(0 0 14px rgba(9, 75, 117, 0.32))"
   }
 
-  @techtree_logo_hover %{
-    "mode" => "collapse",
-    "durationMs" => 960,
-    "fill" => "rgba(0, 97, 0, 0.24)",
-    "stroke" => "#006100",
-    "opacity" => 0.16,
-    "scale" => 0.68,
-    "translate" => 8,
-    "shadow" => "drop-shadow(0 0 14px rgba(0, 97, 0, 0.28))"
-  }
-
-  @autolaunch_logo_hover %{
-    "group" => "autolaunch-home-cluster",
-    "mode" => "explode",
-    "durationMs" => 920,
-    "fill" => "rgba(11, 66, 61, 0.28)",
-    "stroke" => "#0b423d",
-    "opacity" => 0.18,
-    "scale" => 1.08,
-    "translate" => 14,
-    "staggerMs" => 24,
-    "shadow" => "drop-shadow(0 0 16px rgba(11, 66, 61, 0.3))"
-  }
-
   def home_scene("dashboard"),
     do:
       home_logo_scene(
@@ -686,17 +662,19 @@ defmodule PlatformPhxWeb.RegentScenes do
     |> place_quadrant_cells(2)
     |> rotate_quadrants()
     |> centered_cells()
-    |> voxel_boxes(0, 3)
-    |> build_box_commands(target_id, [0.705, 0.705, 0.66], @dashboard_logo_hover)
+    |> restore_top_left_voxel()
+    |> voxel_boxes(0, 2)
+    |> build_box_commands(target_id, [0.705, 0.705, 0.66], nil)
   end
 
   defp techtree_ledger_home_commands(target_id) do
     alpha = techtree_t_cells({0, 0}, 4, 4, 5)
     beta = shift_cells(alpha, 5, 6)
     [alpha, beta] = centered_layer_sets([alpha, beta])
+    alpha = restore_top_left_voxel(alpha)
 
     (voxel_boxes(alpha, 0, 2) ++ voxel_boxes(beta, 2, 2))
-    |> build_box_commands(target_id, [0.95, 0.95, 0.92], @techtree_logo_hover)
+    |> build_box_commands(target_id, [0.95, 0.95, 0.92], nil)
   end
 
   defp autolaunch_claim_home_commands(target_id) do
@@ -711,7 +689,7 @@ defmodule PlatformPhxWeb.RegentScenes do
     |> uniq_cells()
     |> centered_cells()
     |> voxel_boxes(0, 3)
-    |> build_box_commands(target_id, [0.83, 0.83, 0.88], @autolaunch_logo_hover)
+    |> build_box_commands(target_id, [0.83, 0.83, 0.88], nil)
   end
 
   defp overview_human_commands(target_id) do
@@ -907,6 +885,21 @@ defmodule PlatformPhxWeb.RegentScenes do
   end
 
   defp uniq_cells(cells), do: cells |> Enum.uniq() |> Enum.sort()
+
+  defp restore_top_left_voxel(cells) do
+    top_y =
+      cells
+      |> Enum.map(&elem(&1, 1))
+      |> Enum.min()
+
+    left_x =
+      cells
+      |> Enum.filter(&(elem(&1, 1) == top_y))
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.min()
+
+    uniq_cells([{left_x - 1, top_y} | cells])
+  end
 
   def techtree_bridge(focus, scene_version) do
     focus = techtree_focus(focus)

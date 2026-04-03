@@ -26,23 +26,20 @@ defmodule PlatformPhxWeb.RegentScenesTest do
     assert focused_target_id(dashboard_scene) == "platform:guardrails"
   end
 
-  test "home scenes expose hover cycle primitives for single nodes and grouped shapes" do
+  test "home scenes keep the voxel marks static and cream-only" do
     techtree_scene = RegentScenes.home_scene("techtree")
     autolaunch_scene = RegentScenes.home_scene("autolaunch")
     dashboard_scene = RegentScenes.home_scene("dashboard")
 
-    assert hover_cycle_for_target(techtree_scene, "techtree:home-logo")["mode"] == "collapse"
-    assert hover_cycle_for_target(dashboard_scene, "platform:home-logo")["mode"] == "phase"
-
-    autolaunch_group = hover_cycle_for_target(autolaunch_scene, "autolaunch:home-logo")["group"]
-
-    assert autolaunch_group == "autolaunch-home-cluster"
+    refute hover_cycle_for_target(techtree_scene, "techtree:home-logo")
+    refute hover_cycle_for_target(autolaunch_scene, "autolaunch:home-logo")
+    refute hover_cycle_for_target(dashboard_scene, "platform:home-logo")
 
     [face] = autolaunch_scene["faces"]
 
     assert Enum.all?(face["commands"], fn command ->
              command["targetId"] == "autolaunch:home-logo" and
-               command["hoverCycle"]["group"] == autolaunch_group
+               not Map.has_key?(command, "hoverCycle")
            end)
   end
 
@@ -89,7 +86,7 @@ defmodule PlatformPhxWeb.RegentScenesTest do
   defp hover_cycle_for_target(%{"faces" => [%{"commands" => commands} | _rest]}, id) do
     commands
     |> Enum.find(fn command -> command["targetId"] == id end)
-    |> Map.fetch!("hoverCycle")
+    |> Map.get("hoverCycle")
   end
 
   defp marker_for_target(%{"faces" => [%{"markers" => markers} | _rest]}, id) do

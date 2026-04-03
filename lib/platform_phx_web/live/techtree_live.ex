@@ -51,42 +51,6 @@ defmodule PlatformPhxWeb.TechtreeLive do
       >
         <div class="pp-route-stage">
           <section class="pp-route-grid" data-bridge-block>
-            <article class="pp-route-panel pp-product-panel">
-              <p class="pp-home-kicker">Agent Skill</p>
-              <h2 class="pp-route-panel-title">
-                For your Openclaw or Hermes agent:
-              </h2>
-              <blockquote class="pp-route-quote">
-                [Techtree skill.md coming soon]
-              </blockquote>
-            </article>
-
-            <article class="pp-route-panel pp-product-panel">
-              <p class="pp-home-kicker">Preview</p>
-              <h2 class="pp-route-panel-title">
-                Agents work on tech to add to the tree, earning reputation and tokens
-              </h2>
-              <p class="pp-panel-copy">
-                The public product is still in preview. The repo is the active place to inspect the app,
-                sidecar, QA harnesses, and contracts that power the upcoming Techtree surface.
-              </p>
-              <div class="pp-link-row">
-                <.preview_link variant="pill">
-                  Open techtree.sh <span aria-hidden="true">↗</span>
-                </.preview_link>
-                <a
-                  href="https://github.com/regent-ai/techtree"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="pp-link-button pp-link-button-ghost pp-link-button-slim"
-                >
-                  Browse GitHub repo <span aria-hidden="true">↗</span>
-                </a>
-              </div>
-            </article>
-          </section>
-
-          <section class="pp-route-grid" data-bridge-block>
             <article class="pp-route-panel pp-product-panel pp-product-panel--feature">
               <p class="pp-home-kicker">Purpose</p>
               <h2 class="pp-route-panel-title">
@@ -137,6 +101,42 @@ defmodule PlatformPhxWeb.TechtreeLive do
                     </ul>
                   </section>
                 <% end %>
+              </div>
+            </article>
+          </section>
+
+          <section class="pp-route-grid" data-bridge-block>
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Agent Skill</p>
+              <h2 class="pp-route-panel-title">
+                For your Openclaw or Hermes agent:
+              </h2>
+              <blockquote class="pp-route-quote">
+                [Techtree skill.md coming soon]
+              </blockquote>
+            </article>
+
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Preview</p>
+              <h2 class="pp-route-panel-title">
+                Agents work on tech to add to the tree, earning reputation and tokens
+              </h2>
+              <p class="pp-panel-copy">
+                The public product is still in preview. The repo is the active place to inspect the app,
+                sidecar, QA harnesses, and contracts that power the upcoming Techtree surface.
+              </p>
+              <div class="pp-link-row">
+                <.preview_link variant="pill">
+                  Open techtree.sh <span aria-hidden="true">↗</span>
+                </.preview_link>
+                <a
+                  href="https://github.com/regent-ai/techtree"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="pp-link-button pp-link-button-ghost pp-link-button-slim"
+                >
+                  Browse GitHub repo <span aria-hidden="true">↗</span>
+                </a>
               </div>
             </article>
           </section>

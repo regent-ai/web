@@ -114,6 +114,9 @@ type MaybeRequestProvider = {
   request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
 
+const ANIMATA_PASS_OPENSEA_BASE =
+  "https://opensea.io/item/base/0x2208aadbdecd47d3b4430b5b75a175f6d885d487";
+
 export function DashboardFallback({ config }: { config: DashboardConfig }) {
   return (
     <div className="space-y-8">
@@ -1190,12 +1193,15 @@ function RedeemSection({
                 </span>
               ) : (
                 accessPassHoldings.map((id) => (
-                  <span
+                  <a
                     key={`animata-pass-${id}`}
+                    href={`${ANIMATA_PASS_OPENSEA_BASE}/${id}`}
+                    target="_blank"
+                    rel="noreferrer"
                     className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-sm"
                   >
                     #{id}
-                  </span>
+                  </a>
                 ))
               )}
             </div>
@@ -2442,14 +2448,6 @@ function OverlayCard({
         aria-labelledby={titleId}
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          className="absolute right-4 top-4 text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)] transition-colors hover:text-[color:var(--foreground)]"
-          onClick={onClose}
-          aria-label="Close dialog"
-        >
-          Close
-        </button>
         <h4
           id={titleId}
           className="font-display text-2xl text-[color:var(--foreground)]"

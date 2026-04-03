@@ -17,6 +17,7 @@ import {
   revertAnimation,
 } from "./animations";
 import { FooterVoxelHook } from "./footer_voxel";
+import { HomeRegentScene } from "./home_regent_scene";
 import { mountProceduralHeerichDemo } from "./heerich_demo";
 import { AnimatedHomeLogoSceneHook } from "./home_logo_scene";
 import { LogoStudiesHook } from "./logos";
@@ -423,6 +424,7 @@ const hooks: HooksOptions = {
   ...regentHooks,
   DashboardRoot: DashboardRootHook,
   AnimatedHomeLogoScene: AnimatedHomeLogoSceneHook,
+  HomeRegentScene,
   HomeReveal: HomeRevealHook,
   BridgeReveal: BridgeRevealHook,
   BugReportReveal: BugReportRevealHook,

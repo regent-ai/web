@@ -94,36 +94,4 @@ defmodule Regent.Panels do
     </svg>
     """
   end
-
-  attr :id, :string, required: true
-  attr :class, :any, default: nil
-  attr :hook, :string, default: "RegentBackground"
-  attr :cube_width, :integer, default: 44
-  attr :cube_height, :integer, default: 24
-  attr :cube_depth, :integer, default: 14
-  attr :overscan, :integer, default: 4
-  attr :neighbor_radius, :integer, default: 1
-  attr :hide_cursor, :boolean, default: true
-  attr :rest, :global
-
-  def background_grid(assigns) do
-    ~H"""
-    <div
-      id={@id}
-      class={["rg-background-grid", @class]}
-      phx-hook={@hook}
-      phx-update="ignore"
-      data-cube-width={@cube_width}
-      data-cube-height={@cube_height}
-      data-cube-depth={@cube_depth}
-      data-overscan={@overscan}
-      data-neighbor-radius={@neighbor_radius}
-      data-hide-cursor={if(@hide_cursor, do: "true", else: "false")}
-      aria-hidden="true"
-      {@rest}
-    >
-      <svg class="rg-background-grid-svg" />
-    </div>
-    """
-  end
 end

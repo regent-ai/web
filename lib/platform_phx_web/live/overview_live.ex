@@ -74,12 +74,6 @@ defmodule PlatformPhxWeb.OverviewLive do
                     </button>
                   </div>
                 </div>
-
-                <div class="space-y-3">
-                  <h2 class="pp-route-panel-title">
-                    Regents gives humans and agents one stack for research, launches, and shared revenue.
-                  </h2>
-                </div>
               </div>
 
               <div id="platform-overview-stack" class="pp-overview-stack" data-mode="human">
@@ -203,6 +197,18 @@ defmodule PlatformPhxWeb.OverviewLive do
     </Layouts.app>
     """
   end
+
+  @impl true
+  def handle_event("regent:node_select", _params, socket), do: {:noreply, socket}
+
+  @impl true
+  def handle_event("regent:node_hover", _params, socket), do: {:noreply, socket}
+
+  @impl true
+  def handle_event("regent:surface_ready", _params, socket), do: {:noreply, socket}
+
+  @impl true
+  def handle_event("regent:surface_error", _params, socket), do: {:noreply, socket}
 
   defp build_scene_assign(scene) do
     %{

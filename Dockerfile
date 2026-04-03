@@ -4,6 +4,7 @@ ARG OTP_VERSION=28
 FROM elixir:${ELIXIR_VERSION}-otp-${OTP_VERSION} AS build
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV FOUNDRY_DIR=/opt/foundry
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends build-essential git curl ca-certificates nodejs npm && \
@@ -14,6 +15,9 @@ WORKDIR /app
 ENV MIX_ENV=prod
 
 RUN mix local.hex --force && mix local.rebar --force
+RUN curl -L https://foundry.paradigm.xyz | bash && \
+    "${FOUNDRY_DIR}/bin/foundryup" && \
+    cp "${FOUNDRY_DIR}/bin/cast" /usr/local/bin/cast
 
 COPY mix.exs mix.lock ./
 COPY config config
@@ -46,6 +50,7 @@ ENV HOME=/app
 
 WORKDIR /app
 
+COPY --from=build /usr/local/bin/cast /usr/local/bin/cast
 COPY --from=build /app/_build/prod/rel/platform_phx ./
 
 EXPOSE 4000

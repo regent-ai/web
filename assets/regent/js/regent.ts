@@ -4,7 +4,6 @@ import { HoverCycle, HoverCycleController, normalizeHoverCycleSpec } from "./reg
 import { REGENT_SIGILS, sigilSvg, sigilVoxelMarkup } from "./regent_sigils"
 import { prefersReducedMotion, pulseElement, revealSequence, traceSvgPaths } from "./regent_motion"
 import { RegentSceneRenderer } from "./regent_scene_renderer"
-import { RegentBackgroundRenderer } from "./regent_background_renderer"
 
 export {
   hooks,
@@ -19,7 +18,6 @@ export {
   revealSequence,
   traceSvgPaths,
   RegentSceneRenderer,
-  RegentBackgroundRenderer,
 }
 
 export function installHeerich(HeerichCtor: unknown): void {

@@ -67,42 +67,6 @@ defmodule PlatformPhxWeb.AutolaunchLive do
       >
         <div class="pp-route-stage">
           <section class="pp-route-grid" data-bridge-block>
-            <article class="pp-route-panel pp-product-panel">
-              <p class="pp-home-kicker">Agent Skill</p>
-              <h2 class="pp-route-panel-title">
-                For your Openclaw or Hermes agent:
-              </h2>
-              <blockquote class="pp-route-quote">
-                [Autolaunch skill.md coming soon]
-              </blockquote>
-            </article>
-
-            <article class="pp-route-panel pp-product-panel">
-              <p class="pp-home-kicker">Preview</p>
-              <h2 class="pp-route-panel-title">
-                See the upcoming launch surface, or inspect the repo that runs it today.
-              </h2>
-              <p class="pp-panel-copy">
-                The public product is still in preview. The repo is the active place to inspect the Phoenix
-                app, local Foundry workspace, and the trust and lifecycle logic behind the upcoming market surface.
-              </p>
-              <div class="pp-link-row">
-                <.preview_link variant="pill">
-                  Open autolaunch.sh <span aria-hidden="true">↗</span>
-                </.preview_link>
-                <a
-                  href="https://github.com/regent-ai/autolaunch"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="pp-link-button pp-link-button-ghost pp-link-button-slim"
-                >
-                  Browse GitHub repo <span aria-hidden="true">↗</span>
-                </a>
-              </div>
-            </article>
-          </section>
-
-          <section class="pp-route-grid" data-bridge-block>
             <article class="pp-route-panel pp-product-panel pp-product-panel--feature">
               <p class="pp-home-kicker">Purpose</p>
               <h2 class="pp-route-panel-title">
@@ -150,6 +114,42 @@ defmodule PlatformPhxWeb.AutolaunchLive do
                     </ul>
                   </section>
                 <% end %>
+              </div>
+            </article>
+          </section>
+
+          <section class="pp-route-grid" data-bridge-block>
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Agent Skill</p>
+              <h2 class="pp-route-panel-title">
+                For your Openclaw or Hermes agent:
+              </h2>
+              <blockquote class="pp-route-quote">
+                [Autolaunch skill.md coming soon]
+              </blockquote>
+            </article>
+
+            <article class="pp-route-panel pp-product-panel">
+              <p class="pp-home-kicker">Preview</p>
+              <h2 class="pp-route-panel-title">
+                See the upcoming launch surface, or inspect the repo that runs it today.
+              </h2>
+              <p class="pp-panel-copy">
+                The public product is still in preview. The repo is the active place to inspect the Phoenix
+                app, local Foundry workspace, and the trust and lifecycle logic behind the upcoming market surface.
+              </p>
+              <div class="pp-link-row">
+                <.preview_link variant="pill">
+                  Open autolaunch.sh <span aria-hidden="true">↗</span>
+                </.preview_link>
+                <a
+                  href="https://github.com/regent-ai/autolaunch"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="pp-link-button pp-link-button-ghost pp-link-button-slim"
+                >
+                  Browse GitHub repo <span aria-hidden="true">↗</span>
+                </a>
               </div>
             </article>
           </section>

@@ -30,7 +30,7 @@ defmodule PlatformPhxWeb.PlatformComponents do
           selected_target_id={@card.selected_target_id}
           theme={@card.theme}
           camera_distance={20}
-          hook={if @variant == "home", do: "AnimatedHomeLogoScene", else: "RegentScene"}
+          hook={if @variant == "home", do: "HomeRegentScene", else: "RegentScene"}
           data-home-logo-sequence={if @variant == "home", do: @card.sequence_index}
           data-home-logo-count={if @variant == "home", do: @card.sequence_count}
         />

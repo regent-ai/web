@@ -9,7 +9,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Regents Labs"
     assert html =~ "$REGENT"
     assert html =~ "platform-home-shell"
-    assert html =~ "platform-home-background"
     assert html =~ "entry-card-surface-techtree-home"
     assert html =~ "entry-card-surface-autolaunch-home"
     assert html =~ "entry-card-surface-dashboard-home"
@@ -33,12 +32,14 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "platform-footer-voxel-classic"
 
     assert html =~
-             "Upgrade your Openclaw or Hermes agent with the skills to compete on improving the"
+             "Upgrade your Claw or Hermes agent to collaborate and autoresearch. First tech:"
 
     assert html =~ "https://huggingface.co/datasets/nvidia/Nemotron-RL-bixbench_hypothesis"
     assert html =~ "BBH-Train"
     assert html =~ "benchmark by Nvidia."
     assert html =~ "Capable agents can raise capital through a fair 3 day Uniswap CCA auction."
+    assert html =~ "Your agent now has funds to immediately scale token, API, and server costs."
+    assert html =~ "Token holders share upside in future revenue."
   end
 
   test "demo route renders", %{conn: conn} do
@@ -57,7 +58,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
 
     assert html =~ "Regents Overview"
     assert html =~ "Overview"
-    assert html =~ "platform-app-background"
     assert html =~ "platform-footer-voxel-classic"
     assert html =~ "Human Overview"
     assert html =~ "Agent Overview"
@@ -75,6 +75,20 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "platform-overview-agent-scene"
 
     assert html =~ ~r/href="\/overview".*href="\/token-info"/s
+  end
+
+  test "overview route accepts regent scene lifecycle events", %{conn: conn} do
+    {:ok, overview, _html} = live(conn, "/overview")
+
+    assert render_hook(overview, "regent:surface_ready", %{
+             "active_face" => "entry",
+             "rendered_targets" => 1,
+             "scene_version" => 2
+           }) =~ "platform-overview-human-scene"
+
+    assert render_hook(overview, "regent:surface_error", %{
+             "message" => "test"
+           }) =~ "platform-overview-agent-scene"
   end
 
   test "services route renders", %{conn: conn} do
@@ -95,7 +109,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "phx-hook=\"SidebarCommunity\""
     assert html =~ "platform-footer-voxel-classic"
     assert html =~ "dashboard-root"
-    assert html =~ "platform-app-background"
 
     refute html =~
              "A growing platform for all documentation and actions to take part in the Regents ecosystem."
@@ -106,7 +119,7 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
   test "heerich demo route renders", %{conn: conn} do
     {:ok, _demo, html} = live(conn, "/heerich-demo")
 
-    assert html =~ "Heerich 0.6.4 Lab"
+    assert html =~ "Heerich 0.7.1 Lab"
     assert html =~ "platform-heerich-demo-shell"
     assert html =~ "demo-explode-cluster"
     assert html =~ "addGeometry(type: fill)"
@@ -130,7 +143,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Shared Research and Eval Tree"
     assert html =~ "Techtree"
     assert html =~ "Agent Skill"
-    assert html =~ "platform-app-background"
     assert html =~ "Techtree gives agents a public graph for open autoresearch."
     assert html =~ "notebook, eval, harness, skill, trace"
     assert html =~ "replicable Python notebooks on marimo.io"
@@ -169,7 +181,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Raise agent capital"
     assert html =~ "Autolaunch"
     assert html =~ "Agent Skill"
-    assert html =~ "platform-app-background"
     assert html =~ "Autolaunch helps agents raise capital before they scale."
     assert html =~ "Uniswap CCA auctions"
     assert html =~ "revsplit contract"
@@ -205,7 +216,6 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Local Operator Surface"
     assert html =~ "Regent CLI"
     assert html =~ "Copy page as markdown"
-    assert html =~ "platform-app-background"
     assert html =~ "Local runtime and operator surface for"
     assert html =~ "@regentlabs/cli"
     assert html =~ "regent create init"
@@ -223,10 +233,9 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
 
     assert html =~ "Token Purpose"
     assert html =~ "$REGENT is staked to earn your share of protocol revenue."
-    assert html =~ "All additional revenue after paying stakers is used to buyback $REGENT."
+    assert html =~ "The majority of revenue is used to buyback $REGENT."
     assert html =~ "$REGENT is live on Base"
 
-    assert html =~ "platform-app-background"
     assert html =~ "Platform revenue token"
     assert html =~ "Agent economies"
 
@@ -248,13 +257,8 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "raised USDC in CCA auctions."
     assert html =~ "Stablecoin Revenues"
     assert html =~ "Regents Platform"
-    assert html =~ "Stake in the Regents revsplit contract."
-
-    assert html =~
-             "You accumulate tokens equivalent to your percentage of staked tokens out of 100 billion."
-
-    assert html =~
-             "So 1% of staking total tokens means 1% of protocol revenue accrues to you."
+    assert html =~ "Stake $REGENT in the protocol revsplit contract."
+    assert html =~ "Claim your stablecoin share of Regent Labs revenue anytime."
 
     assert html =~ "80% or more of protocol skim will go to buybacks."
 

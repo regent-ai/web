@@ -675,7 +675,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "scaled-voxels",
       %{
-        eyebrow: "Heerich 0.6.4 / voxel scale",
+        eyebrow: "Heerich 0.7.1 / voxel scale",
         title: "Anchored voxel scaling",
         description:
           "These boxes are still ordinary Regent targets, but their voxel mass is compressed and pinned from the floor so the marker and the body stay visually married.",
@@ -738,7 +738,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "carved-walls",
       %{
-        eyebrow: "Heerich 0.6.4 / carved walls",
+        eyebrow: "Heerich 0.7.1 / carved walls",
         title: "Styled negative space",
         description:
           "The subtraction commands now tint the newly exposed walls, so carved geometry reads as a deliberate chamber instead of an empty deletion.",
@@ -824,7 +824,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
     sample(
       "restyled-geometry",
       %{
-        eyebrow: "Heerich 0.6.4 / restyling",
+        eyebrow: "Heerich 0.7.1 / restyling",
         title: "Restyle after placement",
         description:
           "The base geometry goes down once, then later commands repaint the top plate and the rail. That keeps the scene editable without rebuilding the structure.",
@@ -875,7 +875,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenes do
 
   defp raw_scene(theme, sigil, commands, markers, opts) do
     face =
-      SceneSpec.face("demo", "Heerich 0.6.4 demo", sigil, commands, markers, orientation: "front")
+      SceneSpec.face("demo", "Heerich 0.7.1 demo", sigil, commands, markers, orientation: "front")
 
     SceneSpec.scene(theme, theme, "demo", face,
       distance: Keyword.get(opts, :distance, 20),

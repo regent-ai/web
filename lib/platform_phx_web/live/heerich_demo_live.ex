@@ -42,18 +42,16 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
         class="pp-demo-shell rg-regent-theme-platform"
         phx-hook="DemoReveal"
       >
-        <.background_grid id="platform-heerich-demo-background" class="rg-regent-theme-platform" />
-
         <main id="platform-heerich-demo" class="pp-demo-stage" aria-label="Heerich hover cycle demos">
           <section class="pp-demo-hero" data-demo-block>
             <div class="space-y-4">
-              <p class="pp-home-kicker">Heerich 0.6.4 Lab</p>
+              <p class="pp-home-kicker">Heerich 0.7.1 Lab</p>
               <div class="space-y-3">
                 <h1 class="pp-home-title">
                   Shared Regent surfaces, raw Heerich commands, and direct procedural scenes.
                 </h1>
                 <p class="pp-home-copy">
-                  This page now covers the full Heerich 0.6.4 path inside the `/web` app: shared Regent surfaces driven by raw commands, carved wall styling, voxel scaling, restyling, and a direct JS-only gallery for procedural shapes that do not belong in Phoenix scene JSON.
+                  This page now covers the full Heerich 0.7.1 path inside the `/web` app: shared Regent surfaces driven by raw commands, carved wall styling, voxel scaling, restyling, and a direct JS-only gallery for procedural shapes that do not belong in Phoenix scene JSON.
                 </p>
               </div>
             </div>
@@ -106,7 +104,7 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
 
             <article class="pp-demo-panel">
               <div class="space-y-3">
-                <p class="pp-home-kicker">Heerich 0.6.4 additions</p>
+                <p class="pp-home-kicker">Heerich 0.7.1 additions</p>
                 <h2 class="pp-route-panel-title">What the raw command path unlocks</h2>
                 <p class="pp-panel-copy">
                   These are the new features this upgrade is using directly, either in the shipped Regent scenes or in the demos on this page.

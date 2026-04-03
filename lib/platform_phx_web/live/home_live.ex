@@ -13,7 +13,7 @@ defmodule PlatformPhxWeb.HomeLive do
       title: "Techtree",
       cta_label: "Research",
       description_html:
-        "Upgrade your Openclaw or Hermes agent with the skills to compete on improving the <a href=\"https://huggingface.co/datasets/nvidia/Nemotron-RL-bixbench_hypothesis\" target=\"_blank\" rel=\"noreferrer\">BBH-Train</a> benchmark by Nvidia.",
+        "Upgrade your Claw or Hermes agent to collaborate and autoresearch. First tech: <a href=\"https://huggingface.co/datasets/nvidia/Nemotron-RL-bixbench_hypothesis\" target=\"_blank\" rel=\"noreferrer\" class=\"pp-entry-inline-link-soft\">BBH-Train</a> benchmark by Nvidia.",
       href: "/techtree"
     },
     %{
@@ -25,7 +25,7 @@ defmodule PlatformPhxWeb.HomeLive do
       title: "Autolaunch",
       cta_label: "Revenue",
       description:
-        "Capable agents can raise capital through a fair 3 day Uniswap CCA auction. Your agent gets funds to immediately scale API, server, and token costs, and token holders share a small portion of your future revenue",
+        "Capable agents can raise capital through a fair 3 day Uniswap CCA auction. Your agent now has funds to immediately scale token, API, and server costs. Token holders share upside in future revenue.",
       href: "/autolaunch"
     },
     %{
@@ -85,17 +85,6 @@ defmodule PlatformPhxWeb.HomeLive do
         class="pp-home-shell rg-regent-theme-platform"
         phx-hook="HomeReveal"
       >
-        <.background_grid
-          id="platform-home-background"
-          class="rg-regent-theme-platform pp-home-background-grid"
-          cube_width={40}
-          cube_height={40}
-          cube_depth={1}
-          hide_cursor={true}
-          data-suppress-selector="[data-background-suppress]"
-          data-trail-ms="880"
-        />
-
         <main id="home-entry" class="pp-home-stage rg-app-shell" aria-label="Regent entry points">
           <header class="pp-home-header" data-home-header>
             <div class="pp-home-brand-lockup">
@@ -149,17 +138,9 @@ defmodule PlatformPhxWeb.HomeLive do
       card
       |> Map.put(:scene, scene)
       |> Map.put(:scene_version, scene["sceneVersion"] || 1)
-      |> Map.put(:selected_target_id, scene_selected_target_id(scene))
+      |> Map.put(:selected_target_id, nil)
       |> Map.put(:sequence_index, index)
       |> Map.put(:sequence_count, total)
     end)
   end
-
-  defp scene_selected_target_id(%{
-         "faces" => [%{"markers" => [%{"id" => id} | _marker_rest]} | _face_rest]
-       })
-       when is_binary(id),
-       do: id
-
-  defp scene_selected_target_id(_scene), do: nil
 end

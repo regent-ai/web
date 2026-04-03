@@ -53,7 +53,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenesTest do
     assert {"easing", _, _} = Enum.find(rows, fn {label, _, _} -> label == "easing" end)
   end
 
-  test "raw 0.6.4 samples expose scaling, carved walls, and restyling" do
+  test "raw 0.7.1 samples expose scaling, carved walls, and restyling" do
     samples = HeerichDemoScenes.samples()
 
     scaled_scene = sample(samples, "scaled-voxels").scene
@@ -72,7 +72,7 @@ defmodule PlatformPhxWeb.HeerichDemoScenesTest do
            end)
   end
 
-  test "feature atlas covers the new 0.6.4 primitives" do
+  test "feature atlas covers the new 0.7.1 primitives" do
     rows = HeerichDemoScenes.feature_rows()
 
     assert {"scale", _, _} = Enum.find(rows, fn {label, _, _} -> label == "scale" end)

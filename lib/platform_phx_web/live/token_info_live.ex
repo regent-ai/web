@@ -218,8 +218,10 @@ defmodule PlatformPhxWeb.TokenInfoLive do
                 <p class="pp-home-kicker">Token Purpose</p>
                 <div class="pp-token-purpose-block">
                   <h2 class="pp-route-panel-title pp-token-purpose-title">
-                    $REGENT is staked to earn your share of protocol revenue. <br />
-                    All additional revenue after paying stakers is used to buyback $REGENT.
+                    <span>$REGENT is staked to earn your share of protocol revenue.</span>
+                    <span class="pp-token-purpose-title-break">
+                      The majority of revenue is used to buyback $REGENT.
+                    </span>
                   </h2>
                 </div>
               </div>
@@ -290,9 +292,11 @@ defmodule PlatformPhxWeb.TokenInfoLive do
                 </div>
 
                 <article class="pp-token-economics-detail-card">
-                  <p class="pp-token-source-title">Stake in the Regents revsplit contract.</p>
+                  <p class="pp-token-source-title">
+                    Stake $REGENT in the protocol revsplit contract.
+                  </p>
                   <p class="pp-token-source-explainer">
-                    You accumulate tokens equivalent to your percentage of staked tokens out of 100 billion. So 1% of staking total tokens means 1% of protocol revenue accrues to you.
+                    Claim your stablecoin share of Regent Labs revenue anytime.
                   </p>
                 </article>
 

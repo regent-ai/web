@@ -180,7 +180,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
 
     const motion = { progress: 0 };
     const collapsedLabelOffset = 14;
-    const collapsedArrowOffset = 10;
     let animation: ReturnType<typeof animate> | undefined;
     let expandedWidth = visual.getBoundingClientRect().width;
     let collapsedWidth = visual.getBoundingClientRect().height;
@@ -208,8 +207,8 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       }
 
       if (arrow) {
-        arrow.style.opacity = "1";
-        arrow.style.transform = "translateX(0px)";
+        arrow.style.opacity = "";
+        arrow.style.transform = "";
       }
     };
 
@@ -235,8 +234,8 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       }
 
       if (arrow) {
-        arrow.style.opacity = `${1 - progress}`;
-        arrow.style.transform = `translateX(${collapsedArrowOffset * progress}px)`;
+        arrow.style.opacity = "";
+        arrow.style.transform = "";
       }
     };
 
@@ -245,7 +244,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
 
       const visualRect = visual.getBoundingClientRect();
       const visualStyles = window.getComputedStyle(visual);
-      const collapsedPad = Number.parseFloat(visualStyles.paddingLeft) || 0;
 
       expandedWidth = visualRect.width;
       expandedGap = Number.parseFloat(visualStyles.columnGap || visualStyles.gap) || 0;
@@ -253,11 +251,12 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       expandedPadEnd = Number.parseFloat(visualStyles.paddingRight) || 0;
       labelExpandedWidth = label?.scrollWidth ?? label?.getBoundingClientRect().width ?? 0;
       collapsedWidth = Math.round(visualRect.height);
+      resetInlineState();
 
       visual.style.width = `${collapsedWidth}px`;
       visual.style.gap = "0px";
-      visual.style.paddingLeft = `${collapsedPad}px`;
-      visual.style.paddingRight = `${collapsedPad}px`;
+      visual.style.paddingLeft = `${expandedPadStart}px`;
+      visual.style.paddingRight = `${expandedPadStart}px`;
 
       if (label) {
         label.style.opacity = "0";
@@ -265,13 +264,12 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
         label.style.transform = `translateX(${collapsedLabelOffset}px)`;
       }
 
-      const logoRect = logo?.getBoundingClientRect();
+      const collapsedLogoRect = logo?.getBoundingClientRect();
 
-      if (logoRect) {
+      if (collapsedLogoRect) {
+        const collapsedLogoTargetLeft = visual.getBoundingClientRect().left + expandedPadStart;
         logoOffset =
-          visual.getBoundingClientRect().left +
-          collapsedWidth / 2 -
-          (logoRect.left + logoRect.width / 2);
+          collapsedLogoTargetLeft - collapsedLogoRect.left;
       } else {
         logoOffset = 0;
       }

@@ -26,20 +26,6 @@
   --rg-intent-glow-navigate: rgba(104, 199, 255, 0.24);
   --rg-intent-glow-back: rgba(185, 206, 241, 0.22);
   --rg-intent-glow-danger: rgba(255, 120, 134, 0.24);
-  --rg-bg-cube-top: rgba(196, 217, 255, 0.07);
-  --rg-bg-cube-left: rgba(88, 103, 134, 0.10);
-  --rg-bg-cube-right: rgba(118, 140, 181, 0.09);
-  --rg-bg-cube-stroke: rgba(172, 191, 235, 0.16);
-  --rg-bg-cube-top-active: rgba(142, 234, 255, 0.62);
-  --rg-bg-cube-left-active: rgba(63, 170, 205, 0.5);
-  --rg-bg-cube-right-active: rgba(94, 195, 235, 0.56);
-  --rg-bg-cube-top-neighbor: rgba(142, 234, 255, 0.2);
-  --rg-bg-cube-left-neighbor: rgba(64, 142, 176, 0.14);
-  --rg-bg-cube-right-neighbor: rgba(96, 168, 208, 0.16);
-  --rg-bg-cube-top-trail: var(--rg-bg-cube-top-active);
-  --rg-bg-cube-left-trail: var(--rg-bg-cube-left-active);
-  --rg-bg-cube-right-trail: var(--rg-bg-cube-right-active);
-  --rg-bg-cube-trail-shadow: rgba(117, 219, 255, 0.12);
 }
 
 html[data-color-mode="dark"] {
@@ -56,20 +42,6 @@ html[data-color-mode="dark"] {
   --rg-node-stroke-focused: color-mix(in oklch, #fbf4de 42%, #d4a756 58%);
   --rg-sigil-color: #fbf4de;
   --rg-sigil-color-active: color-mix(in oklch, #fbf4de 86%, #d4a756 14%);
-  --rg-bg-cube-top: color-mix(in oklch, #fbf4de 5%, transparent);
-  --rg-bg-cube-left: color-mix(in oklch, #315569 24%, transparent);
-  --rg-bg-cube-right: color-mix(in oklch, #fbf4de 8%, transparent);
-  --rg-bg-cube-stroke: color-mix(in oklch, #fbf4de 13%, transparent);
-  --rg-bg-cube-top-active: color-mix(in oklch, #fbf4de 24%, #034568 76%);
-  --rg-bg-cube-left-active: color-mix(in oklch, #fbf4de 18%, #034568 82%);
-  --rg-bg-cube-right-active: color-mix(in oklch, #fbf4de 20%, #034568 80%);
-  --rg-bg-cube-top-neighbor: color-mix(in oklch, #fbf4de 8%, transparent);
-  --rg-bg-cube-left-neighbor: color-mix(in oklch, #fbf4de 6%, transparent);
-  --rg-bg-cube-right-neighbor: color-mix(in oklch, #fbf4de 7%, transparent);
-  --rg-bg-cube-top-trail: color-mix(in oklch, #fbf4de 20%, #034568 80%);
-  --rg-bg-cube-left-trail: color-mix(in oklch, #fbf4de 16%, #034568 84%);
-  --rg-bg-cube-right-trail: color-mix(in oklch, #fbf4de 18%, #034568 82%);
-  --rg-bg-cube-trail-shadow: color-mix(in oklch, #fbf4de 8%, transparent);
 }
 
 @font-face {
@@ -101,100 +73,6 @@ body {
   cursor: none !important;
 }
 
-.rg-background-grid {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.rg-background-grid-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.rg-bg-cube {
-  transition: filter 120ms ease, opacity 120ms ease;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.rg-bg-cube-face {
-  transition:
-    fill 100ms ease,
-    stroke 100ms ease,
-    opacity 100ms ease,
-    transform 100ms ease;
-  vector-effect: non-scaling-stroke;
-}
-
-.rg-bg-cube-face-top {
-  fill: var(--rg-bg-cube-top);
-  stroke: var(--rg-bg-cube-stroke);
-  stroke-width: 1;
-}
-
-.rg-bg-cube-face-left {
-  fill: var(--rg-bg-cube-left);
-  stroke: var(--rg-bg-cube-stroke);
-  stroke-width: 1;
-}
-
-.rg-bg-cube-face-right {
-  fill: var(--rg-bg-cube-right);
-  stroke: var(--rg-bg-cube-stroke);
-  stroke-width: 1;
-}
-
-.rg-bg-cube.is-neighbor {
-  filter: drop-shadow(0 0 6px rgba(117, 219, 255, 0.08));
-}
-
-.rg-bg-cube.is-neighbor .rg-bg-cube-face-top {
-  fill: var(--rg-bg-cube-top-neighbor);
-}
-
-.rg-bg-cube.is-neighbor .rg-bg-cube-face-left {
-  fill: var(--rg-bg-cube-left-neighbor);
-}
-
-.rg-bg-cube.is-neighbor .rg-bg-cube-face-right {
-  fill: var(--rg-bg-cube-right-neighbor);
-}
-
-.rg-bg-cube.is-active {
-  filter: drop-shadow(0 0 12px rgba(115, 231, 255, 0.24));
-}
-
-.rg-bg-cube.is-active .rg-bg-cube-face-top {
-  fill: var(--rg-bg-cube-top-active);
-}
-
-.rg-bg-cube.is-active .rg-bg-cube-face-left {
-  fill: var(--rg-bg-cube-left-active);
-}
-
-.rg-bg-cube.is-active .rg-bg-cube-face-right {
-  fill: var(--rg-bg-cube-right-active);
-}
-
-.rg-bg-cube.is-trail {
-  filter: drop-shadow(0 0 8px var(--rg-bg-cube-trail-shadow));
-}
-
-.rg-bg-cube.is-trail .rg-bg-cube-face-top {
-  fill: var(--rg-bg-cube-top-trail);
-}
-
-.rg-bg-cube.is-trail .rg-bg-cube-face-left {
-  fill: var(--rg-bg-cube-left-trail);
-}
-
-.rg-bg-cube.is-trail .rg-bg-cube-face-right {
-  fill: var(--rg-bg-cube-right-trail);
-}
 
 .rg-app-shell {
   position: relative;
@@ -468,16 +346,6 @@ body {
   --rg-intent-glow-scene-action: rgba(214, 162, 72, 0.24);
   --rg-intent-glow-navigate: rgba(55, 106, 193, 0.22);
   --rg-intent-glow-back: rgba(210, 177, 108, 0.2);
-  --rg-bg-cube-top: rgba(17, 76, 167, 0.08);
-  --rg-bg-cube-left: rgba(109, 82, 33, 0.11);
-  --rg-bg-cube-right: rgba(201, 164, 89, 0.1);
-  --rg-bg-cube-stroke: rgba(103, 86, 50, 0.18);
-  --rg-bg-cube-top-active: rgba(17, 76, 167, 0.28);
-  --rg-bg-cube-left-active: rgba(73, 49, 11, 0.24);
-  --rg-bg-cube-right-active: rgba(212, 177, 91, 0.22);
-  --rg-bg-cube-top-neighbor: rgba(17, 76, 167, 0.12);
-  --rg-bg-cube-left-neighbor: rgba(73, 49, 11, 0.1);
-  --rg-bg-cube-right-neighbor: rgba(212, 177, 91, 0.09);
 }
 
 .rg-regent-theme-platform {
@@ -494,16 +362,6 @@ body {
   --rg-node-stroke-focused: #7a5e24;
   --rg-sigil-color: #11140f;
   --rg-sigil-color-active: #08283d;
-  --rg-bg-cube-top: rgba(49, 85, 105, 0.08);
-  --rg-bg-cube-left: rgba(132, 128, 120, 0.1);
-  --rg-bg-cube-right: rgba(212, 167, 86, 0.1);
-  --rg-bg-cube-stroke: rgba(70, 78, 75, 0.16);
-  --rg-bg-cube-top-active: rgba(49, 85, 105, 0.34);
-  --rg-bg-cube-left-active: rgba(132, 128, 120, 0.28);
-  --rg-bg-cube-right-active: rgba(212, 167, 86, 0.32);
-  --rg-bg-cube-top-neighbor: rgba(49, 85, 105, 0.16);
-  --rg-bg-cube-left-neighbor: rgba(132, 128, 120, 0.16);
-  --rg-bg-cube-right-neighbor: rgba(212, 167, 86, 0.16);
 }
 
 .rg-regent-theme-autolaunch {
@@ -529,21 +387,9 @@ body {
   --rg-intent-glow-scene-action: rgba(214, 118, 34, 0.24);
   --rg-intent-glow-navigate: rgba(43, 154, 125, 0.2);
   --rg-intent-glow-back: rgba(184, 144, 95, 0.2);
-  --rg-bg-cube-top: rgba(15, 118, 110, 0.08);
-  --rg-bg-cube-left: rgba(142, 73, 35, 0.11);
-  --rg-bg-cube-right: rgba(217, 119, 6, 0.1);
-  --rg-bg-cube-stroke: rgba(22, 57, 57, 0.16);
-  --rg-bg-cube-top-active: rgba(15, 118, 110, 0.24);
-  --rg-bg-cube-left-active: rgba(142, 73, 35, 0.23);
-  --rg-bg-cube-right-active: rgba(217, 119, 6, 0.24);
-  --rg-bg-cube-top-neighbor: rgba(15, 118, 110, 0.1);
-  --rg-bg-cube-left-neighbor: rgba(142, 73, 35, 0.1);
-  --rg-bg-cube-right-neighbor: rgba(217, 119, 6, 0.1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rg-bg-cube,
-  .rg-bg-cube-face,
   .rg-sigil-marker,
   .rg-sigil-marker * {
     transition-duration: 0.01ms !important;
@@ -647,8 +493,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rg-bg-cube,
-  .rg-bg-cube-face,
   .rg-sigil-marker {
     transition: none !important;
   }

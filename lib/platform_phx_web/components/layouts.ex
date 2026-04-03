@@ -35,17 +35,6 @@ defmodule PlatformPhxWeb.Layouts do
 
       <%= if @chrome == :app do %>
         <div class="mx-auto flex min-h-screen max-w-[1600px] gap-3 p-3 lg:p-4">
-          <.background_grid
-            id="platform-app-background"
-            class={["pp-route-background-grid", app_background_theme_class(@active_nav)]}
-            cube_width={40}
-            cube_height={40}
-            cube_depth={1}
-            hide_cursor={true}
-            data-suppress-selector="[data-background-suppress]"
-            data-trail-ms="880"
-          />
-
           <div class="pp-sidebar-column hidden w-72 shrink-0 self-stretch lg:flex lg:flex-col">
             <aside
               data-background-suppress
@@ -143,83 +132,6 @@ defmodule PlatformPhxWeb.Layouts do
                 </p>
                 <h1 class="pp-chrome-title">{chrome_title(@active_nav)}</h1>
               </div>
-              <div
-                data-background-suppress
-                class="pp-mobile-nav lg:hidden"
-              >
-                <div class="pp-mobile-nav-row" aria-label="Quick navigation">
-                  <.nav_chip
-                    current={@active_nav == "overview"}
-                    href={~p"/overview"}
-                    label="Overview"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "services"}
-                    href={~p"/services"}
-                    label="Services"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "token-info"}
-                    href={~p"/token-info"}
-                    label="Platform Token"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "techtree"}
-                    href={~p"/techtree"}
-                    label="Techtree"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "autolaunch"}
-                    href={~p"/autolaunch"}
-                    label="Autolaunch"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "regent-cli"}
-                    href={~p"/regent-cli"}
-                    label="Regent CLI"
-                  />
-                  <.nav_chip
-                    current={@active_nav == "bug-report"}
-                    href={~p"/bug-report"}
-                    label="Bug Report"
-                  />
-                </div>
-
-                <div class="pp-mobile-nav-meta">
-                  <.external_nav_chip
-                    href="https://github.com/orgs/regent-ai/repositories"
-                    label="Github"
-                  />
-
-                  <div
-                    id="mobile-community"
-                    class="pp-sidebar-community pp-mobile-community"
-                    phx-hook="SidebarCommunity"
-                  >
-                    <button
-                      type="button"
-                      class="pp-sidebar-community-toggle"
-                      data-community-toggle
-                      aria-expanded="false"
-                      aria-controls="mobile-community-drawer"
-                    >
-                      <span>Community</span>
-                      <span aria-hidden="true" data-community-icon>↓</span>
-                    </button>
-
-                    <div
-                      id="mobile-community-drawer"
-                      class="pp-sidebar-community-drawer"
-                      data-community-panel
-                      hidden
-                    >
-                      <div class="pp-sidebar-community-grid">
-                        <.community_links />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </header>
 
             <main
@@ -279,27 +191,6 @@ defmodule PlatformPhxWeb.Layouts do
 
   attr :href, :string, required: true
   attr :label, :string, required: true
-  attr :current, :boolean, default: false
-
-  defp nav_chip(assigns) do
-    ~H"""
-    <.link
-      navigate={@href}
-      class={[
-        "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.16em] transition",
-        @current &&
-          "border-[color:var(--ring)] bg-[color:var(--sidebar-accent)] text-[color:var(--foreground)]",
-        !@current &&
-          "border-[color:var(--border)] bg-[color:var(--card)] text-[color:var(--muted-foreground)]"
-      ]}
-    >
-      {@label}
-    </.link>
-    """
-  end
-
-  attr :href, :string, required: true
-  attr :label, :string, required: true
 
   defp external_nav_link(assigns) do
     ~H"""
@@ -314,26 +205,6 @@ defmodule PlatformPhxWeb.Layouts do
     </a>
     """
   end
-
-  attr :href, :string, required: true
-  attr :label, :string, required: true
-
-  defp external_nav_chip(assigns) do
-    ~H"""
-    <a
-      href={@href}
-      target="_blank"
-      rel="noreferrer"
-      class="shrink-0 whitespace-nowrap rounded-full border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-[color:var(--muted-foreground)] transition hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
-    >
-      {@label}
-    </a>
-    """
-  end
-
-  defp app_background_theme_class("techtree"), do: "rg-regent-theme-techtree"
-  defp app_background_theme_class("autolaunch"), do: "rg-regent-theme-autolaunch"
-  defp app_background_theme_class(_active_nav), do: "rg-regent-theme-platform"
 
   defp community_links(assigns) do
     ~H"""
@@ -499,30 +370,6 @@ defmodule PlatformPhxWeb.Layouts do
     <div id={@id} aria-live="polite">
       <.flash kind={:info} flash={@flash} />
       <.flash kind={:error} flash={@flash} />
-
-      <.flash
-        id="client-error"
-        kind={:error}
-        title={gettext("We can't find the internet")}
-        phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
-        phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
-        hidden
-      >
-        {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
-      </.flash>
-
-      <.flash
-        id="server-error"
-        kind={:error}
-        title={gettext("Something went wrong!")}
-        phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
-        phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
-        hidden
-      >
-        {gettext("Attempting to reconnect")}
-        <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
-      </.flash>
     </div>
     """
   end
