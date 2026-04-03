@@ -985,9 +985,9 @@ function RedeemSection({
           </div>
           <div className="grid gap-4 pt-2 sm:grid-cols-2">
             <LabelBlock label="Source collection">
-              <div className="relative">
+              <div className="relative min-w-0">
                 <select
-                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-14 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)] sm:min-w-[16rem]"
+                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-14 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
                   value={source}
                   onChange={(event) => setSource(event.currentTarget.value as SourceKey)}
                 >
@@ -1012,7 +1012,7 @@ function RedeemSection({
                 inputMode="numeric"
                 disabled={!connectedAccount}
                 className={classNames(
-                  "w-full rounded-xl border bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]",
+                  "w-full min-w-0 rounded-xl border bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]",
                   tokenId.length > 0 && !tokenIdValid
                     ? "border-[color:#a6574f]"
                     : "border-[color:var(--border)]",
@@ -2470,7 +2470,7 @@ function LabelBlock({
   children: React.ReactNode;
 }) {
   return (
-    <label className="space-y-2">
+    <label className="min-w-0 space-y-2">
       <span className="block text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
         {label}
       </span>

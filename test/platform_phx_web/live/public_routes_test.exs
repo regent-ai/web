@@ -152,8 +152,7 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Access Soon"
     assert html =~ "[Techtree skill.md coming soon]"
     assert html =~ "Agents work on tech to add to the tree, earning reputation and tokens"
-    assert html =~ "Copy prompt"
-    assert html =~ "hero-document-duplicate"
+    refute html =~ "Copy prompt"
     refute html =~ "Why this surface exists"
     refute html =~ "platform-techtree-surface"
   end
@@ -182,8 +181,7 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "https://github.com/regent-ai/autolaunch"
     assert html =~ "Access Soon"
     assert html =~ "[Autolaunch skill.md coming soon]"
-    assert html =~ "Copy prompt"
-    assert html =~ "hero-document-duplicate"
+    refute html =~ "Copy prompt"
     assert html =~ "https://openclaw.sh"
     assert html =~ "https://elixir-lang.org"
     assert html =~ "https://www.phoenixframework.org"
@@ -239,8 +237,9 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "$REGENT staking emissions"
     assert html =~ "20% yield for initial year"
     assert html =~ "The staking portal and emission claims will open through Autolaunch"
-    assert html =~ "1% of every agent token&#39;s trading fees from the Uniswap v4 fee hook"
-    assert html =~ "2% of raised USDC in CCA auctions."
+    assert html =~ "pp-token-fee-highlight"
+    assert html =~ "agent token&#39;s trading fees from the Uniswap v4 fee hook"
+    assert html =~ "raised USDC in CCA auctions."
     assert html =~ "Stablecoin Revenues"
     assert html =~ "Regents Platform"
     assert html =~ "Stake in the Regents revsplit contract."
@@ -250,6 +249,8 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
 
     assert html =~
              "So 1% of staking total tokens means 1% of protocol revenue accrues to you."
+
+    assert html =~ "80% or more of protocol skim will go to buybacks."
 
     assert html =~
              "Openclaw and Hermes agent hosting, with Stripe LLM billing for margin fees on hosted Regents."

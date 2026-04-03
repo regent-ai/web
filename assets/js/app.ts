@@ -96,6 +96,107 @@ const ClipboardCopyHook = {
   },
 };
 
+function homeCtaMotionReduced(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function isModifiedNavigation(event: MouseEvent): boolean {
+  return (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
+function mountHomeCtaMotion(root: HTMLElement): () => void {
+  if (!(root instanceof HTMLAnchorElement)) return () => undefined;
+
+  const logo = root.querySelector<HTMLElement>("[data-home-cta-logo]");
+  const label = root.querySelector<HTMLElement>("[data-home-cta-label]");
+  const arrow = root.querySelector<HTMLElement>("[data-home-cta-arrow]");
+
+  if (!logo || !label || !arrow) return () => undefined;
+
+  let isAnimating = false;
+
+  const reset = () => {
+    root.dataset.ctaAnimating = "false";
+    isAnimating = false;
+    logo.style.transform = "";
+    logo.style.opacity = "";
+    label.style.transform = "";
+    label.style.opacity = "";
+    arrow.style.transform = "";
+    arrow.style.opacity = "";
+  };
+
+  const goToTarget = () => {
+    window.location.assign(root.href);
+  };
+
+  const handleClick = (event: MouseEvent) => {
+    if (isModifiedNavigation(event) || isAnimating) return;
+    if (root.target && root.target !== "_self") return;
+    if (homeCtaMotionReduced()) return;
+
+    event.preventDefault();
+    isAnimating = true;
+    root.dataset.ctaAnimating = "true";
+
+    const logoRect = logo.getBoundingClientRect();
+    const arrowRect = arrow.getBoundingClientRect();
+    const deltaX = arrowRect.left + arrowRect.width / 2 - (logoRect.left + logoRect.width / 2);
+
+    animate(label, {
+      opacity: [1, 0],
+      translateX: [0, 18],
+      duration: 220,
+      ease: "outQuad",
+    });
+
+    animate(arrow, {
+      translateX: [0, -6, 0],
+      scale: [1, 1.1, 1],
+      opacity: [1, 1],
+      duration: 360,
+      ease: "outQuart",
+    });
+
+    animate(logo, {
+      translateX: [0, deltaX],
+      scale: [1, 0.22],
+      rotate: ["0turn", "1turn"],
+      opacity: [1, 0.2],
+      duration: 420,
+      ease: "inOutQuart",
+      onComplete: goToTarget,
+    });
+  };
+
+  root.addEventListener("click", handleClick);
+
+  return () => {
+    root.removeEventListener("click", handleClick);
+    reset();
+  };
+}
+
+const HomeCtaMotionHook = {
+  mounted(this: HookContext & { __homeCtaCleanup?: () => void }) {
+    this.__homeCtaCleanup = mountHomeCtaMotion(this.el as HTMLElement);
+  },
+  updated(this: HookContext & { __homeCtaCleanup?: () => void }) {
+    this.__homeCtaCleanup?.();
+    this.__homeCtaCleanup = mountHomeCtaMotion(this.el as HTMLElement);
+  },
+  destroyed(this: HookContext & { __homeCtaCleanup?: () => void }) {
+    this.__homeCtaCleanup?.();
+  },
+};
+
 function bugReportMotionReduced(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -436,6 +537,7 @@ const hooks: HooksOptions = {
   FooterVoxel: FooterVoxelHook,
   LogoStudies: LogoStudiesHook,
   ClipboardCopy: ClipboardCopyHook,
+  HomeCtaMotion: HomeCtaMotionHook,
   OverviewMode: OverviewModeHook,
   ColorModeToggle: ColorModeToggleHook,
 };

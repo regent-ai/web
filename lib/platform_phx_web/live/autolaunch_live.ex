@@ -69,25 +69,9 @@ defmodule PlatformPhxWeb.AutolaunchLive do
           <section class="pp-route-grid" data-bridge-block>
             <article class="pp-route-panel pp-product-panel">
               <p class="pp-home-kicker">Agent Skill</p>
-              <div class="pp-route-panel-heading">
-                <h2 class="pp-route-panel-title">
-                  For your Openclaw or Hermes agent:
-                </h2>
-                <button
-                  id="platform-autolaunch-skill-copy"
-                  type="button"
-                  phx-hook="ClipboardCopy"
-                  class="pp-copy-chip pp-copy-chip--prompt"
-                  aria-label="Copy Autolaunch agent prompt"
-                  title="Copy Autolaunch agent prompt"
-                  data-copy-text="[Autolaunch skill.md coming soon]"
-                >
-                  <span class="pp-copy-chip-label">Copy prompt</span>
-                  <span class="pp-copy-chip-icon" aria-hidden="true">
-                    <.icon name="hero-document-duplicate" class="size-4" />
-                  </span>
-                </button>
-              </div>
+              <h2 class="pp-route-panel-title">
+                For your Openclaw or Hermes agent:
+              </h2>
               <blockquote class="pp-route-quote">
                 [Autolaunch skill.md coming soon]
               </blockquote>

@@ -140,18 +140,18 @@ defmodule PlatformPhxWeb.TokenInfoLive do
       title: "Autolaunch",
       short: "Hook + auction fees",
       body_html:
-        "1% of every agent token's trading fees from the Uniswap v4 fee hook<br />2% of raised USDC in CCA auctions."
+        "<span class=\"pp-token-fee-highlight\">1%</span> of every agent token's trading fees from the Uniswap v4 fee hook<br /><span class=\"pp-token-fee-highlight\">2%</span> of raised USDC in CCA auctions."
     },
     %{
       title: "Techtree",
       short: "Agent token earnings",
-      body: "1% of agent token earnings."
+      body_html: "<span class=\"pp-token-fee-highlight\">1%</span> of agent token earnings."
     },
     %{
       title: "Stablecoin Revenues",
       short: "Revsplit-tracked gross revenue",
-      body:
-        "1% of gross revenue for all agents, from x402, MPP, and other sources. Tracked onchain through the revsplit contract."
+      body_html:
+        "<span class=\"pp-token-fee-highlight\">1%</span> of gross revenue for all agents, from x402, MPP, and other sources. Tracked onchain through the revsplit contract."
     },
     %{
       title: "Regents Platform",
@@ -301,7 +301,7 @@ defmodule PlatformPhxWeb.TokenInfoLive do
                   <p class="pp-panel-copy">
                     After the revenue split owed to stakers is accounted for, the remaining balance
                     is used to buy back $REGENT. At launch only ~20% of tokens are circulating, so
-                    80% of fees will go to buybacks if everyone stakes.
+                    80% or more of protocol skim will go to buybacks.
                   </p>
                 </article>
 

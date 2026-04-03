@@ -1010,6 +1010,10 @@ html[data-color-mode="dark"] .pp-route-background-grid {
   line-height: 1.6;
 }
 
+.pp-token-fee-highlight {
+  color: color-mix(in oklch, #f08a24 82%, var(--foreground) 18%);
+}
+
 .pp-token-economics-detail-card {
   display: grid;
   gap: 0.6rem;
@@ -1695,6 +1699,7 @@ html[data-color-mode="dark"] .pp-preview-link {
   --pp-entry-link-gap: 0.86rem;
   --pp-entry-link-pad-start: 0.14rem;
   --pp-entry-link-pad-end: 1.25rem;
+  position: relative;
   justify-content: flex-start;
   gap: var(--pp-entry-link-gap);
   inline-size: min(100%, 17.75rem);
@@ -1725,6 +1730,9 @@ html[data-color-mode="dark"] .pp-preview-link {
   padding: 0;
   border-radius: 999px;
   background: transparent;
+  transform-origin: center center;
+  will-change: transform, opacity;
+  z-index: 1;
 }
 
 .pp-entry-link-logo img {
@@ -1757,6 +1765,11 @@ html[data-color-mode="dark"] .pp-preview-link {
   line-height: 1;
   white-space: nowrap;
   will-change: opacity, transform;
+  transform-origin: center center;
+}
+
+.pp-entry-link[data-cta-animating="true"] {
+  pointer-events: none;
 }
 
 .pp-entry-link:hover,
@@ -2939,6 +2952,38 @@ html[data-color-mode="dark"] .pp-preview-link {
   gap: 0.55rem;
 }
 
+.pp-mobile-nav {
+  display: grid;
+  width: 100%;
+  gap: 0.75rem;
+}
+
+.pp-mobile-nav-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+  padding-right: 0.1rem;
+}
+
+.pp-mobile-nav-meta {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.pp-mobile-community .pp-sidebar-community-toggle {
+  min-height: 100%;
+  padding-block: 0.72rem;
+}
+
+.pp-mobile-community .pp-sidebar-community-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .pp-sidebar-community-toggle {
   display: flex;
   width: 100%;
@@ -3355,29 +3400,29 @@ html[data-color-mode="dark"] .pp-preview-link {
   }
 
   .pp-home-card-grid > .pp-entry-card {
-    min-block-size: clamp(29rem, 100vw, 34rem);
+    min-block-size: clamp(31.5rem, 108vw, 36rem);
   }
 
   .pp-card-depth-stage {
-    block-size: clamp(13.5rem, 54vw, 15.5rem);
-    min-block-size: clamp(13.5rem, 54vw, 15.5rem);
+    block-size: clamp(14.5rem, 60vw, 17rem);
+    min-block-size: clamp(14.5rem, 60vw, 17rem);
   }
 
   .pp-entry-card.rg-regent-theme-autolaunch .pp-card-depth-stage,
   .pp-home-card-grid > .pp-entry-card.rg-regent-theme-techtree .pp-card-depth-stage,
   .pp-home-card-grid > .pp-entry-card.rg-regent-theme-autolaunch .pp-card-depth-stage {
-    block-size: clamp(14rem, 57vw, 16.5rem);
-    min-block-size: clamp(14rem, 57vw, 16.5rem);
+    block-size: clamp(15.25rem, 63vw, 18rem);
+    min-block-size: clamp(15.25rem, 63vw, 18rem);
   }
 
   .pp-entry-card.rg-regent-theme-platform .pp-card-depth-stage {
-    block-size: clamp(11.25rem, 46.5vw, 13.5rem);
-    min-block-size: clamp(11.25rem, 46.5vw, 13.5rem);
+    block-size: clamp(12rem, 50vw, 14.5rem);
+    min-block-size: clamp(12rem, 50vw, 14.5rem);
   }
 
   .pp-home-card-grid > .pp-entry-card .pp-card-depth-stage {
-    block-size: clamp(14rem, 57vw, 16.5rem);
-    min-block-size: clamp(14rem, 57vw, 16.5rem);
+    block-size: clamp(15.25rem, 63vw, 18rem);
+    min-block-size: clamp(15.25rem, 63vw, 18rem);
   }
 
   .pp-entry-card::before,
@@ -3399,12 +3444,27 @@ html[data-color-mode="dark"] .pp-preview-link {
   }
 
   .pp-entry-footer {
-    justify-content: stretch;
+    justify-content: flex-start;
   }
 
   .pp-entry-footer .pp-entry-link {
-    inline-size: 100%;
+    inline-size: fit-content;
+    min-inline-size: min(100%, 15.5rem);
+    max-inline-size: 100%;
     justify-content: flex-start;
+    gap: 0.68rem;
+    padding-right: 1rem;
+  }
+
+  .pp-home-card-grid > .pp-entry-card.rg-regent-theme-techtree .pp-card-surface .rg-surface-scene > svg,
+  .pp-home-card-grid > .pp-entry-card.rg-regent-theme-autolaunch .pp-card-surface .rg-surface-scene > svg {
+    transform: scale(0.9);
+    transform-origin: center center;
+  }
+
+  .pp-home-card-grid > .pp-entry-card.rg-regent-theme-platform .pp-card-surface .rg-surface-scene > svg {
+    transform: scale(0.68) translateY(-0.4rem);
+    transform-origin: center center;
   }
 }
 

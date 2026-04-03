@@ -54,6 +54,7 @@ defmodule PlatformPhxWeb.PlatformComponents do
           <.link
             navigate={@card.href}
             class="pp-entry-link"
+            phx-hook={if @variant == "home", do: "HomeCtaMotion", else: nil}
             aria-label={if @variant == "home", do: @card.cta_label, else: nil}
             title={if @variant == "home", do: @card.cta_label, else: nil}
             data-home-cta-root={@variant == "home"}
@@ -68,13 +69,9 @@ defmodule PlatformPhxWeb.PlatformComponents do
               <img src={Map.get(@card, :logo_path)} alt="" />
             </span>
             <span
-              :if={@variant != "home"}
               class="pp-entry-link-label"
               data-home-cta-label={@variant == "home"}
             >
-              {@card.cta_label}
-            </span>
-            <span :if={@variant == "home"} class="sr-only">
               {@card.cta_label}
             </span>
             <span

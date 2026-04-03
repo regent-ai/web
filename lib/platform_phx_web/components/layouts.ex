@@ -145,40 +145,80 @@ defmodule PlatformPhxWeb.Layouts do
               </div>
               <div
                 data-background-suppress
-                class="flex w-full items-center gap-2 overflow-x-auto pb-1 pr-1 lg:hidden"
-                aria-label="Quick navigation"
+                class="pp-mobile-nav lg:hidden"
               >
-                <.nav_chip
-                  current={@active_nav == "overview"}
-                  href={~p"/overview"}
-                  label="Overview"
-                />
-                <.nav_chip
-                  current={@active_nav == "services"}
-                  href={~p"/services"}
-                  label="Services"
-                />
-                <.nav_chip
-                  current={@active_nav == "token-info"}
-                  href={~p"/token-info"}
-                  label="Platform Token"
-                />
-                <.nav_chip current={@active_nav == "techtree"} href={~p"/techtree"} label="Techtree" />
-                <.nav_chip
-                  current={@active_nav == "autolaunch"}
-                  href={~p"/autolaunch"}
-                  label="Autolaunch"
-                />
-                <.nav_chip
-                  current={@active_nav == "regent-cli"}
-                  href={~p"/regent-cli"}
-                  label="Regent CLI"
-                />
-                <.nav_chip
-                  current={@active_nav == "bug-report"}
-                  href={~p"/bug-report"}
-                  label="Bug Report"
-                />
+                <div class="pp-mobile-nav-row" aria-label="Quick navigation">
+                  <.nav_chip
+                    current={@active_nav == "overview"}
+                    href={~p"/overview"}
+                    label="Overview"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "services"}
+                    href={~p"/services"}
+                    label="Services"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "token-info"}
+                    href={~p"/token-info"}
+                    label="Platform Token"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "techtree"}
+                    href={~p"/techtree"}
+                    label="Techtree"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "autolaunch"}
+                    href={~p"/autolaunch"}
+                    label="Autolaunch"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "regent-cli"}
+                    href={~p"/regent-cli"}
+                    label="Regent CLI"
+                  />
+                  <.nav_chip
+                    current={@active_nav == "bug-report"}
+                    href={~p"/bug-report"}
+                    label="Bug Report"
+                  />
+                </div>
+
+                <div class="pp-mobile-nav-meta">
+                  <.external_nav_chip
+                    href="https://github.com/orgs/regent-ai/repositories"
+                    label="Github"
+                  />
+
+                  <div
+                    id="mobile-community"
+                    class="pp-sidebar-community pp-mobile-community"
+                    phx-hook="SidebarCommunity"
+                  >
+                    <button
+                      type="button"
+                      class="pp-sidebar-community-toggle"
+                      data-community-toggle
+                      aria-expanded="false"
+                      aria-controls="mobile-community-drawer"
+                    >
+                      <span>Community</span>
+                      <span aria-hidden="true" data-community-icon>↓</span>
+                    </button>
+
+                    <div
+                      id="mobile-community-drawer"
+                      class="pp-sidebar-community-drawer"
+                      data-community-panel
+                      hidden
+                    >
+                      <div class="pp-sidebar-community-grid">
+                        <.community_links />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </header>
 
@@ -271,6 +311,22 @@ defmodule PlatformPhxWeb.Layouts do
     >
       <span>{@label}</span>
       <span aria-hidden="true">↗</span>
+    </a>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+
+  defp external_nav_chip(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      target="_blank"
+      rel="noreferrer"
+      class="shrink-0 whitespace-nowrap rounded-full border border-[color:var(--border)] bg-[color:var(--card)] px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-[color:var(--muted-foreground)] transition hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
+    >
+      {@label}
     </a>
     """
   end
