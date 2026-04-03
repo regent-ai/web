@@ -5,6 +5,7 @@ import { LiveSocket, type HooksOptions } from "phoenix_live_view";
 import { Heerich } from "heerich";
 import topbar from "../vendor/topbar.cjs";
 import { mountDashboardRoot, unmountDashboardRoot } from "./dashboard/root";
+import { mountShaderRoot, unmountShaderRoot } from "./shader/root";
 import {
   hooks as regentHooks,
   installHeerich,
@@ -57,6 +58,17 @@ const DashboardRootHook = {
   },
   destroyed(this: HookContext) {
     unmountDashboardRoot(this.el);
+  },
+};
+const ShaderRootHook = {
+  mounted(this: HookContext) {
+    mountShaderRoot(this.el);
+  },
+  updated(this: HookContext) {
+    mountShaderRoot(this.el);
+  },
+  destroyed(this: HookContext) {
+    unmountShaderRoot(this.el);
   },
 };
 const HomeRevealHook = createRevealHook(mountHomeReveal);
@@ -423,6 +435,7 @@ installHeerich(Heerich);
 const hooks: HooksOptions = {
   ...regentHooks,
   DashboardRoot: DashboardRootHook,
+  ShaderRoot: ShaderRootHook,
   AnimatedHomeLogoScene: AnimatedHomeLogoSceneHook,
   HomeRegentScene,
   HomeReveal: HomeRevealHook,

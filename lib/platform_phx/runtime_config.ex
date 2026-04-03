@@ -2,7 +2,7 @@ defmodule PlatformPhx.RuntimeConfig do
   @moduledoc false
 
   def database_url, do: fetch("DATABASE_URL")
-  def base_rpc_url, do: fetch("BASE_RPC_URL")
+  def base_rpc_url, do: fetch("BASE_RPC_URL") || "https://mainnet.base.org"
   def ethereum_rpc_url, do: fetch("ETHEREUM_RPC_URL")
   def privy_app_id, do: fetch("VITE_PRIVY_APP_ID")
   def privy_client_id, do: fetch("VITE_PRIVY_APP_CLIENT_ID")

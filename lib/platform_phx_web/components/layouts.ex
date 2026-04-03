@@ -341,6 +341,7 @@ defmodule PlatformPhxWeb.Layouts do
   defp chrome_eyebrow("autolaunch"), do: "Raise agent capital"
   defp chrome_eyebrow("regent-cli"), do: "Local Operator Surface"
   defp chrome_eyebrow("token-info"), do: "Platform revenue token"
+  defp chrome_eyebrow("shader"), do: "Shader Registry"
   defp chrome_eyebrow(_), do: "Regents Labs"
 
   defp chrome_title("overview"), do: "Overview"
@@ -350,6 +351,7 @@ defmodule PlatformPhxWeb.Layouts do
   defp chrome_title("autolaunch"), do: "Autolaunch"
   defp chrome_title("regent-cli"), do: "Regent CLI"
   defp chrome_title("token-info"), do: "Agent economies"
+  defp chrome_title("shader"), do: "Shader"
   defp chrome_title(_), do: "Regents Home"
 
   attr :class, :string, default: nil

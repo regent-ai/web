@@ -109,11 +109,23 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "phx-hook=\"SidebarCommunity\""
     assert html =~ "platform-footer-voxel-classic"
     assert html =~ "dashboard-root"
+    assert html =~ "/api/opensea/redeem-stats"
 
     refute html =~
              "A growing platform for all documentation and actions to take part in the Regents ecosystem."
 
     refute html =~ "platform-dashboard-surface"
+  end
+
+  test "shader route renders", %{conn: conn} do
+    {:ok, _shader, html} = live(conn, "/shader")
+
+    assert html =~ "Shader Registry"
+    assert html =~ "Shader"
+    assert html =~ "shader-root"
+    assert html =~ "phx-hook=\"ShaderRoot\""
+    assert html =~ "platform-layout-root"
+    assert html =~ "platform-footer-voxel-classic"
   end
 
   test "heerich demo route renders", %{conn: conn} do
@@ -234,6 +246,8 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Token Purpose"
     assert html =~ "$REGENT is staked to earn your share of protocol revenue."
     assert html =~ "The majority of revenue is used to buyback $REGENT."
+    assert html =~ "Market Cap"
+    assert html =~ "FDV"
     assert html =~ "$REGENT is live on Base"
 
     assert html =~ "Platform revenue token"

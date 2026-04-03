@@ -10,11 +10,13 @@ defmodule PlatformPhxWeb.Api.OpenseaControllerTest do
 
     Application.put_env(:platform_phx, :opensea_http_client, PlatformPhx.OpenSeaFakeClient)
     Application.put_env(:platform_phx, :opensea_fake_responses, %{})
+    PlatformPhx.OpenSea.clear_cache()
 
     on_exit(fn ->
       restore_app_env(:platform_phx, :opensea_http_client, previous_client)
       restore_app_env(:platform_phx, :opensea_fake_responses, previous_responses)
       restore_system_env("OPENSEA_API_KEY", previous_api_key)
+      PlatformPhx.OpenSea.clear_cache()
     end)
 
     :ok
@@ -78,8 +80,44 @@ defmodule PlatformPhxWeb.Api.OpenseaControllerTest do
     assert response["statusMessage"] == "OpenSea request failed with status 500"
   end
 
+  test "returns redeem collection supply stats", %{conn: conn} do
+    System.put_env("OPENSEA_API_KEY", "test-key")
+
+    Application.put_env(:platform_phx, :opensea_fake_responses, %{
+      collection_url("animata") => {:ok, %{"total_supply" => 248}},
+      collection_url("regent-animata-ii") => {:ok, %{"total_supply" => 319}}
+    })
+
+    response =
+      conn
+      |> get("/api/opensea/redeem-stats")
+      |> json_response(200)
+
+    assert response == %{"animata" => 248, "regent-animata-ii" => 319}
+  end
+
+  test "returns 502 when redeem stats fail upstream", %{conn: conn} do
+    System.put_env("OPENSEA_API_KEY", "test-key")
+
+    Application.put_env(:platform_phx, :opensea_fake_responses, %{
+      collection_url("animata") => {:status, 500, %{"error" => "boom"}},
+      collection_url("regent-animata-ii") => {:ok, %{"total_supply" => 319}}
+    })
+
+    response =
+      conn
+      |> get("/api/opensea/redeem-stats")
+      |> json_response(502)
+
+    assert response["statusMessage"] == "OpenSea request failed with status 500"
+  end
+
   defp request_url(address, collection) do
     "https://api.opensea.io/api/v2/chain/base/account/#{address}/nfts?collection=#{collection}&limit=100"
+  end
+
+  defp collection_url(slug) do
+    "https://api.opensea.io/api/v2/collections/#{slug}"
   end
 
   defp restore_app_env(app, key, nil), do: Application.delete_env(app, key)

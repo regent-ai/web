@@ -25,7 +25,8 @@ defmodule PlatformPhxWeb.DashboardLive do
            basenamesRecent: "/api/basenames/recent",
            basenamesMint: "/api/basenames/mint",
            autolaunchAuctions: "/api/agentlaunch/auctions",
-           opensea: "/api/opensea"
+           opensea: "/api/opensea",
+           openseaRedeemStats: "/api/opensea/redeem-stats"
          }
        })
      )}

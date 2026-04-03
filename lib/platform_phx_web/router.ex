@@ -25,6 +25,7 @@ defmodule PlatformPhxWeb.Router do
       live "/overview", OverviewLive
       live "/logos", LogosLive
       live "/services", DashboardLive
+      live "/shader", ShaderLive
       live "/bug-report", BugReportLive
       live "/techtree", TechtreeLive
       live "/autolaunch", AutolaunchLive
@@ -51,6 +52,7 @@ defmodule PlatformPhxWeb.Router do
 
     get "/agentlaunch/auctions", Api.AgentLaunchController, :auctions
     get "/opensea", Api.OpenseaController, :index
+    get "/opensea/redeem-stats", Api.OpenseaController, :redeem_stats
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

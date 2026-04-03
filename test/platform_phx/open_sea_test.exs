@@ -14,6 +14,7 @@ defmodule PlatformPhx.OpenSeaTest do
     Application.put_env(:platform_phx, :opensea_http_client, OpenSeaFakeClient)
     Application.put_env(:platform_phx, :opensea_fake_responses, %{})
     System.put_env("OPENSEA_API_KEY", "test-opensea-key")
+    OpenSea.clear_cache()
 
     on_exit(fn ->
       restore_app_env(:platform_phx, :opensea_http_client, previous_client)
@@ -23,6 +24,8 @@ defmodule PlatformPhx.OpenSeaTest do
         nil -> System.delete_env("OPENSEA_API_KEY")
         value -> System.put_env("OPENSEA_API_KEY", value)
       end
+
+      OpenSea.clear_cache()
     end)
   end
 
@@ -58,12 +61,36 @@ defmodule PlatformPhx.OpenSeaTest do
              OpenSea.fetch_holdings(@address, "animata")
   end
 
+  test "fetch_redeem_stats returns collection supply counts" do
+    Application.put_env(:platform_phx, :opensea_fake_responses, %{
+      collection_url("animata") => {:ok, %{"total_supply" => 248}},
+      collection_url("regent-animata-ii") => {:ok, %{"total_supply" => 319}}
+    })
+
+    assert {:ok, payload} = OpenSea.fetch_redeem_stats()
+    assert payload == %{"animata" => 248, "regent-animata-ii" => 319}
+  end
+
+  test "fetch_redeem_stats surfaces collection lookup failures" do
+    Application.put_env(:platform_phx, :opensea_fake_responses, %{
+      collection_url("animata") => {:status, 500, %{"error" => "boom"}},
+      collection_url("regent-animata-ii") => {:ok, %{"total_supply" => 319}}
+    })
+
+    assert {:error, {:external, :opensea, "OpenSea request failed with status 500"}} =
+             OpenSea.fetch_redeem_stats()
+  end
+
   defp request_url(address, collection) do
     "https://api.opensea.io/api/v2/chain/base/account/#{address}/nfts?collection=#{collection}&limit=100"
   end
 
   defp request_url(address, collection, cursor) do
     "#{request_url(address, collection)}&next=#{URI.encode_www_form(cursor)}"
+  end
+
+  defp collection_url(slug) do
+    "https://api.opensea.io/api/v2/collections/#{slug}"
   end
 
   defp restore_app_env(app, key, nil), do: Application.delete_env(app, key)

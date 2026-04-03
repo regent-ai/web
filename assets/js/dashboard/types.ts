@@ -12,6 +12,7 @@ export type DashboardConfig = {
     basenamesMint: string;
     autolaunchAuctions: string;
     opensea: string;
+    openseaRedeemStats: string;
   };
 };
 
@@ -95,4 +96,9 @@ export interface OpenSeaResponse {
   animata1: number[];
   animata2: number[];
   animataPass: number[];
+}
+
+export interface OpenSeaRedeemStatsResponse {
+  animata: number;
+  "regent-animata-ii": number;
 }

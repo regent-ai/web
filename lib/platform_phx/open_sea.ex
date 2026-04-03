@@ -11,8 +11,11 @@ defmodule PlatformPhx.OpenSea do
           | {:external, :opensea, String.t()}
 
   @collections ["animata", "regent-animata-ii", "animata-pass"]
+  @redeem_collections %{"animata" => "animata", "regent-animata-ii" => "regent-animata-ii"}
   @max_token_count 1_000
   @page_limit 100
+  @cache_table :platform_phx_opensea_cache
+  @cache_ttl_ms :timer.minutes(1)
 
   @type accumulator :: %{ids: [integer()], count: non_neg_integer()}
 
@@ -31,6 +34,29 @@ defmodule PlatformPhx.OpenSea do
          "animataPass" => Map.get(holdings_by_collection, "animata-pass", [])
        }}
     end
+  end
+
+  @spec fetch_redeem_stats() :: {:ok, map()} | {:error, reason()}
+  def fetch_redeem_stats do
+    with {:miss, table} <- fetch_cached(:redeem_stats),
+         {:ok, api_key} <- api_key(),
+         {:ok, stats} <- fetch_collection_supplies(api_key) do
+      put_cached(table, :redeem_stats, stats)
+      {:ok, stats}
+    else
+      {:hit, stats} -> {:ok, stats}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @spec clear_cache() :: :ok
+  def clear_cache do
+    case :ets.whereis(@cache_table) do
+      :undefined -> :ok
+      table -> :ets.delete_all_objects(table)
+    end
+
+    :ok
   end
 
   defp normalize_address(address) do
@@ -60,6 +86,30 @@ defmodule PlatformPhx.OpenSea do
 
   defp requested_collections(_collection), do: {:error, {:bad_request, "Invalid query params"}}
 
+  defp fetch_collection_supplies(api_key) do
+    @redeem_collections
+    |> Task.async_stream(
+      fn {key, slug} ->
+        with {:ok, count} <- fetch_collection_supply(slug, api_key) do
+          {:ok, {key, count}}
+        end
+      end,
+      max_concurrency: 2,
+      ordered: false,
+      timeout: 15_000
+    )
+    |> Enum.reduce_while({:ok, %{}}, fn
+      {:ok, {:ok, {key, count}}}, {:ok, acc} ->
+        {:cont, {:ok, Map.put(acc, key, count)}}
+
+      {:ok, {:error, reason}}, _acc ->
+        {:halt, {:error, reason}}
+
+      {:exit, reason}, _acc ->
+        {:halt, {:error, {:external, :opensea, "OpenSea request failed: #{inspect(reason)}"}}}
+    end)
+  end
+
   defp fetch_requested_collections(address, requested_collections, api_key) do
     requested_collections
     |> Task.async_stream(
@@ -82,6 +132,32 @@ defmodule PlatformPhx.OpenSea do
       {:exit, reason}, _acc ->
         {:halt, {:error, {:external, :opensea, "OpenSea request failed: #{inspect(reason)}"}}}
     end)
+  end
+
+  defp fetch_collection_supply(slug, api_key) do
+    url = URI.new!("https://api.opensea.io/api/v2/collections/#{slug}")
+
+    case http_client().get(url, headers: [{"accept", "application/json"}, {"x-api-key", api_key}]) do
+      {:ok, %{status: status, body: %{"total_supply" => total_supply}}}
+      when status in 200..299 and is_integer(total_supply) ->
+        {:ok, total_supply}
+
+      {:ok, %{status: status, body: %{"total_supply" => total_supply}}}
+      when status in 200..299 and is_binary(total_supply) ->
+        case Integer.parse(total_supply) do
+          {parsed, ""} -> {:ok, parsed}
+          _other -> {:error, {:external, :opensea, "OpenSea response invalid"}}
+        end
+
+      {:ok, %{status: status, body: body}} when status in 200..299 ->
+        {:error, {:external, :opensea, "OpenSea response invalid: #{inspect(body)}"}}
+
+      {:ok, %{status: status}} ->
+        {:error, {:external, :opensea, "OpenSea request failed with status #{status}"}}
+
+      {:error, error} ->
+        {:error, {:external, :opensea, "OpenSea request failed: #{Exception.message(error)}"}}
+    end
   end
 
   defp fetch_collection(address, collection, api_key) do
@@ -153,6 +229,32 @@ defmodule PlatformPhx.OpenSea do
   end
 
   defp parse_identifier(_value), do: nil
+
+  defp fetch_cached(key) do
+    table = ensure_cache_table()
+    now = System.monotonic_time(:millisecond)
+
+    case :ets.lookup(table, key) do
+      [{^key, expires_at, value}] when expires_at > now -> {:hit, value}
+      _stale_or_missing -> {:miss, table}
+    end
+  end
+
+  defp put_cached(table, key, value) do
+    expires_at = System.monotonic_time(:millisecond) + @cache_ttl_ms
+    true = :ets.insert(table, {key, expires_at, value})
+    :ok
+  end
+
+  defp ensure_cache_table do
+    case :ets.whereis(@cache_table) do
+      :undefined ->
+        :ets.new(@cache_table, [:named_table, :public, read_concurrency: true])
+
+      table ->
+        table
+    end
+  end
 
   defp http_client do
     Application.get_env(:platform_phx, :opensea_http_client, PlatformPhx.OpenSea.ReqClient)

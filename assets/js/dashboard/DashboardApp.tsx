@@ -13,7 +13,6 @@ import { base, mainnet } from "viem/chains";
 import {
   ANIMATA1,
   ANIMATA2,
-  COLLECTION3,
   REGENT_PAYOUT,
   USDC,
   USDC_PRICE,
@@ -40,6 +39,7 @@ import type {
   BasenamesConfigResponse,
   DashboardConfig,
   MintResponse,
+  OpenSeaRedeemStatsResponse,
   OpenSeaResponse,
   OwnedNamesResponse,
   RecentNamesResponse,
@@ -102,6 +102,11 @@ type HoldingsFetched = {
 type HoldingList = {
   animata1: number[];
   animata2: number[];
+};
+
+type RedeemSupplyState = {
+  animata: number | null;
+  "regent-animata-ii": number | null;
 };
 
 type WalletSnapshot = {
@@ -389,6 +394,12 @@ function RedeemSection({
   const [accessPassNotice, setAccessPassNotice] = React.useState<Notice | null>(null);
   const [isFetchingAccessPassHoldings, setIsFetchingAccessPassHoldings] =
     React.useState(false);
+  const [redeemSupply, setRedeemSupply] = React.useState<RedeemSupplyState>({
+    animata: null,
+    "regent-animata-ii": null,
+  });
+  const [isFetchingRedeemSupply, setIsFetchingRedeemSupply] = React.useState(false);
+  const [redeemSupplyNotice, setRedeemSupplyNotice] = React.useState<Notice | null>(null);
   const [claimable, setClaimable] = React.useState<bigint | null>(null);
   const [remaining, setRemaining] = React.useState<bigint | null>(null);
   const [nftApproved, setNftApproved] = React.useState(false);
@@ -421,6 +432,7 @@ function RedeemSection({
   const ownsTokenStatus = tokenIdValid ? ownsSelectedToken : null;
   const holdingsRequestRef = React.useRef(0);
   const accessPassRequestRef = React.useRef(0);
+  const redeemSupplyRequestRef = React.useRef(0);
   const ownershipRequestRef = React.useRef(0);
   const claimableRequestRef = React.useRef(0);
   const approvalsRequestRef = React.useRef(0);
@@ -429,6 +441,7 @@ function RedeemSection({
     return () => {
       invalidateTrackedRequests(holdingsRequestRef);
       invalidateTrackedRequests(accessPassRequestRef);
+      invalidateTrackedRequests(redeemSupplyRequestRef);
       invalidateTrackedRequests(ownershipRequestRef);
       invalidateTrackedRequests(claimableRequestRef);
       invalidateTrackedRequests(approvalsRequestRef);
@@ -580,6 +593,41 @@ function RedeemSection({
       }
     }
   }, [config.endpoints.opensea, connectedAccount]);
+
+  const fetchRedeemSupply = React.useCallback(async () => {
+    const requestId = ++redeemSupplyRequestRef.current;
+    setIsFetchingRedeemSupply(true);
+    setRedeemSupplyNotice(null);
+
+    try {
+      const url = new URL(config.endpoints.openseaRedeemStats, window.location.origin);
+      const data = await fetchJson<OpenSeaRedeemStatsResponse>(url.toString(), {
+        cache: "no-store",
+      });
+
+      if (requestId !== redeemSupplyRequestRef.current) return;
+
+      setRedeemSupply({
+        animata: typeof data.animata === "number" ? data.animata : null,
+        "regent-animata-ii":
+          typeof data["regent-animata-ii"] === "number" ? data["regent-animata-ii"] : null,
+      });
+    } catch (error) {
+      if (requestId !== redeemSupplyRequestRef.current) return;
+      setRedeemSupply({
+        animata: null,
+        "regent-animata-ii": null,
+      });
+      setRedeemSupplyNotice({
+        tone: "error",
+        message: getErrorMessage(error, "Remaining Animata counts are unavailable right now."),
+      });
+    } finally {
+      if (requestId === redeemSupplyRequestRef.current) {
+        setIsFetchingRedeemSupply(false);
+      }
+    }
+  }, [config.endpoints.openseaRedeemStats]);
 
   const ensureWallet = React.useCallback((): WalletSnapshot => {
     if (!walletClient || !connectedAccount) {
@@ -841,6 +889,10 @@ function RedeemSection({
   }, [connectedAccount, fetchAccessPassHoldings]);
 
   React.useEffect(() => {
+    void fetchRedeemSupply();
+  }, [fetchRedeemSupply]);
+
+  React.useEffect(() => {
     if (!connectedAccount) {
       setOwnsSelectedToken(null);
       return;
@@ -903,14 +955,14 @@ function RedeemSection({
             Redeem Animata Pass for $REGENT
           </h3>
           <p className="max-w-3xl text-sm leading-6 text-[color:var(--muted-foreground)]">
-            Steps: Connect wallet on Base. Choose an Animata token you own from{" "}
+            Steps: Connect wallet on Base. Choose a token you own (or buy one) from{" "}
             <a
               href="https://opensea.io/collection/animata"
               target="_blank"
               rel="noreferrer"
               className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
             >
-              Collection I
+              Animata Collection I
             </a>{" "}
             or{" "}
             <a
@@ -919,7 +971,7 @@ function RedeemSection({
               rel="noreferrer"
               className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
             >
-              Collection II
+              Animata Collection II
             </a>
             . Approve the Animata transfer, and approve 80 USDC transfer. Redeem your
             NFT with the USDC to receive 5 million $REGENT streamed over 7 days, as
@@ -981,16 +1033,15 @@ function RedeemSection({
           />
         </SurfaceBlock>
 
-        <SurfaceBlock title="Select NFT to redeem">
+        <SurfaceBlock title="Select Animata Pass to Redeem">
           <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
-            Price: 80 USDC. Receive a Collection 3 NFT plus 5M REGENT streamed over 7
-            days.
+            Price: 80 USDC. Receive 5M REGENT streamed over 7 days.
           </div>
-          <div className="grid gap-4 pt-2 sm:grid-cols-2">
+          <div className="grid gap-4 pt-2 sm:grid-cols-[minmax(13.5rem,1.15fr)_minmax(0,0.85fr)]">
             <LabelBlock label="Source collection">
               <div className="relative min-w-0">
                 <select
-                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-14 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
+                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-12 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
                   value={source}
                   onChange={(event) => setSource(event.currentTarget.value as SourceKey)}
                 >
@@ -1208,6 +1259,34 @@ function RedeemSection({
           </SurfaceBlock>
         </div>
       ) : null}
+
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_78%,transparent)] px-4 py-3 text-sm text-[color:var(--muted-foreground)]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <p>
+              Remaining Animata I to Redeem:{" "}
+              <span className="text-[color:var(--foreground)]">
+                {redeemSupply.animata !== null
+                  ? formatCount(redeemSupply.animata)
+                  : isFetchingRedeemSupply
+                    ? "Loading..."
+                    : "--"}
+              </span>
+            </p>
+            <p>
+              Remaining Animata II to Redeem:{" "}
+              <span className="text-[color:var(--foreground)]">
+                {redeemSupply["regent-animata-ii"] !== null
+                  ? formatCount(redeemSupply["regent-animata-ii"])
+                  : isFetchingRedeemSupply
+                    ? "Loading..."
+                    : "--"}
+              </span>
+            </p>
+          </div>
+        </div>
+        {redeemSupplyNotice ? <InlineNotice notice={redeemSupplyNotice} /> : null}
+      </div>
 
       <div className="text-center text-xs text-[color:var(--muted-foreground)]">
         {redeemerAddress ? (
@@ -2701,6 +2780,10 @@ function formatRegentRounded2(amount: bigint) {
   const whole = cents / 100n;
   const fraction = cents % 100n;
   return `${whole.toLocaleString()}.${fraction.toString().padStart(2, "0")}`;
+}
+
+function formatCount(value: number) {
+  return value.toLocaleString();
 }
 
 function getErrorMessage(error: unknown, fallback: string) {

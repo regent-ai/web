@@ -1,6 +1,8 @@
 defmodule PlatformPhxWeb.TokenInfoLive do
   use PlatformPhxWeb, :live_view
 
+  alias PlatformPhx.TokenMarketData
+
   @holders [
     %{
       rank: 1,
@@ -163,12 +165,19 @@ defmodule PlatformPhxWeb.TokenInfoLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    token_market_summary =
+      case TokenMarketData.fetch_summary() do
+        {:ok, summary} -> summary
+        {:error, _reason} -> %{market_cap_display: "--", fdv_display: "--"}
+      end
+
     {:ok,
      socket
      |> assign(:page_title, "Platform Token")
      |> assign(:economics_sources, @economics_sources)
      |> assign(:holders, @holders)
      |> assign(:allocations, @allocations)
+     |> assign(:token_market_summary, token_market_summary)
      |> assign(:open_holder, nil)}
   end
 
@@ -223,6 +232,24 @@ defmodule PlatformPhxWeb.TokenInfoLive do
                       The majority of revenue is used to buyback $REGENT.
                     </span>
                   </h2>
+                </div>
+              </div>
+
+              <div class="pp-token-metrics-card" aria-label="Token valuation metrics">
+                <div class="pp-token-metrics-band pp-token-metrics-band-primary">
+                  <p class="pp-token-metrics-line">
+                    <span class="pp-token-metrics-label">Market Cap:</span>
+                    <span class="pp-token-metrics-value">
+                      {@token_market_summary.market_cap_display}
+                    </span>
+                  </p>
+                </div>
+                <div class="pp-token-metrics-divider" aria-hidden="true"></div>
+                <div class="pp-token-metrics-band">
+                  <p class="pp-token-metrics-line">
+                    <span class="pp-token-metrics-label">FDV:</span>
+                    <span class="pp-token-metrics-value">{@token_market_summary.fdv_display}</span>
+                  </p>
                 </div>
               </div>
 

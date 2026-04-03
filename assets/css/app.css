@@ -862,7 +862,7 @@ html[data-color-mode="dark"] .pp-sidebar-shell {
 .pp-token-economics-head {
   display: grid;
   gap: clamp(1.2rem, 2vw, 2.2rem);
-  grid-template-columns: minmax(0, 1fr) minmax(17rem, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(12.5rem, 15rem) minmax(17rem, 1fr);
   align-items: stretch;
 }
 
@@ -900,6 +900,67 @@ html[data-color-mode="dark"] .pp-sidebar-shell {
   min-height: 100%;
   padding: 0.85rem 1rem;
   text-align: center;
+}
+
+.pp-token-metrics-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  min-height: 100%;
+  padding: 0.2rem 0;
+}
+
+.pp-token-metrics-band {
+  display: grid;
+  align-content: center;
+  min-height: 100%;
+  padding: 1rem 1.05rem;
+  justify-items: center;
+}
+
+.pp-token-metrics-divider {
+  height: 1px;
+  width: 80%;
+  justify-self: center;
+  background: color-mix(in oklch, var(--brand-ink) 44%, transparent);
+}
+
+.pp-token-metrics-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  text-align: center;
+}
+
+.pp-token-metrics-label {
+  color: var(--muted-foreground);
+  font-family: "GeistPixel Square", sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.pp-token-metrics-value {
+  color: color-mix(in oklch, var(--accent) 58%, var(--foreground) 42%);
+  font-family: "GeistPixel Circle", sans-serif;
+  font-size: clamp(1rem, 1.25vw, 1.16rem);
+  line-height: 1.18;
+  text-align: center;
+}
+
+.pp-token-metrics-band-primary .pp-token-metrics-line {
+  align-items: baseline;
+}
+
+.pp-token-metrics-band-primary .pp-token-metrics-label {
+  font-size: 0.88rem;
+}
+
+.pp-token-metrics-band-primary .pp-token-metrics-value {
+  font-size: clamp(1.5rem, 2vw, 1.72rem);
 }
 
 .pp-token-market-title {
@@ -3148,8 +3209,14 @@ html[data-color-mode="dark"] .pp-preview-link {
   }
 
   .pp-token-economics-copy,
-  .pp-token-market-callout {
+  .pp-token-market-callout,
+  .pp-token-metrics-card {
     max-width: none;
+  }
+
+  .pp-token-market-callout,
+  .pp-token-metrics-card {
+    justify-items: start;
   }
 
   .pp-token-market-callout {
@@ -3380,6 +3447,10 @@ html[data-color-mode="dark"] .pp-preview-link {
   .pp-token-header-logo {
     width: 1.55rem;
     height: 1.55rem;
+  }
+
+  .pp-token-metrics-band {
+    padding: 0.9rem;
   }
 
   .pp-entry-card {

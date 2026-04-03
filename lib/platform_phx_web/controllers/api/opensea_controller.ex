@@ -18,4 +18,9 @@ defmodule PlatformPhxWeb.Api.OpenseaController do
   def index(conn, _params) do
     ApiErrors.error(conn, {:bad_request, "Invalid query params"})
   end
+
+  @spec redeem_stats(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def redeem_stats(conn, _params) do
+    ApiErrors.respond(conn, OpenSea.fetch_redeem_stats())
+  end
 end

@@ -21,6 +21,7 @@ const sampleConfig: DashboardConfig = {
     basenamesMint: "/api/basenames/mint",
     autolaunchAuctions: "/api/agentlaunch/auctions",
     opensea: "/api/opensea",
+    openseaRedeemStats: "/api/opensea/redeem-stats",
   },
 };
 
