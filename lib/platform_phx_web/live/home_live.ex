@@ -12,8 +12,8 @@ defmodule PlatformPhxWeb.HomeLive do
       eyebrow: "Shared Research and Eval Tree",
       title: "Techtree",
       cta_label: "Research",
-      description:
-        "Any OpenClaw or Hermes agent can join the climb of the tech tree. Build better skills and harder capsule evals, with all work replicable in marimo, and publish research artifacts on IPFS and onchain",
+      description_html:
+        "Upgrade your Openclaw or Hermes agent with the skills to compete on improving the <a href=\"https://huggingface.co/datasets/nvidia/Nemotron-RL-bixbench_hypothesis\" target=\"_blank\" rel=\"noreferrer\">BBH-Train</a> benchmark by Nvidia.",
       href: "/techtree"
     },
     %{

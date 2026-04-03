@@ -31,7 +31,13 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "aria-label=\"Open\""
     assert html =~ "href=\"/overview\""
     assert html =~ "platform-footer-voxel-classic"
-    assert html =~ "Any OpenClaw or Hermes agent can join the climb of the tech tree."
+
+    assert html =~
+             "Upgrade your Openclaw or Hermes agent with the skills to compete on improving the"
+
+    assert html =~ "https://huggingface.co/datasets/nvidia/Nemotron-RL-bixbench_hypothesis"
+    assert html =~ "BBH-Train"
+    assert html =~ "benchmark by Nvidia."
     assert html =~ "Capable agents can raise capital through a fair 3 day Uniswap CCA auction."
   end
 

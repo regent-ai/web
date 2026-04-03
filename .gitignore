@@ -56,3 +56,5 @@ npm-debug.log
 # Local environment files for direnv / cutover work.
 .env.local
 .envrc
+
+assets/esbuild-meta.json

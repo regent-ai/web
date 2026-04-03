@@ -54,32 +54,34 @@ defmodule PlatformPhxWeb.PlatformComponents do
           <.link
             navigate={@card.href}
             class="pp-entry-link"
-            phx-hook={if @variant == "home", do: "HomeCtaMotion", else: nil}
             aria-label={if @variant == "home", do: @card.cta_label, else: nil}
             title={if @variant == "home", do: @card.cta_label, else: nil}
             data-home-cta-root={@variant == "home"}
             data-background-suppress={if @variant == "home", do: true, else: nil}
           >
-            <span
-              :if={Map.get(@card, :logo_path)}
-              class="pp-entry-link-logo"
-              data-home-cta-logo={@variant == "home"}
-              aria-hidden="true"
-            >
-              <img src={Map.get(@card, :logo_path)} alt="" />
-            </span>
-            <span
-              class="pp-entry-link-label"
-              data-home-cta-label={@variant == "home"}
-            >
-              {@card.cta_label}
-            </span>
-            <span
-              class="pp-entry-link-arrow"
-              data-home-cta-arrow={@variant == "home"}
-              aria-hidden="true"
-            >
-              →
+            <span class="pp-entry-link-visual" data-home-cta-visual={@variant == "home"}>
+              <span
+                :if={Map.get(@card, :logo_path)}
+                class="pp-entry-link-logo"
+                data-home-cta-logo={@variant == "home"}
+                aria-hidden="true"
+              >
+                <img src={Map.get(@card, :logo_path)} alt="" />
+              </span>
+              <span
+                :if={@variant != "home"}
+                class="pp-entry-link-label"
+                data-home-cta-label={@variant == "home"}
+              >
+                {@card.cta_label}
+              </span>
+              <span
+                class="pp-entry-link-arrow"
+                data-home-cta-arrow={@variant == "home"}
+                aria-hidden="true"
+              >
+                →
+              </span>
             </span>
           </.link>
         </div>

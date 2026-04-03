@@ -12,6 +12,7 @@ type MotionHandle = {
 
 type HomeEntryCtaElements = {
   root: HTMLElement;
+  visual: HTMLElement | null;
   logo: HTMLElement | null;
   label: HTMLElement | null;
   arrow: HTMLElement | null;
@@ -165,63 +166,39 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
   if (!supportsHover) return [];
 
   const ctas = Array.from(
-    root.querySelectorAll<HTMLElement>("[data-home-cta-root='true']"),
+    root.querySelectorAll<HTMLElement>("[data-home-cta-root]"),
   ).map<HomeEntryCtaElements>((entry) => ({
     root: entry,
-    logo: entry.querySelector<HTMLElement>("[data-home-cta-logo='true']"),
-    label: entry.querySelector<HTMLElement>("[data-home-cta-label='true']"),
-    arrow: entry.querySelector<HTMLElement>("[data-home-cta-arrow='true']"),
+    visual: entry.querySelector<HTMLElement>("[data-home-cta-visual]"),
+    logo: entry.querySelector<HTMLElement>("[data-home-cta-logo]"),
+    label: entry.querySelector<HTMLElement>("[data-home-cta-label]"),
+    arrow: entry.querySelector<HTMLElement>("[data-home-cta-arrow]"),
   }));
 
-  return ctas.map(({ root: cta, logo, label, arrow }) => {
-    const logoVisual = logo?.querySelector<HTMLElement>("img") ?? logo;
+  return ctas.map(({ root: cta, visual, logo, label, arrow }) => {
+    if (!visual) return () => undefined;
+
     const motion = { progress: 0 };
-    const expandedGap = 0.86;
-    const collapsedGap = 0.42;
-    const collapsedLabelOffset = 16;
+    const collapsedLabelOffset = 14;
+    const collapsedArrowOffset = 10;
     let animation: ReturnType<typeof animate> | undefined;
-    let expandedWidth = cta.getBoundingClientRect().width;
-    let collapsedWidth = cta.getBoundingClientRect().height;
-    let padStart = 0;
+    let expandedWidth = visual.getBoundingClientRect().width;
+    let collapsedWidth = visual.getBoundingClientRect().height;
+    let expandedGap = 0;
+    let expandedPadStart = 0;
     let expandedPadEnd = 0;
-    let collapsedPadEnd = 0;
-    let labelExpandedWidth = 0;
+    let logoOffset = 0;
+    let labelExpandedWidth = label?.scrollWidth ?? 0;
+    let lockedCollapsed = false;
 
-    const applyProgress = () => {
-      const progress = motion.progress;
-      const width = collapsedWidth + (expandedWidth - collapsedWidth) * progress;
-      const gap = collapsedGap + (expandedGap - collapsedGap) * progress;
-      const padEnd = collapsedPadEnd + (expandedPadEnd - collapsedPadEnd) * progress;
+    const resetInlineState = () => {
+      visual.style.width = "";
+      visual.style.gap = "";
+      visual.style.paddingLeft = "";
+      visual.style.paddingRight = "";
 
-      cta.style.width = `${width}px`;
-      cta.style.setProperty("--pp-entry-link-gap", `${gap}px`);
-      cta.style.setProperty("--pp-entry-link-pad-start", `${padStart}px`);
-      cta.style.setProperty("--pp-entry-link-pad-end", `${padEnd}px`);
-
-      if (logoVisual) {
-        logoVisual.style.transform = `rotate(${-360 * progress}deg)`;
-      }
-
-      if (label) {
-        label.style.opacity = `${progress}`;
-        label.style.maxWidth = `${labelExpandedWidth * progress}px`;
-        label.style.transform = `translateX(${collapsedLabelOffset * (1 - progress)}px)`;
-      }
-
-      if (arrow) {
-        arrow.style.opacity = "1";
-        arrow.style.transform = "translateX(0px)";
-      }
-    };
-
-    const measureState = () => {
-      cta.style.width = "";
-      cta.style.removeProperty("--pp-entry-link-gap");
-      cta.style.removeProperty("--pp-entry-link-pad-start");
-      cta.style.removeProperty("--pp-entry-link-pad-end");
-
-      if (logoVisual) {
-        logoVisual.style.transform = "";
+      if (logo) {
+        logo.style.transform = "translateX(0px)";
       }
 
       if (label) {
@@ -234,19 +211,72 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
         arrow.style.opacity = "1";
         arrow.style.transform = "translateX(0px)";
       }
+    };
 
-      const styles = getComputedStyle(cta);
-      const logoWidth = logo?.getBoundingClientRect().width ?? 0;
-      const arrowWidth = arrow?.getBoundingClientRect().width ?? 0;
+    const applyProgress = () => {
+      const progress = motion.progress;
+      const width = expandedWidth + (collapsedWidth - expandedWidth) * progress;
+      const gap = expandedGap * (1 - progress);
+      const padEnd = expandedPadEnd + (expandedPadStart - expandedPadEnd) * progress;
 
-      expandedWidth = cta.getBoundingClientRect().width;
+      visual.style.width = `${width}px`;
+      visual.style.gap = `${gap}px`;
+      visual.style.paddingLeft = `${expandedPadStart}px`;
+      visual.style.paddingRight = `${padEnd}px`;
+
+      if (logo) {
+        logo.style.transform = `translateX(${logoOffset * progress}px)`;
+      }
+
+      if (label) {
+        label.style.opacity = `${1 - progress}`;
+        label.style.maxWidth = `${labelExpandedWidth * (1 - progress)}px`;
+        label.style.transform = `translateX(${collapsedLabelOffset * progress}px)`;
+      }
+
+      if (arrow) {
+        arrow.style.opacity = `${1 - progress}`;
+        arrow.style.transform = `translateX(${collapsedArrowOffset * progress}px)`;
+      }
+    };
+
+    const measureState = () => {
+      resetInlineState();
+
+      const visualRect = visual.getBoundingClientRect();
+      const visualStyles = window.getComputedStyle(visual);
+      const collapsedPad = Number.parseFloat(visualStyles.paddingLeft) || 0;
+
+      expandedWidth = visualRect.width;
+      expandedGap = Number.parseFloat(visualStyles.columnGap || visualStyles.gap) || 0;
+      expandedPadStart = Number.parseFloat(visualStyles.paddingLeft) || 0;
+      expandedPadEnd = Number.parseFloat(visualStyles.paddingRight) || 0;
       labelExpandedWidth = label?.scrollWidth ?? label?.getBoundingClientRect().width ?? 0;
-      padStart = Number.parseFloat(styles.paddingLeft) || 0;
-      expandedPadEnd = Number.parseFloat(styles.paddingRight) || 0;
-      collapsedPadEnd = Math.max(Number.parseFloat(styles.fontSize) * 0.62, 12);
-      collapsedWidth = Math.ceil(
-        padStart + logoWidth + collapsedGap + arrowWidth + collapsedPadEnd,
-      );
+      collapsedWidth = Math.round(visualRect.height);
+
+      visual.style.width = `${collapsedWidth}px`;
+      visual.style.gap = "0px";
+      visual.style.paddingLeft = `${collapsedPad}px`;
+      visual.style.paddingRight = `${collapsedPad}px`;
+
+      if (label) {
+        label.style.opacity = "0";
+        label.style.maxWidth = "0px";
+        label.style.transform = `translateX(${collapsedLabelOffset}px)`;
+      }
+
+      const logoRect = logo?.getBoundingClientRect();
+
+      if (logoRect) {
+        logoOffset =
+          visual.getBoundingClientRect().left +
+          collapsedWidth / 2 -
+          (logoRect.left + logoRect.width / 2);
+      } else {
+        logoOffset = 0;
+      }
+
+      resetInlineState();
     };
 
     const stopAnimation = () => {
@@ -266,15 +296,25 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       });
     };
 
-    const onPointerEnter = () => animateTo(1, 1000, "outQuart");
-    const onPointerLeave = () => animateTo(0, 600, "outQuart");
-    const onFocus = () => animateTo(1, 1000, "outQuart");
-    const onBlur = () => animateTo(0, 600, "outQuart");
+    const onPointerEnter = () => animateTo(1, 500, "inOutQuart");
+    const onPointerLeave = () => {
+      if (lockedCollapsed) return;
+      animateTo(0, 500, "inOutQuart");
+    };
+    const onFocus = () => animateTo(1, 500, "inOutQuart");
+    const onBlur = () => {
+      if (lockedCollapsed) return;
+      animateTo(0, 500, "inOutQuart");
+    };
+    const onClick = () => {
+      lockedCollapsed = true;
+      animateTo(1, 320, "outQuart");
+    };
     const onResize = () => {
       const currentProgress = motion.progress;
       stopAnimation();
       measureState();
-      motion.progress = currentProgress >= 0.5 ? 1 : 0;
+      motion.progress = lockedCollapsed || currentProgress >= 0.5 ? 1 : 0;
       applyProgress();
     };
 
@@ -286,6 +326,7 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
     cta.addEventListener("pointerleave", onPointerLeave);
     cta.addEventListener("focusin", onFocus);
     cta.addEventListener("focusout", onBlur);
+    cta.addEventListener("click", onClick);
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -294,21 +335,9 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       cta.removeEventListener("pointerleave", onPointerLeave);
       cta.removeEventListener("focusin", onFocus);
       cta.removeEventListener("focusout", onBlur);
+      cta.removeEventListener("click", onClick);
       window.removeEventListener("resize", onResize);
-      cta.style.width = "";
-      cta.style.removeProperty("--pp-entry-link-gap");
-      cta.style.removeProperty("--pp-entry-link-pad-start");
-      cta.style.removeProperty("--pp-entry-link-pad-end");
-      if (logoVisual) logoVisual.style.transform = "";
-      if (label) {
-        label.style.opacity = "";
-        label.style.maxWidth = "";
-        label.style.transform = "";
-      }
-      if (arrow) {
-        arrow.style.opacity = "";
-        arrow.style.transform = "";
-      }
+      resetInlineState();
     };
   });
 }
@@ -331,7 +360,7 @@ export function mountHomeReveal(root: HTMLElement): MotionHandle {
     ...queuePulses(root, "[data-platform-card] .rg-sigil-marker", 320, 70),
   ];
 
-  return { timers, cleanup: [...mountCardDepth(root)] };
+  return { timers, cleanup: [...mountCardDepth(root), ...mountHomeEntryCtas(root)] };
 }
 
 export function mountBridgeReveal(root: HTMLElement): MotionHandle {

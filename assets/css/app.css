@@ -1654,7 +1654,6 @@ html[data-color-mode="dark"] .pp-token-header-icon {
   justify-content: flex-end;
 }
 
-.pp-entry-link,
 .pp-link-button {
   --pp-pill-height: clamp(4.28rem, 4.95vw, 4.7rem);
   display: inline-flex;
@@ -1675,7 +1674,7 @@ html[data-color-mode="dark"] .pp-token-header-icon {
     background 180ms ease;
 }
 
-html[data-color-mode="dark"] .pp-entry-link,
+html[data-color-mode="dark"] .pp-entry-link-visual,
 html[data-color-mode="dark"] .pp-link-button,
 html[data-color-mode="dark"] .pp-home-chip-row span,
 html[data-color-mode="dark"] .pp-tag,
@@ -1695,28 +1694,53 @@ html[data-color-mode="dark"] .pp-preview-link {
 }
 
 .pp-entry-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  inline-size: min(100%, 17.75rem);
+  max-inline-size: 100%;
+  overflow: visible;
+}
+
+.pp-entry-link-visual {
   --pp-pill-height: clamp(5rem, 5.8vw, 5.6rem);
   --pp-entry-link-gap: 0.86rem;
   --pp-entry-link-pad-start: 0.14rem;
   --pp-entry-link-pad-end: 1.25rem;
   position: relative;
+  display: inline-flex;
+  align-items: center;
   justify-content: flex-start;
   gap: var(--pp-entry-link-gap);
-  inline-size: min(100%, 17.75rem);
+  inline-size: 100%;
   padding-left: var(--pp-entry-link-pad-start);
   padding-right: var(--pp-entry-link-pad-end);
   font-size: clamp(1.7rem, 2.25vw, 1.95rem);
   overflow: hidden;
   transform-origin: center right;
   will-change: inline-size, gap, padding;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--background) 94%, var(--card) 6%);
+  min-block-size: var(--pp-pill-height);
+  color: var(--foreground);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
 .pp-home-card-grid .pp-entry-link {
-  inline-size: auto;
-  justify-content: flex-start;
-  gap: 0.62rem;
+  inline-size: clamp(6.9rem, 12vw, 8.15rem);
+}
+
+.pp-home-card-grid .pp-entry-link-visual {
+  --pp-pill-height: clamp(4.15rem, 4.9vw, 4.65rem);
+  justify-content: space-between;
+  gap: 0.34rem;
   padding-left: 0.14rem;
-  padding-right: 0.95rem;
+  padding-right: 0.84rem;
+  font-size: clamp(1.75rem, 2.15vw, 1.95rem);
 }
 
 .pp-entry-link-logo {
@@ -1754,11 +1778,6 @@ html[data-color-mode="dark"] .pp-preview-link {
   will-change: opacity, transform;
 }
 
-.pp-home-card-grid .pp-entry-link-label {
-  flex: 0 1 auto;
-  text-align: left;
-}
-
 .pp-entry-link-arrow {
   display: inline-block;
   flex: 0 0 auto;
@@ -1768,11 +1787,11 @@ html[data-color-mode="dark"] .pp-preview-link {
   transform-origin: center center;
 }
 
-.pp-entry-link[data-cta-animating="true"] {
-  pointer-events: none;
+.pp-home-card-grid .pp-entry-link-label {
+  display: none;
 }
 
-.pp-entry-link:hover,
+.pp-entry-link:hover .pp-entry-link-visual,
 .pp-link-button:hover {
   transform: translateY(-1px);
   border-color: var(--ring);
@@ -3454,6 +3473,15 @@ html[data-color-mode="dark"] .pp-preview-link {
     justify-content: flex-start;
     gap: 0.68rem;
     padding-right: 1rem;
+  }
+
+  .pp-home-card-grid .pp-entry-footer .pp-entry-link {
+    inline-size: clamp(6.25rem, 31vw, 7.25rem);
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    justify-content: space-between;
+    gap: 0.3rem;
+    padding-right: 0.72rem;
   }
 
   .pp-home-card-grid > .pp-entry-card.rg-regent-theme-techtree .pp-card-surface .rg-surface-scene > svg,
