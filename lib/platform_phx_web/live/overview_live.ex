@@ -2,6 +2,7 @@ defmodule PlatformPhxWeb.OverviewLive do
   use PlatformPhxWeb, :live_view
 
   alias PlatformPhxWeb.RegentScenes
+  alias PlatformPhxWeb.SceneSelection
 
   @overview_commands [
     %{
@@ -202,10 +203,10 @@ defmodule PlatformPhxWeb.OverviewLive do
   def handle_event("regent:node_select", _params, socket), do: {:noreply, socket}
 
   @impl true
-  def handle_event("regent:node_hover", _params, socket), do: {:noreply, socket}
-
-  @impl true
-  def handle_event("regent:surface_ready", _params, socket), do: {:noreply, socket}
+  def handle_event(event, _params, socket)
+      when event in ["regent:node_hover", "regent:surface_ready"] do
+    {:noreply, socket}
+  end
 
   @impl true
   def handle_event("regent:surface_error", _params, socket), do: {:noreply, socket}
@@ -214,15 +215,7 @@ defmodule PlatformPhxWeb.OverviewLive do
     %{
       scene: scene,
       scene_version: scene["sceneVersion"] || 1,
-      selected_target_id: scene_selected_target_id(scene)
+      selected_target_id: SceneSelection.selected_target_id(scene)
     }
   end
-
-  defp scene_selected_target_id(%{
-         "faces" => [%{"markers" => [%{"id" => id} | _marker_rest]} | _face_rest]
-       })
-       when is_binary(id),
-       do: id
-
-  defp scene_selected_target_id(_scene), do: nil
 end

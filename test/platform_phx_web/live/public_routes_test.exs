@@ -240,11 +240,15 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "Agent economies"
 
     assert html =~
+             "https://app.uniswap.org/explore/tokens/base/0x6f89bca4ea5931edfcb09786267b251dee752b07?inputCurrency=NATIVE"
+
+    assert html =~
              "https://www.geckoterminal.com/base/pools/0x4ed3b69ac263ad86482f609b2c2105f64bcfd3a7e02e8e078ec9fec1f0324bed"
 
     assert html =~
              "https://dexscreener.com/base/0x4ed3b69ac263ad86482f609b2c2105f64bcfd3a7e02e8e078ec9fec1f0324bed"
 
+    assert html =~ "View on Uniswap"
     assert html =~ "View on GeckoTerminal"
     assert html =~ "View on Dexscreener"
     assert html =~ "Autolaunch"

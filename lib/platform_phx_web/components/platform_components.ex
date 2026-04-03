@@ -12,6 +12,8 @@ defmodule PlatformPhxWeb.PlatformComponents do
   attr :variant, :string, required: true
 
   def entry_card(assigns) do
+    assigns = assign(assigns, :selected_target_id, Map.get(assigns.card, :selected_target_id))
+
     ~H"""
     <article
       id={"platform-entry-card-#{@card.id}-#{@variant}"}
@@ -27,7 +29,7 @@ defmodule PlatformPhxWeb.PlatformComponents do
           class={"pp-card-surface pp-surface-single #{@card.theme_class}"}
           scene={@card.scene}
           scene_version={@card.scene_version}
-          selected_target_id={@card.selected_target_id}
+          selected_target_id={@selected_target_id}
           theme={@card.theme}
           camera_distance={20}
           hook={if @variant == "home", do: "HomeRegentScene", else: "RegentScene"}
@@ -71,7 +73,6 @@ defmodule PlatformPhxWeb.PlatformComponents do
               <span
                 :if={@variant != "home"}
                 class="pp-entry-link-label"
-                data-home-cta-label={@variant == "home"}
               >
                 {@card.cta_label}
               </span>

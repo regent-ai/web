@@ -14,7 +14,6 @@ type HomeEntryCtaElements = {
   root: HTMLElement;
   visual: HTMLElement | null;
   logo: HTMLElement | null;
-  label: HTMLElement | null;
   arrow: HTMLElement | null;
 };
 
@@ -171,15 +170,13 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
     root: entry,
     visual: entry.querySelector<HTMLElement>("[data-home-cta-visual]"),
     logo: entry.querySelector<HTMLElement>("[data-home-cta-logo]"),
-    label: entry.querySelector<HTMLElement>("[data-home-cta-label]"),
     arrow: entry.querySelector<HTMLElement>("[data-home-cta-arrow]"),
   }));
 
-  return ctas.map(({ root: cta, visual, logo, label, arrow }) => {
+  return ctas.map(({ root: cta, visual, logo, arrow }) => {
     if (!visual) return () => undefined;
 
     const motion = { progress: 0 };
-    const collapsedLabelOffset = 14;
     let animation: ReturnType<typeof animate> | undefined;
     let expandedWidth = visual.getBoundingClientRect().width;
     let collapsedWidth = visual.getBoundingClientRect().height;
@@ -187,7 +184,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
     let expandedPadStart = 0;
     let expandedPadEnd = 0;
     let logoOffset = 0;
-    let labelExpandedWidth = label?.scrollWidth ?? 0;
     let lockedCollapsed = false;
 
     const resetInlineState = () => {
@@ -198,12 +194,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
 
       if (logo) {
         logo.style.transform = "translateX(0px)";
-      }
-
-      if (label) {
-        label.style.opacity = "1";
-        label.style.maxWidth = "none";
-        label.style.transform = "translateX(0px)";
       }
 
       if (arrow) {
@@ -227,12 +217,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
         logo.style.transform = `translateX(${logoOffset * progress}px)`;
       }
 
-      if (label) {
-        label.style.opacity = `${1 - progress}`;
-        label.style.maxWidth = `${labelExpandedWidth * (1 - progress)}px`;
-        label.style.transform = `translateX(${collapsedLabelOffset * progress}px)`;
-      }
-
       if (arrow) {
         arrow.style.opacity = "";
         arrow.style.transform = "";
@@ -249,7 +233,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       expandedGap = Number.parseFloat(visualStyles.columnGap || visualStyles.gap) || 0;
       expandedPadStart = Number.parseFloat(visualStyles.paddingLeft) || 0;
       expandedPadEnd = Number.parseFloat(visualStyles.paddingRight) || 0;
-      labelExpandedWidth = label?.scrollWidth ?? label?.getBoundingClientRect().width ?? 0;
       collapsedWidth = Math.round(visualRect.height);
       resetInlineState();
 
@@ -257,12 +240,6 @@ function mountHomeEntryCtas(root: ParentNode): Array<() => void> {
       visual.style.gap = "0px";
       visual.style.paddingLeft = `${expandedPadStart}px`;
       visual.style.paddingRight = `${expandedPadStart}px`;
-
-      if (label) {
-        label.style.opacity = "0";
-        label.style.maxWidth = "0px";
-        label.style.transform = `translateX(${collapsedLabelOffset}px)`;
-      }
 
       const collapsedLogoRect = logo?.getBoundingClientRect();
 

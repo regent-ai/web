@@ -232,6 +232,20 @@ defmodule PlatformPhxWeb.TokenInfoLive do
 
                 <div class="pp-token-economics-actions">
                   <a
+                    href="https://app.uniswap.org/explore/tokens/base/0x6f89bca4ea5931edfcb09786267b251dee752b07?inputCurrency=NATIVE"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="pp-token-header-icon"
+                    aria-label="View on Uniswap"
+                    title="View on Uniswap"
+                  >
+                    <img
+                      src={~p"/images/uniswaplogo.png"}
+                      alt="Uniswap"
+                      class="pp-token-header-logo"
+                    />
+                  </a>
+                  <a
                     href="https://www.geckoterminal.com/base/pools/0x4ed3b69ac263ad86482f609b2c2105f64bcfd3a7e02e8e078ec9fec1f0324bed"
                     target="_blank"
                     rel="noreferrer"

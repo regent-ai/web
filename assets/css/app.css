@@ -1761,10 +1761,6 @@ html[data-color-mode="dark"] .pp-preview-link {
   z-index: 0;
 }
 
-.pp-home-card-grid .pp-entry-link-label {
-  display: none;
-}
-
 .pp-entry-link:hover,
 .pp-link-button:hover {
   transform: translateY(-1px);

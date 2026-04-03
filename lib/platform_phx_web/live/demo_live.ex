@@ -2,6 +2,7 @@ defmodule PlatformPhxWeb.DemoLive do
   use PlatformPhxWeb, :live_view
 
   alias PlatformPhxWeb.RegentScenes
+  alias PlatformPhxWeb.SceneSelection
 
   @scene_specs [
     %{id: "techtree", theme: "techtree", theme_class: "rg-regent-theme-techtree"},
@@ -46,6 +47,12 @@ defmodule PlatformPhxWeb.DemoLive do
     """
   end
 
+  @impl true
+  def handle_event(event, _params, socket)
+      when event in ["regent:node_hover", "regent:surface_ready"] do
+    {:noreply, socket}
+  end
+
   defp build_demo_scenes do
     total = length(@scene_specs)
 
@@ -55,17 +62,9 @@ defmodule PlatformPhxWeb.DemoLive do
       spec
       |> Map.put(:scene, scene)
       |> Map.put(:scene_version, scene["sceneVersion"] || 1)
-      |> Map.put(:selected_target_id, scene_selected_target_id(scene))
+      |> Map.put(:selected_target_id, SceneSelection.selected_target_id(scene))
       |> Map.put(:sequence_index, index)
       |> Map.put(:sequence_count, total)
     end)
   end
-
-  defp scene_selected_target_id(%{
-         "faces" => [%{"markers" => [%{"id" => id} | _marker_rest]} | _face_rest]
-       })
-       when is_binary(id),
-       do: id
-
-  defp scene_selected_target_id(_scene), do: nil
 end

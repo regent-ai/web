@@ -57,8 +57,11 @@ defmodule PlatformPhxWeb.HomeLive do
   end
 
   def handle_event("regent:node_select", _params, socket), do: {:noreply, socket}
-  def handle_event("regent:node_hover", _params, socket), do: {:noreply, socket}
-  def handle_event("regent:surface_ready", _params, socket), do: {:noreply, socket}
+
+  def handle_event(event, _params, socket)
+      when event in ["regent:node_hover", "regent:surface_ready"] do
+    {:noreply, socket}
+  end
 
   @impl true
   def handle_event("regent:surface_error", _params, socket) do
@@ -138,7 +141,6 @@ defmodule PlatformPhxWeb.HomeLive do
       card
       |> Map.put(:scene, scene)
       |> Map.put(:scene_version, scene["sceneVersion"] || 1)
-      |> Map.put(:selected_target_id, nil)
       |> Map.put(:sequence_index, index)
       |> Map.put(:sequence_count, total)
     end)

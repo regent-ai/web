@@ -15,8 +15,11 @@ defmodule PlatformPhxWeb.HeerichDemoLive do
   end
 
   def handle_event("regent:node_select", _params, socket), do: {:noreply, socket}
-  def handle_event("regent:node_hover", _params, socket), do: {:noreply, socket}
-  def handle_event("regent:surface_ready", _params, socket), do: {:noreply, socket}
+
+  def handle_event(event, _params, socket)
+      when event in ["regent:node_hover", "regent:surface_ready"] do
+    {:noreply, socket}
+  end
 
   @impl true
   def handle_event("regent:surface_error", _params, socket) do
