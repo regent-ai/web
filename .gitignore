@@ -48,6 +48,8 @@ platform_phx-*.tar
 /priv/static/regent/*-[0-9a-f]*.svg
 /priv/static/regent/sigils/*-[0-9a-f]*.svg
 /priv/static/robots-[0-9a-f]*.txt
+/priv/static/site-[0-9a-f]*.webmanifest
+/priv/static/.DS_Store
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
@@ -58,3 +60,4 @@ npm-debug.log
 .envrc
 
 assets/esbuild-meta.json
+assets/.DS_Store
