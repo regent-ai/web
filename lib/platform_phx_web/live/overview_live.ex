@@ -170,7 +170,7 @@ defmodule PlatformPhxWeb.OverviewLive do
             <article class="pp-route-panel pp-product-panel pp-route-panel-span">
               <p class="pp-home-kicker">CLI rails</p>
               <h2 class="pp-route-panel-title">
-                Preview the planned operator surface and upcoming skill document paths.
+                Keep the operator rails handy, then jump straight into the live product surfaces.
               </h2>
               <div class="pp-overview-command-grid">
                 <%= for command <- @overview_commands do %>
@@ -184,11 +184,11 @@ defmodule PlatformPhxWeb.OverviewLive do
                 <% end %>
               </div>
               <div class="pp-link-row">
-                <.preview_link variant="pill">
-                  Open Techtree Skill.md <span aria-hidden="true">↗</span>
+                <.preview_link variant="pill" href="https://techtree.sh">
+                  Visit techtree.sh <span aria-hidden="true">↗</span>
                 </.preview_link>
-                <.preview_link variant="pill-ghost">
-                  Open Autolaunch Skill.md <span aria-hidden="true">↗</span>
+                <.preview_link variant="pill-ghost" href="https://autolaunch.sh">
+                  Visit autolaunch.sh <span aria-hidden="true">↗</span>
                 </.preview_link>
               </div>
             </article>

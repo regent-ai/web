@@ -3,12 +3,50 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
 
   import Phoenix.LiveViewTest
 
+  test "home route exposes social share metadata", %{conn: conn} do
+    html =
+      conn
+      |> get("/")
+      |> html_response(200)
+
+    share_description =
+      "Autolaunch and Techtree let your Claws and Hermes do more, run a business, and advance the tech trees of the world."
+
+    share_image_url = PlatformPhxWeb.Endpoint.url() <> "/images/og-image.png"
+
+    assert html =~ ~s(<meta name="description" content="#{share_description}")
+    assert html =~ ~s(<meta property="og:title" content="Regents Labs")
+    assert html =~ ~s(<meta property="og:description" content="#{share_description}")
+    assert html =~ ~s(<meta property="og:image" content="#{share_image_url}")
+    assert html =~ ~s(<meta name="twitter:card" content="summary_large_image")
+    assert html =~ ~s(<meta name="twitter:image" content="#{share_image_url}")
+    assert html =~ ~s(<link rel="manifest" href="/site.webmanifest")
+
+    assert html =~
+             ~s(<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png")
+
+    assert html =~
+             ~s(<link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png")
+  end
+
+  test "site web manifest is served", %{conn: conn} do
+    body =
+      conn
+      |> get("/site.webmanifest")
+      |> response(200)
+
+    assert body =~ "\"name\": \"Regent Platform\""
+    assert body =~ "\"src\": \"/images/android-chrome-512x512.png\""
+  end
+
   test "home route renders", %{conn: conn} do
     {:ok, _home, html} = live(conn, "/")
 
     assert html =~ "Regents Labs"
     assert html =~ "$REGENT"
     assert html =~ "platform-home-shell"
+    assert html =~ "home-voxel-background"
+    assert html =~ "data-voxel-background=\"home\""
     assert html =~ "entry-card-surface-techtree-home"
     assert html =~ "entry-card-surface-autolaunch-home"
     assert html =~ "entry-card-surface-dashboard-home"
@@ -66,8 +104,10 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "npm install -g @regentlabs/cli"
     assert html =~ "planned package name for the shared operator surface"
     assert html =~ "access opens"
-    assert html =~ "Access Soon"
-    assert html =~ "aria-disabled=\"true\""
+    assert html =~ "Visit techtree.sh"
+    assert html =~ "Visit autolaunch.sh"
+    assert html =~ "https://techtree.sh"
+    assert html =~ "https://autolaunch.sh"
     assert html =~ "phx-hook=\"OverviewMode\""
     assert html =~ "platform-footer-voxel-classic"
     assert html =~ "data-mode=\"human\""
@@ -107,9 +147,16 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
              "https://www.geckoterminal.com/base/pools/0x4ed3b69ac263ad86482f609b2c2105f64bcfd3a7e02e8e078ec9fec1f0324bed"
 
     assert html =~ "phx-hook=\"SidebarCommunity\""
+    assert html =~ "dashboard-voxel-background"
+    assert html =~ "data-voxel-background=\"dashboard\""
     assert html =~ "platform-footer-voxel-classic"
+    assert html =~ "Use Regents from one LiveView surface"
+    assert html =~ "LiveView first"
+    assert html =~ "services-wallet-console"
     assert html =~ "dashboard-root"
     assert html =~ "/api/opensea/redeem-stats"
+    assert html =~ "https://techtree.sh"
+    assert html =~ "https://autolaunch.sh"
 
     refute html =~
              "A growing platform for all documentation and actions to take part in the Regents ecosystem."
@@ -126,6 +173,25 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "phx-hook=\"ShaderRoot\""
     assert html =~ "platform-layout-root"
     assert html =~ "platform-footer-voxel-classic"
+  end
+
+  test "token card route renders hosted card shell", %{conn: conn} do
+    html =
+      conn
+      |> get("/cards/regents-club/1")
+      |> html_response(200)
+
+    assert html =~ "regents-token-card-page"
+    assert html =~ "data-token-card-root"
+    assert html =~ "\"tokenId\":1"
+    assert html =~ "\"shaderId\":"
+    assert html =~ "Regents Club #1"
+  end
+
+  test "token card route returns not found for unknown token", %{conn: conn} do
+    conn
+    |> get("/cards/regents-club/99999")
+    |> response(404)
   end
 
   test "heerich demo route renders", %{conn: conn} do
@@ -173,15 +239,15 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "https://ipfs.io"
     assert html =~ "https://ethereum.org"
     assert html =~ "https://base.org"
-    assert html =~ "public product is still in preview"
+    assert html =~ "Techtree is live at techtree.sh."
     assert html =~ "regent techtree start"
     assert html =~ "regent techtree autoskill publish skill"
     assert html =~ "regent techtree bbh capsules list"
     assert html =~ "Open techtree.sh"
     assert html =~ "https://github.com/regent-ai/techtree"
-    assert html =~ "Access Soon"
+    assert html =~ "https://techtree.sh"
     assert html =~ "[Techtree skill.md coming soon]"
-    assert html =~ "Agents work on tech to add to the tree, earning reputation and tokens"
+    assert html =~ "Open the live Techtree surface, or inspect the repo that backs it."
     refute html =~ "Copy prompt"
     refute html =~ "Why this surface exists"
     refute html =~ "platform-techtree-surface"
@@ -202,13 +268,13 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "IPFS"
     assert html =~ "Ethereum"
     assert html =~ "Base"
-    assert html =~ "upcoming market surface"
+    assert html =~ "Autolaunch is live at autolaunch.sh."
     assert html =~ "regent autolaunch prelaunch wizard"
     assert html =~ "regent autolaunch launch finalize"
     assert html =~ "regent autolaunch trust x-link --agent &lt;id&gt;"
     assert html =~ "Open autolaunch.sh"
     assert html =~ "https://github.com/regent-ai/autolaunch"
-    assert html =~ "Access Soon"
+    assert html =~ "https://autolaunch.sh"
     assert html =~ "[Autolaunch skill.md coming soon]"
     refute html =~ "Copy prompt"
     assert html =~ "https://openclaw.sh"
@@ -238,6 +304,8 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "regent chatbox history --webapp|--agent"
     assert html =~ "CLI posting is agent-room only."
     assert html =~ "regent autolaunch ..."
+    assert html =~ "regent shader list"
+    assert html =~ "regent shader export w3dfWN --out avatars/shard.png"
   end
 
   test "token info route renders", %{conn: conn} do

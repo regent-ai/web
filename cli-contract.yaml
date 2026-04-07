@@ -1,0 +1,169 @@
+openapi: 3.1.0
+info:
+  title: Regent CLI Contract
+  version: 0.1.0
+  description: Canonical local/runtime-backed CLI surface for shader export.
+commands:
+  - name: regent shader list
+    summary: List the available shader avatars and their editable parameters.
+    auth:
+      mode: none
+    transport:
+      kind: local-runtime
+    args: []
+    flags:
+      - name: --usage
+        type: string
+        required: false
+        enum: [avatar, background, creator-inert]
+        description: Filter shaders by usage tag.
+    output:
+      format: json
+      schema:
+        type: object
+        required: [ok, command, shaders]
+        properties:
+          ok:
+            type: boolean
+          command:
+            type: string
+          shaders:
+            type: array
+            items:
+              type: object
+              required: [id, title, description, usage, defineControls]
+              properties:
+                id:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                usage:
+                  type: array
+                  items:
+                    type: string
+                defineControls:
+                  type: array
+                  items:
+                    type: object
+                    required: [key, kind, defaultValue]
+                    properties:
+                      key:
+                        type: string
+                      kind:
+                        type: string
+                      defaultValue:
+                        type: string
+                      min:
+                        type: number
+                      max:
+                        type: number
+                      step:
+                        type: number
+                      description:
+                        type: [string, 'null']
+  - name: regent shader export
+    summary: Render one shader avatar to a local image file, using defaults or explicit define overrides.
+    auth:
+      mode: none
+    transport:
+      kind: local-runtime
+    args:
+      - name: shader_id
+        type: string
+        required: true
+        description: Shader id from `regent shader list`.
+    flags:
+      - name: --define
+        type: string
+        required: false
+        repeatable: true
+        description: Repeatable KEY=VALUE override for shader define controls.
+      - name: --width
+        type: integer
+        required: false
+        default: 1024
+        description: Output width in pixels.
+      - name: --height
+        type: integer
+        required: false
+        default: 1024
+        description: Output height in pixels.
+      - name: --settle-ms
+        type: integer
+        required: false
+        default: 900
+        description: Milliseconds to let the shader run before capture.
+      - name: --out
+        type: string
+        required: false
+        description: Output image path. Defaults to ./regent-shader-<shader_id>.png
+      - name: --spec-out
+        type: string
+        required: false
+        description: Optional output path for the captured shader metadata JSON.
+      - name: --browser
+        type: string
+        required: false
+        description: Optional Chrome or Chromium executable path for the headless renderer.
+    output:
+      format: json
+      schema:
+        type: object
+        required: [ok, command, shader, outputPath, width, height, defineValues, imageSpec]
+        properties:
+          ok:
+            type: boolean
+          command:
+            type: string
+          shader:
+            type: object
+            required: [id, title, usage, sourceUrl]
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              usage:
+                type: array
+                items:
+                  type: string
+              sourceUrl:
+                type: string
+          outputPath:
+            type: string
+          specPath:
+            type: [string, 'null']
+          width:
+            type: integer
+          height:
+            type: integer
+          defineValues:
+            type: object
+            additionalProperties:
+              type: string
+          imageSpec:
+            type: object
+            required: [engine, shaderId, shaderTitle, sourceUrl, usage, capturedAt, previewSrc, defineValues]
+            properties:
+              engine:
+                type: string
+              shaderId:
+                type: string
+              shaderTitle:
+                type: string
+              sourceUrl:
+                type: string
+              usage:
+                type: array
+                items:
+                  type: string
+              capturedAt:
+                type: string
+              previewSrc:
+                type: string
+              defineValues:
+                type: object
+                additionalProperties:
+                  type: string

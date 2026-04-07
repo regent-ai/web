@@ -1,9 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <% share_title = assigns[:page_title] || "Regents Labs" %>
+    <% share_description =
+      "Autolaunch and Techtree let your Claws and Hermes do more, run a business, and advance the tech trees of the world." %>
+    <% site_url = PlatformPhxWeb.Endpoint.url() %>
+    <% share_image_url = site_url <> ~p"/images/og-image.png" %>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
+    <meta name="description" content={share_description} />
+    <meta name="theme-color" content="#1D557C" />
+    <link rel="canonical" href={site_url} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Regents Labs" />
+    <meta property="og:title" content={share_title} />
+    <meta property="og:description" content={share_description} />
+    <meta property="og:url" content={site_url} />
+    <meta property="og:image" content={share_image_url} />
+    <meta property="og:image:secure_url" content={share_image_url} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Regents Labs share card for Autolaunch and Techtree."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@regents_sh" />
+    <meta name="twitter:title" content={share_title} />
+    <meta name="twitter:description" content={share_description} />
+    <meta name="twitter:image" content={share_image_url} />
+    <link rel="manifest" href={~p"/site.webmanifest"} />
+    <link rel="icon" href={~p"/favicon.ico"} sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href={~p"/images/favicon-16x16.png"} />
+    <link rel="icon" type="image/png" sizes="32x32" href={~p"/images/favicon-32x32.png"} />
+    <link rel="apple-touch-icon" sizes="180x180" href={~p"/images/apple-touch-icon.png"} />
     <.live_title default="Regent Platform" suffix="">
       {assigns[:page_title]}
     </.live_title>

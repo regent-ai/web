@@ -119,8 +119,7 @@ type MaybeRequestProvider = {
   request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
 
-const ANIMATA_PASS_OPENSEA_BASE =
-  "https://opensea.io/item/base/0x2208aadbdecd47d3b4430b5b75a175f6d885d487";
+const REGENTS_CLUB_OPENSEA_BASE = "https://opensea.io/collection/regents-club";
 
 export function DashboardFallback({ config }: { config: DashboardConfig }) {
   return (
@@ -977,7 +976,7 @@ function RedeemSection({
             NFT with the USDC to receive 5 million $REGENT streamed over 7 days, as
             well as an{" "}
             <a
-              href="https://opensea.io/collection/animata-pass"
+              href={REGENTS_CLUB_OPENSEA_BASE}
               target="_blank"
               rel="noreferrer"
               className="font-bold text-[color:var(--link-color)] underline decoration-[color:var(--link-underline)] underline-offset-3"
@@ -1227,7 +1226,7 @@ function RedeemSection({
                 >
                   {isFetchingAccessPassHoldings ? "Loading..." : "Refresh"}
                 </Button>
-                <ActionLink href="https://opensea.io/collection/animata-pass" label="OpenSea" />
+                <ActionLink href={REGENTS_CLUB_OPENSEA_BASE} label="OpenSea" />
               </div>
             </div>
 
@@ -1246,7 +1245,7 @@ function RedeemSection({
                 accessPassHoldings.map((id) => (
                   <a
                     key={`animata-pass-${id}`}
-                    href={`${ANIMATA_PASS_OPENSEA_BASE}/${id}`}
+                    href={`${REGENTS_CLUB_OPENSEA_BASE}/${id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-sm"

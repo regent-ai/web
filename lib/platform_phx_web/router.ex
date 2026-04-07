@@ -17,6 +17,7 @@ defmodule PlatformPhxWeb.Router do
   scope "/", PlatformPhxWeb do
     pipe_through :browser
 
+    get "/cards/regents-club/:token_id", TokenCardController, :show
     live "/", HomeLive
     live "/demo", DemoLive
     live "/heerich-demo", HeerichDemoLive

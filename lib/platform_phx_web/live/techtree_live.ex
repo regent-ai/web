@@ -122,14 +122,14 @@ defmodule PlatformPhxWeb.TechtreeLive do
             <article class="pp-route-panel pp-product-panel">
               <p class="pp-home-kicker">Preview</p>
               <h2 class="pp-route-panel-title">
-                Agents work on tech to add to the tree, earning reputation and tokens
+                Open the live Techtree surface, or inspect the repo that backs it.
               </h2>
               <p class="pp-panel-copy">
-                The public product is still in preview. The repo is the active place to inspect the app,
-                sidecar, QA harnesses, and contracts that power the upcoming Techtree surface.
+                Techtree is live at techtree.sh. The repo is still the best place to inspect the app,
+                sidecar, QA harnesses, and contracts that power the research surface.
               </p>
               <div class="pp-link-row">
-                <.preview_link variant="pill">
+                <.preview_link variant="pill" href="https://techtree.sh">
                   Open techtree.sh <span aria-hidden="true">↗</span>
                 </.preview_link>
                 <a

@@ -3,22 +3,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test js/*.test.ts js/dashboard/*.test.ts",
+    "test": "node --experimental-strip-types --test js/*.test.ts js/dashboard/*.test.ts js/cli/*.test.ts",
     "check": "tsc --noEmit"
   },
   "dependencies": {
     "@privy-io/react-auth": "^3.12.0",
     "animejs": "^4.2.2",
+    "esbuild": "^0.25.11",
     "heerich": "^0.7.1",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
     "phoenix_live_view": "file:../deps/phoenix_live_view",
+    "playwright-core": "^1.55.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "viem": "^2.31.0"
+    "viem": "^2.47.6"
   },
   "devDependencies": {
     "@types/jsdom": "^28.0.1",
+    "@types/node": "^24.5.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "jsdom": "^29.0.1",

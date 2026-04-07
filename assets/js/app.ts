@@ -1,11 +1,11 @@
 import "phoenix_html";
-import { animate } from "animejs";
 import { Socket } from "phoenix";
 import { LiveSocket, type HooksOptions } from "phoenix_live_view";
 import { Heerich } from "heerich";
 import topbar from "../vendor/topbar.cjs";
 import { mountDashboardRoot, unmountDashboardRoot } from "./dashboard/root";
 import { mountShaderRoot, unmountShaderRoot } from "./shader/root";
+import { mountTokenCardRoot, unmountTokenCardRoot } from "./shader/token_card_root";
 import {
   hooks as regentHooks,
   installHeerich,
@@ -24,6 +24,7 @@ import { AnimatedHomeLogoSceneHook } from "./home_logo_scene";
 import { LogoStudiesHook } from "./logos";
 import { mountOverviewMode } from "./overview";
 import { mountColorModeToggle } from "./color_mode";
+import { VoxelBackgroundHook } from "./voxel_background";
 
 type HookContext = {
   el: Element;
@@ -113,6 +114,38 @@ function bugReportMotionReduced(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+const COLLAPSIBLE_CLOSE_MS = 240;
+
+function openCollapsiblePanel(panel: HTMLDivElement): void {
+  panel.hidden = false;
+  panel.dataset.panelState = "closed";
+
+  requestAnimationFrame(() => {
+    panel.dataset.panelState = "open";
+  });
+}
+
+function closeCollapsiblePanel(
+  panel: HTMLDivElement,
+  motionReduced: boolean,
+  closeTimer?: number,
+): number | undefined {
+  if (closeTimer) window.clearTimeout(closeTimer);
+
+  panel.dataset.panelState = "closed";
+
+  if (motionReduced) {
+    panel.hidden = true;
+    return undefined;
+  }
+
+  return window.setTimeout(() => {
+    if (panel.dataset.panelState === "closed") {
+      panel.hidden = true;
+    }
+  }, COLLAPSIBLE_CLOSE_MS);
+}
+
 function setDisclosureButtonState(
   button: HTMLButtonElement,
   expanded: boolean,
@@ -141,63 +174,33 @@ function mountDisclosurePanels(
     if (!panel) return;
 
     setDisclosureButtonState(button, false, collapsedLabel, expandedLabel);
+    panel.dataset.panelState = "closed";
     panel.hidden = true;
-    panel.style.height = "0px";
-    panel.style.opacity = "0";
-    panel.style.overflow = "hidden";
+    let closeTimer: number | undefined;
 
     const toggle = () => {
       const expanded = button.getAttribute("aria-expanded") === "true";
 
       if (expanded) {
         setDisclosureButtonState(button, false, collapsedLabel, expandedLabel);
-
-        if (bugReportMotionReduced()) {
-          panel.hidden = true;
-          panel.style.height = "0px";
-          panel.style.opacity = "0";
-          return;
-        }
-
-        const currentHeight = panel.getBoundingClientRect().height || panel.scrollHeight;
-        animate(panel, {
-          height: [`${currentHeight}px`, "0px"],
-          opacity: [1, 0],
-          duration: 220,
-          ease: "outQuad",
-          complete: () => {
-            panel.hidden = true;
-            panel.style.height = "0px";
-            panel.style.opacity = "0";
-          },
-        });
+        closeTimer = closeCollapsiblePanel(panel, bugReportMotionReduced(), closeTimer);
 
         return;
       }
 
       setDisclosureButtonState(button, true, collapsedLabel, expandedLabel);
-      panel.hidden = false;
+      if (closeTimer) {
+        window.clearTimeout(closeTimer);
+        closeTimer = undefined;
+      }
 
       if (bugReportMotionReduced()) {
-        panel.style.height = "auto";
-        panel.style.opacity = "1";
+        panel.hidden = false;
+        panel.dataset.panelState = "open";
         return;
       }
 
-      panel.style.height = "0px";
-      panel.style.opacity = "0";
-      const targetHeight = panel.scrollHeight;
-
-      animate(panel, {
-        height: ["0px", `${targetHeight}px`],
-        opacity: [0, 1],
-        duration: 280,
-        ease: "outQuart",
-        complete: () => {
-          panel.style.height = "auto";
-          panel.style.opacity = "1";
-        },
-      });
+      openCollapsiblePanel(panel);
     };
 
     button.addEventListener("click", toggle);
@@ -272,8 +275,7 @@ function mountSidebarCommunity(root: HTMLElement): () => void {
   const button = root.querySelector<HTMLButtonElement>("[data-community-toggle]");
   const panel = root.querySelector<HTMLDivElement>("[data-community-panel]");
   const icon = root.querySelector<HTMLElement>("[data-community-icon]");
-  const items = Array.from(root.querySelectorAll<HTMLElement>(".pp-sidebar-community-link"));
-  let animationToken = 0;
+  let closeTimer: number | undefined;
 
   if (!button || !panel) return () => undefined;
 
@@ -286,89 +288,31 @@ function mountSidebarCommunity(root: HTMLElement): () => void {
 
   const resetClosed = () => {
     panel.hidden = true;
-    panel.style.height = "0px";
-    panel.style.opacity = "0";
-    panel.style.overflow = "hidden";
-    items.forEach((item) => {
-      item.style.opacity = "0";
-      item.style.transform = "translateY(8px)";
-    });
+    panel.dataset.panelState = "closed";
   };
 
   syncExpanded(false);
   resetClosed();
 
   const open = () => {
-    animationToken += 1;
-    const token = animationToken;
     syncExpanded(true);
-    panel.hidden = false;
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = undefined;
+    }
 
     if (motionReduced) {
-      panel.style.height = "auto";
-      panel.style.opacity = "1";
-      items.forEach((item) => {
-        item.style.opacity = "1";
-        item.style.transform = "translateY(0)";
-      });
+      panel.hidden = false;
+      panel.dataset.panelState = "open";
       return;
     }
 
-    panel.style.height = "0px";
-    panel.style.opacity = "0";
-    const targetHeight = panel.scrollHeight;
-
-    animate(panel, {
-      height: ["0px", `${targetHeight}px`],
-      opacity: [0, 1],
-      duration: 280,
-      ease: "outQuad",
-      onComplete: () => {
-        if (token !== animationToken) return;
-        panel.style.height = "auto";
-        panel.style.opacity = "1";
-      },
-    });
-
-    animate(items, {
-      opacity: [0, 1],
-      translateY: [8, 0],
-      duration: 220,
-      delay: (_element, index) => 40 + index * 35,
-      ease: "outQuad",
-    });
+    openCollapsiblePanel(panel);
   };
 
   const close = () => {
-    animationToken += 1;
-    const token = animationToken;
     syncExpanded(false);
-
-    if (motionReduced) {
-      resetClosed();
-      return;
-    }
-
-    const currentHeight = panel.getBoundingClientRect().height || panel.scrollHeight;
-
-    animate(items, {
-      opacity: [1, 0],
-      translateY: [0, 8],
-      duration: 220,
-      delay: (_element, index) => 40 + (items.length - index - 1) * 35,
-      ease: "inQuad",
-    });
-
-    animate(panel, {
-      height: [`${currentHeight}px`, "0px"],
-      opacity: [1, 0],
-      duration: 280,
-      ease: "inQuad",
-      onComplete: () => {
-        if (token !== animationToken) return;
-        resetClosed();
-      },
-    });
+    closeTimer = closeCollapsiblePanel(panel, motionReduced, closeTimer);
   };
 
   const toggle = () => {
@@ -384,6 +328,7 @@ function mountSidebarCommunity(root: HTMLElement): () => void {
   button.addEventListener("click", toggle);
 
   return () => {
+    if (closeTimer) window.clearTimeout(closeTimer);
     button.removeEventListener("click", toggle);
   };
 }
@@ -427,6 +372,18 @@ const ColorModeToggleHook = {
   },
 };
 
+function mountStaticTokenCardRoots() {
+  document.querySelectorAll("[data-token-card-root]").forEach((el) => {
+    mountTokenCardRoot(el);
+  });
+}
+
+function unmountStaticTokenCardRoots() {
+  document.querySelectorAll("[data-token-card-root]").forEach((el) => {
+    unmountTokenCardRoot(el);
+  });
+}
+
 const csrfToken =
   document.querySelector("meta[name='csrf-token']")?.getAttribute("content") ?? "";
 
@@ -453,6 +410,7 @@ const hooks: HooksOptions = {
   ClipboardCopy: ClipboardCopyHook,
   OverviewMode: OverviewModeHook,
   ColorModeToggle: ColorModeToggleHook,
+  VoxelBackground: VoxelBackgroundHook,
 };
 
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -464,6 +422,14 @@ const liveSocket = new LiveSocket("/live", Socket, {
 topbar.config({ barColors: { 0: "#034568" }, shadowColor: "rgba(0, 0, 0, .18)" });
 window.addEventListener("phx:page-loading-start", () => topbar.show(200));
 window.addEventListener("phx:page-loading-stop", () => topbar.hide());
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mountStaticTokenCardRoots, { once: true });
+} else {
+  mountStaticTokenCardRoots();
+}
+
+window.addEventListener("beforeunload", unmountStaticTokenCardRoots);
 
 liveSocket.connect();
 

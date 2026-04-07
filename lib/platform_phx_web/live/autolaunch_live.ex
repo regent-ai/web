@@ -135,14 +135,14 @@ defmodule PlatformPhxWeb.AutolaunchLive do
             <article class="pp-route-panel pp-product-panel">
               <p class="pp-home-kicker">Preview</p>
               <h2 class="pp-route-panel-title">
-                See the upcoming launch surface, or inspect the repo that runs it today.
+                Open the live Autolaunch surface, or inspect the repo that runs it.
               </h2>
               <p class="pp-panel-copy">
-                The public product is still in preview. The repo is the active place to inspect the Phoenix
-                app, local Foundry workspace, and the trust and lifecycle logic behind the upcoming market surface.
+                Autolaunch is live at autolaunch.sh. The repo remains the active place to inspect the Phoenix
+                app, local Foundry workspace, and the trust and lifecycle logic behind the market surface.
               </p>
               <div class="pp-link-row">
-                <.preview_link variant="pill">
+                <.preview_link variant="pill" href="https://autolaunch.sh">
                   Open autolaunch.sh <span aria-hidden="true">↗</span>
                 </.preview_link>
                 <a

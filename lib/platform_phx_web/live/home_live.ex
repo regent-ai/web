@@ -88,6 +88,16 @@ defmodule PlatformPhxWeb.HomeLive do
         class="pp-home-shell rg-regent-theme-platform"
         phx-hook="HomeReveal"
       >
+        <div class="pp-voxel-background pp-voxel-background--home" aria-hidden="true">
+          <div
+            id="home-voxel-background"
+            class="pp-voxel-background-canvas"
+            phx-hook="VoxelBackground"
+            data-voxel-background="home"
+          >
+          </div>
+        </div>
+
         <main id="home-entry" class="pp-home-stage rg-app-shell" aria-label="Regent entry points">
           <header class="pp-home-header" data-home-header>
             <div class="pp-home-brand-lockup">

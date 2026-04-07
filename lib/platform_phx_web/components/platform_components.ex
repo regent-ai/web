@@ -135,29 +135,50 @@ defmodule PlatformPhxWeb.PlatformComponents do
 
   attr :variant, :string, default: "inline"
   attr :class, :string, default: nil
+  attr :href, :string, default: nil
+  attr :external, :boolean, default: true
   attr :tooltip, :string, default: "Access Soon"
   slot :inner_block, required: true
 
   def preview_link(assigns) do
     ~H"""
-    <span
-      tabindex="0"
-      role="link"
-      aria-disabled="true"
-      title={@tooltip}
-      data-preview-text={@tooltip}
-      class={[
-        "pp-preview-link",
-        @variant == "pill" && "pp-link-button pp-link-button-slim pp-preview-link-pill",
-        @variant == "pill-ghost" &&
-          "pp-link-button pp-link-button-ghost pp-link-button-slim pp-preview-link-pill",
-        @variant == "inline" && "pp-preview-link-inline",
-        @variant == "list" && "pp-preview-link-list",
-        @class
-      ]}
-    >
-      {render_slot(@inner_block)}
-    </span>
+    <%= if @href do %>
+      <a
+        href={@href}
+        target={if @external, do: "_blank", else: nil}
+        rel={if @external, do: "noreferrer", else: nil}
+        class={[
+          "pp-preview-link",
+          @variant == "pill" && "pp-link-button pp-link-button-slim pp-preview-link-pill",
+          @variant == "pill-ghost" &&
+            "pp-link-button pp-link-button-ghost pp-link-button-slim pp-preview-link-pill",
+          @variant == "inline" && "pp-preview-link-inline",
+          @variant == "list" && "pp-preview-link-list",
+          @class
+        ]}
+      >
+        {render_slot(@inner_block)}
+      </a>
+    <% else %>
+      <span
+        tabindex="0"
+        role="link"
+        aria-disabled="true"
+        title={@tooltip}
+        data-preview-text={@tooltip}
+        class={[
+          "pp-preview-link pp-preview-link-disabled",
+          @variant == "pill" && "pp-link-button pp-link-button-slim pp-preview-link-pill",
+          @variant == "pill-ghost" &&
+            "pp-link-button pp-link-button-ghost pp-link-button-slim pp-preview-link-pill",
+          @variant == "inline" && "pp-preview-link-inline",
+          @variant == "list" && "pp-preview-link-list",
+          @class
+        ]}
+      >
+        {render_slot(@inner_block)}
+      </span>
+    <% end %>
     """
   end
 

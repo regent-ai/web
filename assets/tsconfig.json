@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["phoenix_live_view", "react", "react-dom"]
+    "types": ["node", "phoenix_live_view", "react", "react-dom"]
   },
   "include": [
     "js/**/*",

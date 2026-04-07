@@ -73,6 +73,7 @@ export interface ShaderToyRuntimeOptions {
   fragmentSource: string;
   channels?: readonly (ShaderChannelTexture | null | undefined)[];
   devicePixelRatioCap?: number;
+  preserveDrawingBuffer?: boolean;
   debugLabel?: string;
   onError?: (message: string) => void;
 }
@@ -85,6 +86,7 @@ export interface ShaderToyRuntime {
   updateFragmentSource: (fragmentSource: string) => boolean;
   setPointer: (x: number, y: number) => void;
   setPointerDown: (isDown: boolean, x?: number, y?: number) => void;
+  renderFrameAt: (elapsedSeconds: number, deltaSeconds?: number) => void;
   captureFrame: (type?: string, quality?: number) => string | null;
 }
 
@@ -308,7 +310,7 @@ export function createShaderToyRuntime(
     depth: false,
     stencil: false,
     premultipliedAlpha: false,
-    preserveDrawingBuffer: false,
+    preserveDrawingBuffer: options.preserveDrawingBuffer ?? false,
     failIfMajorPerformanceCaveat: true,
     powerPreference: "high-performance",
   });
@@ -561,13 +563,16 @@ export function createShaderToyRuntime(
     }
   }
 
-  function render(nowMs: number) {
-    if (!running || destroyed || contextLost || !program || !uniforms) return;
+  function drawFrame(
+    elapsedSeconds: number,
+    deltaSeconds: number,
+    nowMs: number,
+    nowDate: Date,
+  ) {
+    if (destroyed || contextLost || !program || !uniforms) return;
 
     resize();
 
-    const elapsedSeconds = (nowMs - startedAtMs) / 1000;
-    const deltaSeconds = frame === 0 ? 0 : Math.max(0, (nowMs - lastFrameAtMs) / 1000);
     const frameRate = deltaSeconds > 0 ? 1 / deltaSeconds : 0;
     updateAdaptiveDpr(deltaSeconds);
 
@@ -584,7 +589,6 @@ export function createShaderToyRuntime(
     const mouseZ = pointer.hasClick ? (pointer.isDown ? clickX : -Math.abs(clickX)) : 0;
     const mouseW = pointer.hasClick ? (pointer.isDown ? clickY : -Math.abs(clickY)) : 0;
 
-    const nowDate = new Date();
     const daySeconds =
       nowDate.getHours() * 3600 +
       nowDate.getMinutes() * 60 +
@@ -650,6 +654,14 @@ export function createShaderToyRuntime(
 
     frame += 1;
     lastFrameAtMs = nowMs;
+  }
+
+  function render(nowMs: number) {
+    if (!running || destroyed || contextLost || !program || !uniforms) return;
+
+    const elapsedSeconds = (nowMs - startedAtMs) / 1000;
+    const deltaSeconds = frame === 0 ? 0 : Math.max(0, (nowMs - lastFrameAtMs) / 1000);
+    drawFrame(elapsedSeconds, deltaSeconds, nowMs, new Date());
     animationFrameId = requestAnimationFrame(render);
   }
 
@@ -820,6 +832,13 @@ export function createShaderToyRuntime(
     }
   }
 
+  function renderFrameAt(elapsedSeconds: number, deltaSeconds = 0) {
+    if (destroyed || contextLost || !program || !uniforms) return;
+    stop();
+    const nowMs = startedAtMs + Math.max(0, elapsedSeconds) * 1000;
+    drawFrame(Math.max(0, elapsedSeconds), Math.max(0, deltaSeconds), nowMs, new Date());
+  }
+
   resize();
 
   return {
@@ -830,6 +849,7 @@ export function createShaderToyRuntime(
     updateFragmentSource,
     setPointer,
     setPointerDown,
+    renderFrameAt,
     captureFrame,
   };
 }

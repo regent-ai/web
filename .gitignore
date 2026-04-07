@@ -10,6 +10,9 @@
 # Local editor / language server state.
 /.elixir_ls/
 
+# DS_store
+.DS_Store
+
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc/
 
@@ -45,6 +48,7 @@ platform_phx-*.tar
 /priv/static/images/*-[0-9a-f]*.jpeg
 /priv/static/images/*-[0-9a-f]*.jpg
 /priv/static/images/*-[0-9a-f]*.svg
+/priv/static/images/animata/
 /priv/static/regent/*-[0-9a-f]*.svg
 /priv/static/regent/sigils/*-[0-9a-f]*.svg
 /priv/static/robots-[0-9a-f]*.txt
@@ -61,3 +65,4 @@ npm-debug.log
 
 assets/esbuild-meta.json
 assets/.DS_Store
+shaders/animata/out/

@@ -136,12 +136,15 @@ defmodule PlatformPhxWeb.RegentCliCatalog do
         "Autolaunch and adjacent surfaces",
         [
           "regent autolaunch ...",
+          "regent shader list",
+          "regent shader export w3dfWN --out avatars/shard.png",
+          "regent shader export wXdfW4 --define RGB=vec3(8,1,4) --define GLOW=0.35 --out avatars/orb.png",
           "regent xmtp ...",
           "regent agentbook ...",
           "regent regent-staking ...",
           "regent gossipsub status"
         ],
-        "Use these when you move beyond Techtree into launch operations, messaging, registry lookups, staking, or transport inspection."
+        "Use these when you move beyond Techtree into launch operations, shader avatar export for ERC-8004 identities, messaging, registry lookups, staking, or transport inspection."
       )
     ]
   end

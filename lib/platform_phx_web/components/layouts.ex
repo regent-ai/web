@@ -17,6 +17,8 @@ defmodule PlatformPhxWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    assigns = assign(assigns, :nav_items, nav_items())
+
     ~H"""
     <div
       id="platform-layout-root"
@@ -56,41 +58,14 @@ defmodule PlatformPhxWeb.Layouts do
               </div>
 
               <nav class="mt-8 space-y-2" aria-label="Primary">
-                <.nav_link current={@active_nav == "overview"} href={~p"/overview"} label="Overview" />
-                <.nav_link
-                  current={@active_nav == "token-info"}
-                  href={~p"/token-info"}
-                  label="Platform Token"
-                />
-                <.nav_link
-                  current={@active_nav == "services"}
-                  href={~p"/services"}
-                  label="Services"
-                />
-                <.nav_link current={@active_nav == "techtree"} href={~p"/techtree"} label="Techtree" />
-                <.nav_link
-                  current={@active_nav == "autolaunch"}
-                  href={~p"/autolaunch"}
-                  label="Autolaunch"
-                />
-                <.nav_link
-                  current={@active_nav == "regent-cli"}
-                  href={~p"/regent-cli"}
-                  label="Regent CLI"
-                />
-                <.nav_link
-                  current={@active_nav == "bug-report"}
-                  href={~p"/bug-report"}
-                  label="Bug Report"
-                />
-                <.external_nav_link
-                  href="https://news.regents.sh"
-                  label="News"
-                />
-                <.external_nav_link
-                  href="https://github.com/orgs/regent-ai/repositories"
-                  label="Github"
-                />
+                <%= for item <- @nav_items do %>
+                  <%= if item.kind == :internal do %>
+                    <.nav_link current={@active_nav == item.key} href={item.href} label={item.label} />
+                  <% else %>
+                    <.external_nav_link href={item.href} label={item.label} />
+                  <% end %>
+                <% end %>
+
                 <div id="sidebar-community" class="pp-sidebar-community" phx-hook="SidebarCommunity">
                   <button
                     type="button"
@@ -122,6 +97,41 @@ defmodule PlatformPhxWeb.Layouts do
             "pp-platform-content-shell flex min-w-0 flex-1 flex-col rounded-[1.75rem] border border-[color:var(--border)] shadow-[0_26px_70px_-44px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]",
             @active_nav == "token-info" && "pp-platform-content-shell--token"
           ]}>
+            <div
+              data-background-suppress
+              class="pp-mobile-nav-shell lg:hidden"
+            >
+              <div class="pp-mobile-nav-header">
+                <.link navigate={~p"/"} class="pp-mobile-home-link">
+                  <span class="pp-mobile-home-mark">
+                    <img
+                      src={~p"/images/regents-logo.png"}
+                      alt=""
+                      class="h-8 w-8 rounded-xl object-cover"
+                    />
+                  </span>
+                  <span class="pp-mobile-home-copy">
+                    <span class="pp-mobile-home-eyebrow">{chrome_eyebrow(@active_nav)}</span>
+                    <span class="pp-mobile-home-title">Regents Home</span>
+                  </span>
+                </.link>
+              </div>
+
+              <nav class="pp-mobile-nav-rail" aria-label="Primary mobile navigation">
+                <%= for item <- @nav_items do %>
+                  <%= if item.kind == :internal do %>
+                    <.mobile_nav_link
+                      current={@active_nav == item.key}
+                      href={item.href}
+                      label={item.label}
+                    />
+                  <% else %>
+                    <.mobile_external_nav_link href={item.href} label={item.label} />
+                  <% end %>
+                <% end %>
+              </nav>
+            </div>
+
             <header
               data-background-suppress
               class="flex flex-wrap items-center justify-between gap-4 border-b border-[color:var(--border)] px-4 py-4 sm:px-5"
@@ -199,6 +209,42 @@ defmodule PlatformPhxWeb.Layouts do
       target="_blank"
       rel="noreferrer"
       class="flex items-center justify-between rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] px-4 py-3 text-sm text-[color:var(--muted-foreground)] transition hover:border-[color:var(--ring)] hover:text-[color:var(--foreground)]"
+    >
+      <span>{@label}</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+  attr :current, :boolean, default: false
+
+  defp mobile_nav_link(assigns) do
+    ~H"""
+    <.link
+      navigate={@href}
+      class={[
+        "pp-mobile-nav-link",
+        @current && "pp-mobile-nav-link-current"
+      ]}
+    >
+      <span>{@label}</span>
+      <span aria-hidden="true">→</span>
+    </.link>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, required: true
+
+  defp mobile_external_nav_link(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      target="_blank"
+      rel="noreferrer"
+      class="pp-mobile-nav-link"
     >
       <span>{@label}</span>
       <span aria-hidden="true">↗</span>
@@ -353,6 +399,20 @@ defmodule PlatformPhxWeb.Layouts do
   defp chrome_title("token-info"), do: "Agent economies"
   defp chrome_title("shader"), do: "Shader"
   defp chrome_title(_), do: "Regents Home"
+
+  defp nav_items do
+    [
+      %{kind: :internal, key: "overview", href: "/overview", label: "Overview"},
+      %{kind: :internal, key: "token-info", href: "/token-info", label: "Platform Token"},
+      %{kind: :internal, key: "services", href: "/services", label: "Services"},
+      %{kind: :internal, key: "techtree", href: "/techtree", label: "Techtree"},
+      %{kind: :internal, key: "autolaunch", href: "/autolaunch", label: "Autolaunch"},
+      %{kind: :internal, key: "regent-cli", href: "/regent-cli", label: "Regent CLI"},
+      %{kind: :internal, key: "bug-report", href: "/bug-report", label: "Bug Report"},
+      %{kind: :external, href: "https://news.regents.sh", label: "News"},
+      %{kind: :external, href: "https://github.com/orgs/regent-ai/repositories", label: "GitHub"}
+    ]
+  end
 
   attr :class, :string, default: nil
 
