@@ -97,6 +97,8 @@ node --experimental-strip-types shaders/animata/animata.ts render-card-images \
   --skip-existing
 ```
 
+The card PNG renderer now captures the live Phoenix token card page directly, so keep `mix phx.server` running on `http://127.0.0.1:4000` while this command runs.
+
 Build the OpenSea drop package from the rendered card images:
 
 ```bash

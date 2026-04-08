@@ -14,15 +14,21 @@ defmodule PlatformPhxWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :session_api do
+    plug :accepts, ["json"]
+    plug :fetch_session
+  end
+
   scope "/", PlatformPhxWeb do
     pipe_through :browser
 
     get "/cards/regents-club/:token_id", TokenCardController, :show
-    live "/", HomeLive
     live "/demo", DemoLive
     live "/heerich-demo", HeerichDemoLive
 
-    live_session :platform_app do
+    live_session :platform_app, session: {PlatformPhxWeb.LiveSessionData, :session, []} do
+      live "/", HomeLive
+      live "/agents/:slug", AgentSiteLive
       live "/overview", OverviewLive
       live "/logos", LogosLive
       live "/services", DashboardLive
@@ -54,6 +60,28 @@ defmodule PlatformPhxWeb.Router do
     get "/agentlaunch/auctions", Api.AgentLaunchController, :auctions
     get "/opensea", Api.OpenseaController, :index
     get "/opensea/redeem-stats", Api.OpenseaController, :redeem_stats
+    get "/agent-platform/templates", Api.AgentPlatformController, :templates
+    get "/agent-platform/resolve", Api.AgentPlatformController, :resolve
+    get "/agent-platform/agents/:slug/feed", Api.AgentPlatformController, :feed
+  end
+
+  scope "/api/auth/privy", PlatformPhxWeb.Api do
+    pipe_through :session_api
+
+    post "/session", PrivySessionController, :create
+    get "/profile", PrivySessionController, :show
+    delete "/session", PrivySessionController, :delete
+  end
+
+  scope "/api/agent-platform", PlatformPhxWeb.Api do
+    pipe_through :session_api
+
+    get "/wizard", AgentPlatformController, :wizard
+    post "/wizard/llm-billing", AgentPlatformController, :llm_billing
+    post "/wizard/companies", AgentPlatformController, :create_company
+    get "/agents/:slug/runtime", AgentPlatformController, :runtime
+    get "/credits", AgentPlatformController, :credits
+    post "/credits/checkout", AgentPlatformController, :checkout_credits
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

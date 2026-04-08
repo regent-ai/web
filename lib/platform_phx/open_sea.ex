@@ -10,7 +10,7 @@ defmodule PlatformPhx.OpenSea do
           | {:unavailable, String.t()}
           | {:external, :opensea, String.t()}
 
-  @collections ["animata", "regent-animata-ii", "animata-pass"]
+  @collections ["animata", "regent-animata-ii", "regents-club"]
   @redeem_collections %{"animata" => "animata", "regent-animata-ii" => "regent-animata-ii"}
   @max_token_count 1_000
   @page_limit 100
@@ -31,7 +31,7 @@ defmodule PlatformPhx.OpenSea do
          "address" => normalized_address,
          "animata1" => Map.get(holdings_by_collection, "animata", []),
          "animata2" => Map.get(holdings_by_collection, "regent-animata-ii", []),
-         "animataPass" => Map.get(holdings_by_collection, "animata-pass", [])
+         "animataPass" => Map.get(holdings_by_collection, "regents-club", [])
        }}
     end
   end

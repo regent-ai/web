@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Regent CLI Contract
   version: 0.1.0
-  description: Canonical local/runtime-backed CLI surface for shader export.
+  description: Canonical local/runtime-backed CLI surface for shader export and the Regents agent foundry.
 commands:
   - name: regent shader list
     summary: List the available shader avatars and their editable parameters.

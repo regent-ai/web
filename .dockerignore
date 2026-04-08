@@ -12,6 +12,9 @@ AGENTS.md
 priv/static/assets
 priv/static/cache_manifest.json
 priv/static/images
+!priv/static/images/animata
+!priv/static/images/animata/cards
+!priv/static/images/animata/cards/**
 priv/static/*.gz
 priv/static/favicon-*.ico
 priv/static/robots-*.txt

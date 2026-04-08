@@ -23,6 +23,7 @@ import {
   buildOpenSeaDropPackage,
   buildTokenCardManifest,
 } from "./build_drop.ts";
+import { analyzeCardImages } from "./analyze_cards.ts";
 import { uploadMediaToLighthouse, uploadMetadataToLighthouse, writeJsonFile } from "./lighthouse.ts";
 import { buildAnimataPlan } from "./plan.ts";
 import { renderTokenCardImage } from "./render_card.ts";
@@ -61,6 +62,12 @@ async function main() {
       return;
     case "render-card-images":
       await runRenderCardImages(rest);
+      return;
+    case "analyze-card-images":
+      await runAnalyzeCardImages(rest);
+      return;
+    case "rerender-card-outliers":
+      await runRerenderCardOutliers(rest);
       return;
     case "build-drop":
       await runBuildDrop(rest);
@@ -305,8 +312,10 @@ async function runRenderCardImages(args: string[]) {
     HERO_FRAME_SECONDS,
     "--hero-frame-seconds",
   );
+  const requestedTokenIds = parseTokenIdFilter(resolveFlag(args, "--token-ids"));
   const selectedEntries = tokenCardManifest.items.filter((entry) => {
     if (requestedFamilies && !requestedFamilies.has(entry.shaderId)) return false;
+    if (requestedTokenIds && !requestedTokenIds.has(entry.tokenId)) return false;
     if (start !== null && entry.tokenId < start) return false;
     if (end !== null && entry.tokenId > end) return false;
     return true;
@@ -353,6 +362,88 @@ async function runBuildDrop(args: string[]) {
   const outDir = resolveFlag(args, "--out-dir") ?? path.resolve(process.cwd(), "shaders/animata/out/opensea-drop");
   await buildOpenSeaDropPackage(plan, tokenCardManifest, staticRoot, outDir);
   writeJson({ ok: true, command: "build-drop", outDir, items: plan.editions.length });
+}
+
+async function runAnalyzeCardImages(args: string[]) {
+  const cardsDir =
+    resolveFlag(args, "--cards-dir") ??
+    path.resolve(process.cwd(), "priv/static/images/animata/cards");
+  const outPath =
+    resolveFlag(args, "--out") ??
+    path.resolve(process.cwd(), "shaders/animata/out/card-analysis.json");
+
+  const report = await analyzeCardImages(cardsDir, outPath);
+
+  writeJson({
+    ok: true,
+    command: "analyze-card-images",
+    cardsDir,
+    outPath,
+    analyzed: report.analyzed,
+    suspectedBlank: report.suspectedBlank.slice(0, 10).map(toSummaryRow),
+    suspectedWashed: report.suspectedWashed.slice(0, 10).map(toSummaryRow),
+    overallOutliers: report.overallOutliers.slice(0, 20).map(toSummaryRow),
+  });
+}
+
+async function runRerenderCardOutliers(args: string[]) {
+  const analysisPath =
+    resolveFlag(args, "--analysis") ??
+    path.resolve(process.cwd(), "shaders/animata/out/card-analysis.json");
+  const threshold = parseMinimumFloat(resolveFlag(args, "--threshold") ?? "100000", "--threshold");
+  const analysis = JSON.parse(await fs.readFile(analysisPath, "utf8")) as {
+    items: Array<{ tokenId: number; outlierScore: number }>;
+  };
+
+  const tokenIds = analysis.items
+    .filter((item) => item.outlierScore > threshold)
+    .map((item) => item.tokenId)
+    .sort((left, right) => left - right);
+
+  if (tokenIds.length === 0) {
+    writeJson({
+      ok: true,
+      command: "rerender-card-outliers",
+      analysisPath,
+      threshold,
+      rerendered: 0,
+      tokenIds: [],
+    });
+    return;
+  }
+
+  const syntheticArgs = [
+    "--card-manifest",
+    resolveFlag(args, "--card-manifest") ?? path.resolve(process.cwd(), "priv/static/animata/token-card-manifest.json"),
+    "--static-root",
+    resolveFlag(args, "--static-root") ?? path.resolve(process.cwd(), "priv/static"),
+    "--token-ids",
+    tokenIds.join(","),
+    "--workers",
+    resolveFlag(args, "--workers") ?? "4",
+  ];
+
+  const browserPath = resolveFlag(args, "--browser");
+  if (browserPath) {
+    syntheticArgs.push("--browser", browserPath);
+  }
+
+  const heroFrameSeconds = resolveFlag(args, "--hero-frame-seconds");
+  if (heroFrameSeconds) {
+    syntheticArgs.push("--hero-frame-seconds", heroFrameSeconds);
+  }
+
+  const width = resolveFlag(args, "--width");
+  if (width) {
+    syntheticArgs.push("--width", width);
+  }
+
+  const height = resolveFlag(args, "--height");
+  if (height) {
+    syntheticArgs.push("--height", height);
+  }
+
+  await runRenderCardImages(syntheticArgs);
 }
 
 async function runBuildMetadata(args: string[]) {
@@ -471,7 +562,9 @@ function usageText() {
     "node --experimental-strip-types shaders/animata/animata.ts render-all-families [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media] [--families radiant2,cubic] [--limit-per-family 1] [--workers 4] [--skip-existing]",
     "node --experimental-strip-types shaders/animata/animata.ts render-range --start 1 --end 1998 [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media] [--workers 4] [--skip-existing]",
     "node --experimental-strip-types shaders/animata/animata.ts build-card-manifest [--plan ./shaders/animata/out/plan.json] [--out ./priv/static/animata/token-card-manifest.json]",
-    "node --experimental-strip-types shaders/animata/animata.ts render-card-images [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--start 1] [--end 10] [--workers 4] [--skip-existing]",
+    "node --experimental-strip-types shaders/animata/animata.ts render-card-images [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--start 1] [--end 10] [--token-ids 8,70,1123] [--workers 4] [--skip-existing]",
+    "node --experimental-strip-types shaders/animata/animata.ts analyze-card-images [--cards-dir ./priv/static/images/animata/cards] [--out ./shaders/animata/out/card-analysis.json]",
+    "node --experimental-strip-types shaders/animata/animata.ts rerender-card-outliers [--analysis ./shaders/animata/out/card-analysis.json] [--threshold 100000] [--workers 4]",
     "node --experimental-strip-types shaders/animata/animata.ts build-drop [--plan ./shaders/animata/out/plan.json] [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--out-dir ./shaders/animata/out/opensea-drop]",
     "node --experimental-strip-types shaders/animata/animata.ts build-metadata --card-manifest ./priv/static/animata/token-card-manifest.json --site-url https://regents.sh [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/metadata]",
     "node --experimental-strip-types shaders/animata/animata.ts refresh-opensea --card-manifest ./priv/static/animata/token-card-manifest.json --token-id 1 [--api-key-env OPENSEA_API_KEY]",
@@ -522,9 +615,41 @@ function parseOptionalPositiveFloat(rawValue: string | null, flag: string) {
   return parsed;
 }
 
+function parseMinimumFloat(rawValue: string, flag: string) {
+  const parsed = Number.parseFloat(rawValue);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`${flag} must be zero or greater.`);
+  }
+  return parsed;
+}
+
 function parseWorkers(rawValue: string | null) {
   if (rawValue === null) return 1;
   return parseInteger(rawValue, "--workers");
+}
+
+function toSummaryRow(record: {
+  tokenId: number;
+  blankScore: number;
+  washScore: number;
+  outlierScore: number;
+  detailScore: number;
+  creamCoverage: number;
+  meanLuma: number;
+}) {
+  return {
+    tokenId: record.tokenId,
+    blankScore: roundMetric(record.blankScore),
+    washScore: roundMetric(record.washScore),
+    outlierScore: roundMetric(record.outlierScore),
+    detailScore: roundMetric(record.detailScore),
+    creamCoverage: roundMetric(record.creamCoverage),
+    meanLuma: roundMetric(record.meanLuma),
+  };
+}
+
+function roundMetric(value: number) {
+  return Number(value.toFixed(4));
 }
 
 function parseFloatFlag(rawValue: string, defaultValue: number, flag: string) {
@@ -544,6 +669,18 @@ function parseFamilyFilter(rawValue: string | null) {
     .filter((value) => value.length > 0);
 
   return values.length > 0 ? new Set(values) : null;
+}
+
+function parseTokenIdFilter(rawValue: string | null) {
+  if (!rawValue) return null;
+
+  const tokenIds = rawValue
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0)
+    .map((value) => parseInteger(value, "--token-ids"));
+
+  return new Set(tokenIds);
 }
 
 function buildFamilyFolderName(shaderTitle: string) {

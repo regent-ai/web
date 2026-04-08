@@ -34,9 +34,14 @@ import {
 } from "./requests";
 import { attemptWalletCancel } from "./tx-cancel";
 import type {
+  AgentRuntimeResponse,
+  AgentWizardResponse,
   AllowanceResponse,
   AvailabilityResponse,
   BasenamesConfigResponse,
+  ClaimedNameRecord,
+  CreditCheckoutResponse,
+  CurrentHumanProfileResponse,
   DashboardConfig,
   MintResponse,
   OpenSeaRedeemStatsResponse,
@@ -169,8 +174,172 @@ export function DashboardApp({ config }: { config: DashboardConfig }) {
     authenticated,
     login,
     logout,
+    user,
   } = usePrivy();
-  const { account, chainId, wallet, walletClient } = usePrivyWalletClient();
+  const { account, chainId, wallet, walletClient, privyId } = usePrivyWalletClient();
+  const [wizard, setWizard] = React.useState<AgentWizardResponse | null>(null);
+  const [wizardNotice, setWizardNotice] = React.useState<Notice | null>(null);
+  const [wizardOpen, setWizardOpen] = React.useState(false);
+  const [wizardBusy, setWizardBusy] = React.useState(false);
+  const [selectedClaimedLabel, setSelectedClaimedLabel] = React.useState<string | null>(null);
+  const [runtime, setRuntime] = React.useState<AgentRuntimeResponse["runtime"] | null>(null);
+  const [latestCompanySlug, setLatestCompanySlug] = React.useState<string | null>(null);
+  const autoOpenedWizardRef = React.useRef(false);
+  const sessionSignatureRef = React.useRef<string | null>(null);
+  const sessionWalletAddresses = React.useMemo(() => getWalletAddressesFromPrivyUser(user), [user]);
+
+  const loadWizard = React.useCallback(async () => {
+    try {
+      const payload = await fetchJson<AgentWizardResponse>(config.endpoints.wizard);
+      setWizard(payload);
+      setWizardNotice(null);
+      setSelectedClaimedLabel((current) => {
+        if (current && payload.available_claims.some((claim) => claim.label === current)) {
+          return current;
+        }
+        return payload.available_claims[0]?.label ?? null;
+      });
+    } catch (error) {
+      setWizard(null);
+      setWizardNotice({
+        tone: "error",
+        message: getErrorMessage(error, "Agent company wizard is unavailable right now."),
+      });
+    }
+  }, [config.endpoints.wizard]);
+
+  React.useEffect(() => {
+    if (!authenticated || !privyId) {
+      sessionSignatureRef.current = null;
+      autoOpenedWizardRef.current = false;
+      setWizard(null);
+      setWizardOpen(false);
+      setLatestCompanySlug(null);
+      setRuntime(null);
+      return;
+    }
+
+    const nextSignature = JSON.stringify({
+      privyId,
+      account,
+      wallets: sessionWalletAddresses,
+    });
+
+    if (sessionSignatureRef.current === nextSignature) {
+      void loadWizard();
+      return;
+    }
+
+    sessionSignatureRef.current = nextSignature;
+
+    void fetchJson<CurrentHumanProfileResponse>(config.endpoints.privySession, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        privyUserId: privyId,
+        walletAddress: account,
+        walletAddresses: sessionWalletAddresses,
+        displayName: getPrivyDisplayName(user),
+      }),
+    })
+      .then(() => loadWizard())
+      .catch((error) => {
+        setWizardNotice({
+          tone: "error",
+          message: getErrorMessage(error, "Could not start your Regents session."),
+        });
+      });
+  }, [
+    account,
+    authenticated,
+    config.endpoints.privySession,
+    loadWizard,
+    privyId,
+    sessionWalletAddresses,
+    user,
+  ]);
+
+  React.useEffect(() => {
+    if (!wizard?.eligible || autoOpenedWizardRef.current) return;
+    autoOpenedWizardRef.current = true;
+    setWizardOpen(true);
+  }, [wizard?.eligible]);
+
+  const connectLlmBilling = React.useCallback(async () => {
+    setWizardBusy(true);
+    try {
+      await fetchJson<{ ok: boolean }>(config.endpoints.wizardLlmBilling, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+      });
+      await loadWizard();
+    } catch (error) {
+      setWizardNotice({
+        tone: "error",
+        message: getErrorMessage(error, "Stripe LLM billing could not be connected."),
+      });
+    } finally {
+      setWizardBusy(false);
+    }
+  }, [config.endpoints.wizardLlmBilling, loadWizard]);
+
+  const loadRuntime = React.useCallback(
+    async (slug: string) => {
+      try {
+        const payload = await fetchJson<AgentRuntimeResponse>(
+          config.endpoints.wizardCompanies.replace(/\/wizard\/companies$/, `/agents/${slug}/runtime`),
+        );
+        setRuntime(payload.runtime);
+      } catch (error) {
+        setWizardNotice({
+          tone: "error",
+          message: getErrorMessage(error, "Runtime status could not be loaded."),
+        });
+      }
+    },
+    [config.endpoints.wizardCompanies],
+  );
+
+  const createCompany = React.useCallback(async () => {
+    if (!selectedClaimedLabel) return;
+    setWizardBusy(true);
+    try {
+      const payload = await fetchJson<AgentRuntimeResponse>(config.endpoints.wizardCompanies, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ claimedLabel: selectedClaimedLabel }),
+      });
+      setLatestCompanySlug(payload.agent.slug);
+      setRuntime(payload.runtime);
+      await loadWizard();
+      void loadRuntime(payload.agent.slug);
+    } catch (error) {
+      setWizardNotice({
+        tone: "error",
+        message: getErrorMessage(error, "Company provisioning did not finish."),
+      });
+    } finally {
+      setWizardBusy(false);
+    }
+  }, [config.endpoints.wizardCompanies, loadRuntime, loadWizard, selectedClaimedLabel]);
+
+  const handleClaimedNameCreated = React.useCallback(
+    async (claimedName: ClaimedNameRecord) => {
+      setSelectedClaimedLabel(claimedName.label);
+      await loadWizard();
+      setWizardOpen(true);
+    },
+    [loadWizard],
+  );
 
   return (
     <div className="space-y-8">
@@ -183,9 +352,13 @@ export function DashboardApp({ config }: { config: DashboardConfig }) {
         privyReady={privyReady}
         onConnect={() => login()}
         onDisconnect={() => {
+          sessionSignatureRef.current = null;
+          void fetchJson(config.endpoints.privySession, { method: "DELETE" }).catch(() => {});
           void logout();
         }}
       />
+
+      {wizardNotice ? <InlineNotice notice={wizardNotice} /> : null}
 
       <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)]">
         <RedeemSection
@@ -208,8 +381,30 @@ export function DashboardApp({ config }: { config: DashboardConfig }) {
           authenticated={authenticated}
           privyReady={privyReady}
           onConnect={() => login()}
+          onClaimedNameCreated={handleClaimedNameCreated}
         />
       </div>
+
+      {wizardOpen && wizard ? (
+        <AgentCompanyWizard
+          wizard={wizard}
+          busy={wizardBusy}
+          selectedClaimedLabel={selectedClaimedLabel}
+          latestCompanySlug={latestCompanySlug}
+          runtime={runtime}
+          onSelectClaimedLabel={setSelectedClaimedLabel}
+          onConnectBilling={() => void connectLlmBilling()}
+          onCreateCompany={() => void createCompany()}
+          onClose={() => setWizardOpen(false)}
+          onJumpToNameClaim={() => {
+            setWizardOpen(false);
+            document.getElementById("services-name-claim")?.scrollIntoView({
+              behavior: prefersReducedMotion() ? "auto" : "smooth",
+              block: "start",
+            });
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -574,7 +769,7 @@ function RedeemSection({
     try {
       const url = new URL(config.endpoints.opensea, window.location.origin);
       url.searchParams.set("address", connectedAccount);
-      url.searchParams.set("collection", "animata-pass");
+      url.searchParams.set("collection", "regents-club");
 
       const data = await fetchJson<OpenSeaResponse>(url.toString(), { cache: "no-store" });
       if (requestId !== accessPassRequestRef.current) return;
@@ -1036,7 +1231,7 @@ function RedeemSection({
           <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
             Price: 80 USDC. Receive 5M REGENT streamed over 7 days.
           </div>
-          <div className="grid gap-4 pt-2 sm:grid-cols-[minmax(13.5rem,1.15fr)_minmax(0,0.85fr)]">
+          <div className="grid gap-4 pt-2">
             <LabelBlock label="Source collection">
               <div className="relative min-w-0">
                 <select
@@ -1244,7 +1439,7 @@ function RedeemSection({
               ) : (
                 accessPassHoldings.map((id) => (
                   <a
-                    key={`animata-pass-${id}`}
+                    key={`regents-club-${id}`}
                     href={`${REGENTS_CLUB_OPENSEA_BASE}/${id}`}
                     target="_blank"
                     rel="noreferrer"
@@ -1386,6 +1581,7 @@ function NamesSection({
   authenticated,
   privyReady,
   onConnect,
+  onClaimedNameCreated,
 }: {
   config: DashboardConfig;
   account: `0x${string}` | null;
@@ -1395,6 +1591,7 @@ function NamesSection({
   authenticated: boolean;
   privyReady: boolean;
   onConnect: () => void;
+  onClaimedNameCreated?: (claimedName: ClaimedNameRecord) => void;
 }) {
   const [basenamesConfig, setBasenamesConfig] =
     React.useState<BasenamesConfigResponse | null>(null);
@@ -1713,8 +1910,15 @@ function NamesSection({
       }
       claimDialogDismissedRef.current = false;
       await reloadNamesData();
+      onClaimedNameCreated?.({
+        label: result.label,
+        fqdn: result.fqdn,
+        ens_fqdn: result.ensFqdn ?? null,
+        claimed_at: new Date().toISOString(),
+        in_use: false,
+      });
     },
-    [reloadNamesData],
+    [onClaimedNameCreated, reloadNamesData],
   );
 
   const closeClaimDialog = React.useCallback(() => {
@@ -1955,7 +2159,10 @@ function NamesSection({
   ]);
 
   return (
-    <section className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]">
+    <section
+      id="services-name-claim"
+      className="space-y-6 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--card)_96%,var(--background)_4%)] p-6 shadow-[0_24px_70px_-48px_color-mix(in_oklch,var(--brand-ink)_55%,transparent)]"
+    >
       <div className="space-y-3">
         <p className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
           Name Claim
@@ -2251,8 +2458,225 @@ function NamesSection({
             </div>
           ) : null}
         </OverlayCard>
-      ) : null}
+  ) : null}
     </section>
+  );
+}
+
+function AgentCompanyWizard({
+  wizard,
+  busy,
+  selectedClaimedLabel,
+  latestCompanySlug,
+  runtime,
+  onSelectClaimedLabel,
+  onConnectBilling,
+  onCreateCompany,
+  onClose,
+  onJumpToNameClaim,
+}: {
+  wizard: AgentWizardResponse;
+  busy: boolean;
+  selectedClaimedLabel: string | null;
+  latestCompanySlug: string | null;
+  runtime: AgentRuntimeResponse["runtime"] | null;
+  onSelectClaimedLabel: (value: string | null) => void;
+  onConnectBilling: () => void;
+  onCreateCompany: () => void;
+  onClose: () => void;
+  onJumpToNameClaim: () => void;
+}) {
+  const selectedClaim =
+    wizard.available_claims.find((claim) => claim.label === selectedClaimedLabel) ?? null;
+  const totalEligibleTokens =
+    wizard.collections.animata1.length +
+    wizard.collections.animata2.length +
+    wizard.collections.animataPass.length;
+
+  if (latestCompanySlug && runtime) {
+    return (
+      <OverlayCard title="Paperclip-Hermes company created" onClose={onClose}>
+        <div className="space-y-4">
+          <p className="text-sm leading-6 text-[color:var(--muted-foreground)]">
+            Your company is live at{" "}
+            <span className="text-[color:var(--foreground)]">{latestCompanySlug}.regents.sh</span>.
+            The public page is ready, the Sprite trial is active for the first day, and
+            Hermes is set to{" "}
+            <span className="text-[color:var(--foreground)]">{runtime.hermes.model}</span>.
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MetricTile
+              label="Sprite"
+              value={runtime.sprite.name ?? "--"}
+              copy={runtime.sprite.metering_status}
+            />
+            <MetricTile
+              label="Paperclip"
+              value={runtime.paperclip.company_id ?? "--"}
+              copy={runtime.paperclip.status}
+            />
+            <MetricTile
+              label="Hermes"
+              value={runtime.hermes.agent_id ?? "--"}
+              copy={runtime.hermes.adapter_type}
+            />
+            <MetricTile
+              label="Credits"
+              value={formatUsdCents(runtime.sprite.credit_balance_usd_cents)}
+              copy="Sprite runtime balance"
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-end gap-3">
+            <ActionLink href={`https://${latestCompanySlug}.regents.sh`} label="Open public page" />
+            <Button onClick={onClose} tone="primary">
+              Close
+            </Button>
+          </div>
+        </div>
+      </OverlayCard>
+    );
+  }
+
+  return (
+    <OverlayCard title="Create a Paperclip-Hermes company" onClose={onClose}>
+      <div className="space-y-5">
+        <p className="text-sm leading-6 text-[color:var(--muted-foreground)]">
+          Eligible wallets can launch one Regents-owned Sprite, one private Paperclip
+          company, and one Hermes worker behind a public `slug.regents.sh` page. The
+          first day of Sprite runtime is free. After that, the runtime uses Regents
+          prepaid credits. Hermes usage is billed straight to you through Stripe with
+          no Regents margin.
+        </p>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <MetricTile
+            label="Eligibility"
+            value={String(totalEligibleTokens)}
+            copy="Matching holdings across the three current collections"
+          />
+          <MetricTile
+            label="LLM default"
+            value={wizard.llm_billing.model_default}
+            copy="Hermes default model"
+          />
+          <MetricTile
+            label="Available claims"
+            value={String(wizard.available_claims.length)}
+            copy="Unused Regents names ready for activation"
+          />
+          <MetricTile
+            label="Sprite credits"
+            value={formatUsdCents(wizard.credits.total_balance_usd_cents)}
+            copy="Current prepaid runtime balance"
+          />
+        </div>
+
+        {wizard.available_claims.length === 0 ? (
+          <div className="space-y-3">
+            <InlineNotice
+              notice={{
+                tone: "info",
+                message:
+                  "You need at least one unused name claim before Regents can create the company.",
+              }}
+            />
+            <div className="flex justify-end">
+              <Button onClick={onJumpToNameClaim} tone="primary">
+                Claim a Regents name
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <LabelBlock label="Unused Regents name">
+              <div className="relative min-w-0">
+                <select
+                  value={selectedClaimedLabel ?? ""}
+                  onChange={(event) =>
+                    onSelectClaimedLabel(event.currentTarget.value || null)
+                  }
+                  className="w-full min-w-0 appearance-none rounded-xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_84%,transparent)] px-4 py-3 pr-12 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--ring)]"
+                >
+                  {wizard.available_claims.map((claim) => (
+                    <option key={claim.label} value={claim.label}>
+                      {claim.label}.regent.eth
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[color:var(--muted-foreground)]">
+                  <svg viewBox="0 0 16 16" className="h-4 w-4 fill-none stroke-current">
+                    <path
+                      d="m4.25 6.5 3.75 3.75 3.75-3.75"
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                      strokeLinejoin="miter"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </LabelBlock>
+
+            {selectedClaim ? (
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:color-mix(in_oklch,var(--background)_78%,transparent)] px-4 py-3 text-sm text-[color:var(--muted-foreground)]">
+                <p>
+                  Public page:{" "}
+                  <span className="text-[color:var(--foreground)]">
+                    {selectedClaim.label}.regents.sh
+                  </span>
+                </p>
+                <p className="mt-2">
+                  Identity:{" "}
+                  <span className="text-[color:var(--foreground)]">
+                    {selectedClaim.ens_fqdn ?? `${selectedClaim.label}.regent.eth`}
+                  </span>
+                </p>
+              </div>
+            ) : null}
+
+            {!wizard.llm_billing.connected ? (
+              <div className="space-y-3">
+                <InlineNotice
+                  notice={{
+                    tone: "info",
+                    message:
+                      "Stripe LLM billing must be connected before Regents provisions the Sprite and Hermes runtime.",
+                  }}
+                />
+                <div className="flex justify-end">
+                  <Button disabled={busy} onClick={onConnectBilling} tone="primary">
+                    {busy ? "Connecting..." : "Connect Stripe LLM billing"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <InlineNotice
+                  notice={{
+                    tone: "success",
+                    message:
+                      "Stripe LLM billing is connected. Regents will provision the Sprite, Paperclip company, Hermes worker, and subdomain in one step.",
+                  }}
+                />
+                <div className="flex flex-wrap justify-end gap-3">
+                  <Button onClick={onClose} tone="secondary">
+                    Not now
+                  </Button>
+                  <Button
+                    disabled={!selectedClaimedLabel || busy}
+                    onClick={onCreateCompany}
+                    tone="primary"
+                  >
+                    {busy ? "Provisioning..." : "Create company"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </OverlayCard>
   );
 }
 
@@ -2751,6 +3175,64 @@ function toSubnameFqdn(label: string, parentName: string) {
   return `${label.trim().toLowerCase()}.${parentName.trim().toLowerCase()}`;
 }
 
+function getWalletAddressesFromPrivyUser(privyUser: unknown): `0x${string}`[] {
+  if (!privyUser || typeof privyUser !== "object") return [];
+
+  const candidateAddresses = new Set<string>();
+  const directWalletAddress =
+    "wallet" in privyUser &&
+    privyUser.wallet &&
+    typeof privyUser.wallet === "object" &&
+    "address" in privyUser.wallet
+      ? privyUser.wallet.address
+      : null;
+
+  if (typeof directWalletAddress === "string") {
+    candidateAddresses.add(directWalletAddress);
+  }
+
+  const linkedAccounts =
+    "linkedAccounts" in privyUser && Array.isArray(privyUser.linkedAccounts)
+      ? privyUser.linkedAccounts
+      : [];
+
+  linkedAccounts.forEach((account) => {
+    if (
+      account &&
+      typeof account === "object" &&
+      typeof account.type === "string" &&
+      (account.type === "wallet" ||
+        account.type === "wallet_account" ||
+        account.type === "ethereum") &&
+      typeof account.address === "string"
+    ) {
+      candidateAddresses.add(account.address);
+    }
+  });
+
+  return Array.from(candidateAddresses).filter((address): address is `0x${string}` =>
+    isAddress(address),
+  );
+}
+
+function getPrivyDisplayName(privyUser: unknown): string | null {
+  if (!privyUser || typeof privyUser !== "object") return null;
+
+  if ("email" in privyUser && privyUser.email && typeof privyUser.email === "object") {
+    const email =
+      "address" in privyUser.email ? (privyUser.email.address as unknown) : null;
+    if (typeof email === "string" && email.trim()) return email.trim();
+  }
+
+  if ("twitter" in privyUser && privyUser.twitter && typeof privyUser.twitter === "object") {
+    const username =
+      "username" in privyUser.twitter ? (privyUser.twitter.username as unknown) : null;
+    if (typeof username === "string" && username.trim()) return username.trim();
+  }
+
+  return null;
+}
+
 function createMintMessage(
   address: string,
   fqdn: string,
@@ -2783,6 +3265,10 @@ function formatRegentRounded2(amount: bigint) {
 
 function formatCount(value: number) {
   return value.toLocaleString();
+}
+
+function formatUsdCents(amountUsdCents: number) {
+  return `$${(amountUsdCents / 100).toFixed(2)}`;
 }
 
 function getErrorMessage(error: unknown, fallback: string) {

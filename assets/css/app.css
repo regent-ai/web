@@ -3525,6 +3525,7 @@ html[data-color-mode="dark"] .pp-preview-link {
     block-size: clamp(16.5rem, 46vw, 19rem);
     min-block-size: clamp(16.5rem, 46vw, 19rem);
   }
+}
 
 @media (max-width: 700px) {
   .pp-entry-card,

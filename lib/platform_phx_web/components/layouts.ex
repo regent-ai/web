@@ -404,7 +404,7 @@ defmodule PlatformPhxWeb.Layouts do
     [
       %{kind: :internal, key: "overview", href: "/overview", label: "Overview"},
       %{kind: :internal, key: "token-info", href: "/token-info", label: "Platform Token"},
-      %{kind: :internal, key: "services", href: "/services", label: "Services"},
+      %{kind: :internal, key: "services", href: "/services", label: "Foundry"},
       %{kind: :internal, key: "techtree", href: "/techtree", label: "Techtree"},
       %{kind: :internal, key: "autolaunch", href: "/autolaunch", label: "Autolaunch"},
       %{kind: :internal, key: "regent-cli", href: "/regent-cli", label: "Regent CLI"},

@@ -7,12 +7,10 @@ defmodule PlatformPhxWeb.DashboardLive do
   @spec mount(map(), map(), Phoenix.LiveView.Socket.t()) ::
           {:ok, Phoenix.LiveView.Socket.t()}
   def mount(_params, _session, socket) do
-    config = dashboard_config()
-
     {:ok,
      socket
      |> assign(:page_title, "Services")
-     |> assign(:dashboard_config, Jason.encode!(config))}
+     |> assign(:dashboard_config, Jason.encode!(dashboard_config()))}
   end
 
   @impl true
@@ -46,12 +44,12 @@ defmodule PlatformPhxWeb.DashboardLive do
               id="services-wallet-console"
               class="pp-route-panel pp-product-panel pp-route-panel-span pp-dashboard-console-shell"
             >
-              <p class="pp-home-kicker">Interactive wallet console</p>
-              <h2 class="pp-route-panel-title">
-                Wallet auth, Animata redemption, and Regent identity claims live here.
+              <p class="pp-home-kicker">Wallet console</p>
+              <h2 class="pp-route-panel-title max-w-[18ch]">
+                Setup your Agent Company
               </h2>
-              <p class="pp-panel-copy">
-                Connect your wallet here to redeem an Animata pass, claim your Regent identity, and continue into the live services that need a signed account.
+              <p class="pp-panel-copy max-w-[34rem]">
+                Sign in to claim an agent name and redeem Animata Passes.
               </p>
 
               <noscript>
@@ -82,13 +80,19 @@ defmodule PlatformPhxWeb.DashboardLive do
       baseRpcUrl: RuntimeConfig.base_rpc_url(),
       redeemerAddress: RuntimeConfig.redeemer_address(),
       endpoints: %{
+        privySession: "/api/auth/privy/session",
+        privyProfile: "/api/auth/privy/profile",
         basenamesConfig: "/api/basenames/config",
         basenamesAllowance: "/api/basenames/allowance",
         basenamesAvailability: "/api/basenames/availability",
         basenamesOwned: "/api/basenames/owned",
         basenamesRecent: "/api/basenames/recent",
         basenamesMint: "/api/basenames/mint",
-        autolaunchAuctions: "/api/agentlaunch/auctions",
+        wizard: "/api/agent-platform/wizard",
+        wizardLlmBilling: "/api/agent-platform/wizard/llm-billing",
+        wizardCompanies: "/api/agent-platform/wizard/companies",
+        credits: "/api/agent-platform/credits",
+        creditsCheckout: "/api/agent-platform/credits/checkout",
         opensea: "/api/opensea",
         openseaRedeemStats: "/api/opensea/redeem-stats"
       }

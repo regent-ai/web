@@ -7,6 +7,7 @@ defmodule PlatformPhxWeb.ApiErrors do
           {:bad_request, String.t()}
           | {:not_found, String.t()}
           | {:forbidden, String.t()}
+          | {:unauthorized, String.t()}
           | {:conflict, String.t()}
           | {:payment_required, String.t()}
           | {:unavailable, String.t()}
@@ -20,6 +21,7 @@ defmodule PlatformPhxWeb.ApiErrors do
   def error(conn, {:bad_request, message}), do: render_status(conn, :bad_request, message)
   def error(conn, {:not_found, message}), do: render_status(conn, :not_found, message)
   def error(conn, {:forbidden, message}), do: render_status(conn, :forbidden, message)
+  def error(conn, {:unauthorized, message}), do: render_status(conn, :unauthorized, message)
   def error(conn, {:conflict, message}), do: render_status(conn, :conflict, message)
   def error(conn, {:payment_required, message}), do: render_status(conn, 402, message)
   def error(conn, {:unavailable, message}), do: render_status(conn, :service_unavailable, message)

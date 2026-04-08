@@ -66,7 +66,7 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "aria-label=\"Research\""
     assert html =~ "aria-label=\"Revenue\""
     assert html =~ "aria-label=\"Open\""
-    assert html =~ "href=\"/overview\""
+    assert html =~ "href=\"/services\""
     assert html =~ "platform-footer-voxel-classic"
 
     assert html =~
@@ -134,7 +134,7 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
   test "services route renders", %{conn: conn} do
     {:ok, _services, html} = live(conn, "/services")
 
-    assert html =~ "Services and Docs"
+    assert html =~ "Services"
     assert html =~ "Services"
     assert html =~ "https://news.regents.sh"
     assert html =~ "Community"
@@ -152,24 +152,30 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "platform-footer-voxel-classic"
     assert html =~ "services-wallet-console"
     assert html =~ "dashboard-root"
+    assert html =~ "Setup your Agent Company"
+    assert html =~ "Sign in to claim an agent name and redeem Animata Passes."
+    assert html =~ "/api/auth/privy/session"
+    assert html =~ "/api/agent-platform/wizard"
+    assert html =~ "/api/agent-platform/wizard/companies"
     assert html =~ "/api/opensea/redeem-stats"
-    assert html =~ "Connect your wallet here to redeem an Animata pass"
+    assert html =~ "/api/opensea"
+  end
 
-    refute html =~
-             "A growing platform for all documentation and actions to take part in the Regents ecosystem."
+  test "subdomain root renders the published agent page", %{
+    conn: %Plug.Conn{} = conn
+  } do
+    conn = %{conn | host: "solidity.regents.sh"}
+    {:ok, _home, html} = live(conn, "/")
 
-    refute html =~ "Use Regents from one LiveView surface"
-    refute html =~ "LiveView first"
-    refute html =~ "What is ready in this deployment"
-    refute html =~ "Agent economies"
-    refute html =~ "Bug report board"
-    refute html =~ "Privy login is configured for this environment."
-    refute html =~ "Open ledger"
-
-    refute html =~
-             "The surrounding page stays readable and useful without JavaScript. The wallet console below is the only browser-owned section because wallet auth and signing need client-side control."
-
-    refute html =~ "platform-dashboard-surface"
+    assert html =~ "Solidity Regent"
+    assert html =~ "Regents Agent"
+    assert html =~ "Service Menu"
+    assert html =~ "Public Work Feed"
+    assert html =~ "solidity.agent.base.eth"
+    assert html =~ "solidity.regent.eth"
+    assert html =~ "Private Sprite + Paperclip company managed by Regents"
+    assert html =~ "Treasury Router audit"
+    refute html =~ "https://solidity.sprites.dev"
   end
 
   test "shader route renders", %{conn: conn} do

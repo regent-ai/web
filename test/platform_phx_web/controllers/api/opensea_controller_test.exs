@@ -69,7 +69,7 @@ defmodule PlatformPhxWeb.Api.OpenseaControllerTest do
     Application.put_env(:platform_phx, :opensea_fake_responses, %{
       request_url(@address, "animata") => {:status, 500, %{"error" => "boom"}},
       request_url(@address, "regent-animata-ii") => {:ok, %{"nfts" => [], "next" => nil}},
-      request_url(@address, "animata-pass") => {:ok, %{"nfts" => [], "next" => nil}}
+      request_url(@address, "regents-club") => {:ok, %{"nfts" => [], "next" => nil}}
     })
 
     response =

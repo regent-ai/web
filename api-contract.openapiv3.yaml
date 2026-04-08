@@ -303,6 +303,245 @@ paths:
                 $ref: '#/components/schemas/SecurityReportResponse'
         '400':
           $ref: '#/components/responses/StatusMessage400'
+  /api/agent-platform/templates:
+    get:
+      operationId: agentPlatformTemplates
+      responses:
+        '200':
+          description: Built-in agent template catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, templates]
+                properties:
+                  ok: {type: boolean}
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentTemplate'
+  /api/agent-platform/resolve:
+    get:
+      operationId: agentPlatformResolveHost
+      parameters:
+        - name: host
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Published agent matching a host
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, host, agent]
+                properties:
+                  ok: {type: boolean}
+                  host: {type: string}
+                  agent:
+                    $ref: '#/components/schemas/PublicAgentRecord'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '404':
+          $ref: '#/components/responses/StatusMessage404'
+  /api/agent-platform/agents/{slug}/feed:
+    get:
+      operationId: agentPlatformFeed
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public feed for one published agent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, agent, feed]
+                properties:
+                  ok: {type: boolean}
+                  agent:
+                    type: object
+                    required: [slug, name]
+                    properties:
+                      slug: {type: string}
+                      name: {type: string}
+                  feed:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentArtifact'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '404':
+          $ref: '#/components/responses/StatusMessage404'
+  /api/auth/privy/session:
+    post:
+      operationId: privySessionCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivySessionRequest'
+      responses:
+        '200':
+          description: Session established for a Privy human
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentHumanProfile'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+    delete:
+      operationId: privySessionDelete
+      responses:
+        '200':
+          description: Session cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: {type: boolean}
+  /api/auth/privy/profile:
+    get:
+      operationId: privySessionProfile
+      responses:
+        '200':
+          description: Current signed-in human and foundry state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentHumanProfile'
+  /api/agent-platform/wizard:
+    get:
+      operationId: agentPlatformWizard
+      responses:
+        '200':
+          description: Wizard state for the current signed-in human
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentWizardResponse'
+        '502':
+          $ref: '#/components/responses/StatusMessage502'
+        '503':
+          $ref: '#/components/responses/StatusMessage503'
+  /api/agent-platform/wizard/llm-billing:
+    post:
+      operationId: agentPlatformWizardConnectLlmBilling
+      responses:
+        '200':
+          description: Direct Stripe LLM billing marked as connected for the current human
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, llm_billing]
+                properties:
+                  ok: {type: boolean}
+                  llm_billing:
+                    $ref: '#/components/schemas/LlmBillingStatus'
+        '401':
+          $ref: '#/components/responses/StatusMessage401'
+  /api/agent-platform/wizard/companies:
+    post:
+      operationId: agentPlatformWizardCreateCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentCompanyRequest'
+      responses:
+        '200':
+          description: Customer company provisioned and published from the selected claimed name
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, agent, runtime]
+                properties:
+                  ok: {type: boolean}
+                  agent:
+                    $ref: '#/components/schemas/AgentRecord'
+                  runtime:
+                    $ref: '#/components/schemas/AgentRuntime'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '401':
+          $ref: '#/components/responses/StatusMessage401'
+        '402':
+          $ref: '#/components/responses/StatusMessage402'
+        '403':
+          $ref: '#/components/responses/StatusMessage403'
+        '409':
+          $ref: '#/components/responses/StatusMessage409'
+  /api/agent-platform/agents/{slug}/runtime:
+    get:
+      operationId: agentPlatformRuntime
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Runtime status for one owned agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentRuntimeResponse'
+        '401':
+          $ref: '#/components/responses/StatusMessage401'
+        '404':
+          $ref: '#/components/responses/StatusMessage404'
+  /api/agent-platform/credits:
+    get:
+      operationId: agentPlatformCredits
+      responses:
+        '200':
+          description: Current Sprite credit summary for the signed-in human
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, credits]
+                properties:
+                  ok: {type: boolean}
+                  credits:
+                    $ref: '#/components/schemas/SpriteCreditSummary'
+        '401':
+          $ref: '#/components/responses/StatusMessage401'
+  /api/agent-platform/credits/checkout:
+    post:
+      operationId: agentPlatformCreditsCheckout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpriteCreditCheckoutRequest'
+      responses:
+        '200':
+          description: Sprite runtime credits added to one owned company
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpriteCreditCheckoutResponse'
+        '400':
+          $ref: '#/components/responses/StatusMessage400'
+        '401':
+          $ref: '#/components/responses/StatusMessage401'
+        '404':
+          $ref: '#/components/responses/StatusMessage404'
   /api/opensea:
     get:
       operationId: openSeaHoldings
@@ -317,7 +556,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [animata, regent-animata-ii, animata-pass]
+            enum: [animata, regent-animata-ii, regents-club]
       responses:
         '200':
           description: OpenSea holdings for supported collections
@@ -347,6 +586,12 @@ components:
             $ref: '#/components/schemas/StatusMessage'
     StatusMessage403:
       description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusMessage'
+    StatusMessage401:
+      description: Unauthorized
       content:
         application/json:
           schema:
@@ -646,6 +891,342 @@ components:
         progressPercent: {type: integer}
         notes: {type: [string, 'null']}
         uniswapUrl: {type: [string, 'null']}
+    PrivySessionRequest:
+      type: object
+      required: [privyUserId]
+      properties:
+        privyUserId: {type: string}
+        walletAddress: {type: [string, 'null']}
+        walletAddresses:
+          type: array
+          items: {type: string}
+        displayName: {type: [string, 'null']}
+        role: {type: [string, 'null']}
+    ClaimedName:
+      type: object
+      required: [label, fqdn, claimed_at, in_use]
+      properties:
+        label: {type: string}
+        fqdn: {type: string}
+        ens_fqdn: {type: [string, 'null']}
+        claimed_at: {type: string, format: date-time}
+        in_use: {type: boolean}
+    LlmBillingStatus:
+      type: object
+      required: [status, connected, provider, model_default, margin_bps]
+      properties:
+        status: {type: string}
+        connected: {type: boolean}
+        provider: {type: string}
+        external_ref: {type: [string, 'null']}
+        model_default: {type: string}
+        margin_bps: {type: integer}
+    CurrentHuman:
+      type: object
+      required: [id, privy_user_id, wallet_addresses, role, llm_billing]
+      properties:
+        id: {type: integer}
+        privy_user_id: {type: string}
+        wallet_address: {type: [string, 'null']}
+        wallet_addresses:
+          type: array
+          items: {type: string}
+        display_name: {type: [string, 'null']}
+        role: {type: string}
+        llm_billing:
+          $ref: '#/components/schemas/LlmBillingStatus'
+    CurrentHumanProfile:
+      type: object
+      required: [ok, authenticated, claimed_names, agents]
+      properties:
+        ok: {type: boolean}
+        authenticated: {type: boolean}
+        human:
+          oneOf:
+            - $ref: '#/components/schemas/CurrentHuman'
+            - type: 'null'
+        claimed_names:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimedName'
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentRecord'
+    SpriteCreditSummary:
+      type: object
+      required: [total_balance_usd_cents, trialing_companies, paid_companies, paused_companies, companies]
+      properties:
+        total_balance_usd_cents: {type: integer}
+        trialing_companies: {type: integer}
+        paid_companies: {type: integer}
+        paused_companies: {type: integer}
+        companies:
+          type: array
+          items:
+            type: object
+            required: [slug, name, runtime_status, sprite_metering_status, sprite_credit_balance_usd_cents, sprite_free_until]
+            properties:
+              slug: {type: string}
+              name: {type: string}
+              runtime_status: {type: string}
+              sprite_metering_status: {type: string}
+              sprite_credit_balance_usd_cents: {type: integer}
+              sprite_free_until: {type: [string, 'null'], format: date-time}
+    AgentWizardResponse:
+      type: object
+      required: [ok, authenticated, wallet_address, eligible, collections, claimed_names, available_claims, llm_billing, credits, owned_companies]
+      properties:
+        ok: {type: boolean}
+        authenticated: {type: boolean}
+        wallet_address: {type: [string, 'null']}
+        eligible: {type: boolean}
+        collections:
+          type: object
+          required: [animata1, animata2, animataPass]
+          properties:
+            animata1:
+              type: array
+              items: {type: integer}
+            animata2:
+              type: array
+              items: {type: integer}
+            animataPass:
+              type: array
+              items: {type: integer}
+        claimed_names:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimedName'
+        available_claims:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimedName'
+        llm_billing:
+          $ref: '#/components/schemas/LlmBillingStatus'
+        credits:
+          $ref: '#/components/schemas/SpriteCreditSummary'
+        owned_companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentRecord'
+    AgentTemplateService:
+      type: object
+      required: [slug, name, summary, price_label, payment_rail, public_result_default, sort_order]
+      properties:
+        slug: {type: string}
+        name: {type: string}
+        summary: {type: string}
+        price_label: {type: string}
+        payment_rail: {type: string}
+        public_result_default: {type: boolean}
+        sort_order: {type: integer}
+    AgentTemplate:
+      type: object
+      required: [key, public_name, category, summary, hero_statement, what_it_does, services, connection_defaults, runtime_defaults]
+      properties:
+        key: {type: string}
+        public_name: {type: string}
+        category: {type: string}
+        summary: {type: string}
+        hero_statement: {type: string}
+        what_it_does:
+          type: array
+          items: {type: string}
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentTemplateService'
+        connection_defaults:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentConnection'
+        runtime_defaults:
+          $ref: '#/components/schemas/AgentRuntimeDefaults'
+    AgentRuntimeDefaults:
+      type: object
+      required: [sprite_owner, sprite_service_name, paperclip_deployment_mode, paperclip_http_port, hermes_adapter_type, hermes_model, hermes_persist_session, hermes_toolsets, paperclip_company_purpose, hermes_worker_role, recommended_network_domains, checkpoint_moments]
+      properties:
+        sprite_owner: {type: string}
+        sprite_service_name: {type: string}
+        paperclip_deployment_mode: {type: string}
+        paperclip_http_port: {type: integer}
+        hermes_adapter_type: {type: string}
+        hermes_model: {type: string}
+        hermes_persist_session: {type: boolean}
+        hermes_toolsets:
+          type: array
+          items: {type: string}
+        paperclip_company_purpose: {type: string}
+        hermes_worker_role: {type: string}
+        recommended_network_domains:
+          type: array
+          items: {type: string}
+        checkpoint_moments:
+          type: array
+          items: {type: string}
+    AgentSubdomain:
+      type: object
+      required: [hostname, active]
+      properties:
+        hostname: {type: string}
+        active: {type: boolean}
+    AgentService:
+      type: object
+      required: [slug, name, summary, price_label, payment_rail, delivery_mode, public_result_default, sort_order]
+      properties:
+        slug: {type: string}
+        name: {type: string}
+        summary: {type: string}
+        price_label: {type: string}
+        payment_rail: {type: string}
+        delivery_mode: {type: string}
+        public_result_default: {type: boolean}
+        sort_order: {type: integer}
+    AgentConnection:
+      type: object
+      required: [kind, status]
+      properties:
+        kind: {type: string}
+        status: {type: string}
+        display_name: {type: [string, 'null']}
+        external_ref: {type: [string, 'null']}
+        details:
+          type: object
+          additionalProperties: true
+        connected_at: {type: [string, 'null'], format: date-time}
+    AgentArtifact:
+      type: object
+      required: [title, summary, visibility, published_at]
+      properties:
+        title: {type: string}
+        summary: {type: string}
+        url: {type: [string, 'null']}
+        visibility: {type: string}
+        published_at: {type: string, format: date-time}
+    PublicAgentRecord:
+      type: object
+      required: [id, template_key, name, slug, claimed_label, basename_fqdn, ens_fqdn, status, public_summary, services, connections, feed]
+      properties:
+        id: {type: integer}
+        owner_human_id: {type: [integer, 'null']}
+        template_key: {type: string}
+        name: {type: string}
+        slug: {type: string}
+        claimed_label: {type: string}
+        basename_fqdn: {type: string}
+        ens_fqdn: {type: string}
+        status: {type: string}
+        public_summary: {type: string}
+        hero_statement: {type: [string, 'null']}
+        wallet_address: {type: [string, 'null']}
+        published_at: {type: [string, 'null'], format: date-time}
+        subdomain:
+          oneOf:
+            - $ref: '#/components/schemas/AgentSubdomain'
+            - type: 'null'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentService'
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentConnection'
+        feed:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentArtifact'
+    AgentRecord:
+      allOf:
+        - $ref: '#/components/schemas/PublicAgentRecord'
+        - type: object
+          required: [sprite_name, sprite_url, paperclip_url, paperclip_company_id, paperclip_agent_id, runtime_status, checkpoint_status, stripe_llm_billing_status, sprite_free_until, sprite_credit_balance_usd_cents, sprite_metering_status]
+          properties:
+            sprite_name: {type: [string, 'null']}
+            sprite_url: {type: [string, 'null']}
+            paperclip_url: {type: [string, 'null']}
+            paperclip_company_id: {type: [string, 'null']}
+            paperclip_agent_id: {type: [string, 'null']}
+            runtime_status: {type: string}
+            checkpoint_status: {type: string}
+            stripe_llm_billing_status: {type: string}
+            stripe_llm_external_ref: {type: [string, 'null']}
+            sprite_free_until: {type: [string, 'null'], format: date-time}
+            sprite_credit_balance_usd_cents: {type: integer}
+            sprite_metering_status: {type: string}
+    CreateAgentCompanyRequest:
+      type: object
+      required: [claimedLabel]
+      properties:
+        claimedLabel: {type: string}
+    AgentRuntime:
+      type: object
+      required: [sprite, paperclip, hermes, checkpoint, llm_billing]
+      properties:
+        sprite:
+          type: object
+          required: [name, url, status, owner, free_until, credit_balance_usd_cents, metering_status]
+          properties:
+            name: {type: [string, 'null']}
+            url: {type: [string, 'null']}
+            status: {type: string}
+            owner: {type: string}
+            free_until: {type: [string, 'null'], format: date-time}
+            credit_balance_usd_cents: {type: integer}
+            metering_status: {type: string}
+        paperclip:
+          type: object
+          required: [url, company_id, status, deployment_mode, http_port]
+          properties:
+            url: {type: [string, 'null']}
+            company_id: {type: [string, 'null']}
+            status: {type: string}
+            deployment_mode: {type: string}
+            http_port: {type: integer}
+        hermes:
+          type: object
+          required: [agent_id, status, adapter_type, model, persist_session, toolsets]
+          properties:
+            agent_id: {type: [string, 'null']}
+            status: {type: string}
+            adapter_type: {type: string}
+            model: {type: string}
+            persist_session: {type: boolean}
+            toolsets:
+              type: array
+              items: {type: string}
+        checkpoint:
+          type: object
+          required: [status]
+          properties:
+            status: {type: string}
+        llm_billing:
+          $ref: '#/components/schemas/LlmBillingStatus'
+    AgentRuntimeResponse:
+      type: object
+      required: [ok, agent, runtime]
+      properties:
+        ok: {type: boolean}
+        agent:
+          $ref: '#/components/schemas/AgentRecord'
+        runtime:
+          $ref: '#/components/schemas/AgentRuntime'
+    SpriteCreditCheckoutRequest:
+      type: object
+      required: [slug, amountUsdCents]
+      properties:
+        slug: {type: string}
+        amountUsdCents: {type: integer}
+    SpriteCreditCheckoutResponse:
+      type: object
+      required: [ok, agent, credits]
+      properties:
+        ok: {type: boolean}
+        agent:
+          $ref: '#/components/schemas/AgentRecord'
+        credits:
+          $ref: '#/components/schemas/SpriteCreditSummary'
     OpenSeaHoldings:
       type: object
       required: [address, animata1, animata2, animataPass]

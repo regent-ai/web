@@ -37,7 +37,7 @@ defmodule PlatformPhx.OpenSeaTest do
         {:ok, %{"nfts" => [%{"identifier" => "1"}], "next" => nil}},
       request_url(@address, "regent-animata-ii") =>
         {:ok, %{"nfts" => [%{"identifier" => "7"}], "next" => nil}},
-      request_url(@address, "animata-pass") =>
+      request_url(@address, "regents-club") =>
         {:ok, %{"nfts" => [%{"identifier" => "4"}], "next" => nil}}
     })
 
