@@ -28,10 +28,13 @@ import { buildAnimataPlan } from "./plan.ts";
 import { renderTokenCardImage } from "./render_card.ts";
 import { renderEditionLoop } from "./render_loop.ts";
 import type {
+  AnimataEditionPlan,
   AnimataMetadataManifest,
   AnimataPlanDocument,
+  AnimataRenderRecord,
   AnimataRenderManifest,
   AnimataTokenCardManifest,
+  AnimataTokenCardManifestEntry,
 } from "./types.ts";
 
 async function main() {
@@ -156,9 +159,13 @@ async function runRenderAllFamilies(args: string[]) {
   const renderManifestPath = resolveFlag(args, "--render-manifest") ?? path.resolve(process.cwd(), "shaders/animata/out/render-manifest.json");
   const outDir = resolveFlag(args, "--out-dir") ?? path.resolve(process.cwd(), "shaders/animata/out/media");
   const browserPath = resolveFlag(args, "--browser");
+  const workers = parseWorkers(resolveFlag(args, "--workers"));
+  const skipExisting = hasFlag(args, "--skip-existing");
   const requestedFamilies = parseFamilyFilter(resolveFlag(args, "--families"));
   const limitPerFamily = parseOptionalPositiveInteger(resolveFlag(args, "--limit-per-family"), "--limit-per-family");
-  const rendered = [];
+  const existingManifest =
+    skipExisting ? await readJsonIfExists<AnimataRenderManifest>(renderManifestPath) : null;
+  const existingItemsByTokenId = new Map(existingManifest?.items.map((item) => [item.tokenId, item]) ?? []);
   const familyCounts = new Map<string, number>();
   const familyFolders = new Map<string, string>();
   const selectedEditions = plan.editions.filter((edition) => {
@@ -172,18 +179,26 @@ async function runRenderAllFamilies(args: string[]) {
   });
   familyCounts.clear();
 
-  for (const [index, edition] of selectedEditions.entries()) {
+  const results = await runWorkerPool(selectedEditions, workers, async (edition, index, total) => {
     const currentCount = familyCounts.get(edition.shaderId) ?? 0;
     const familyFolderName = buildFamilyFolderName(edition.shaderTitle);
     const familyOutDir = path.join(outDir, familyFolderName);
-    writeProgress(index + 1, selectedEditions.length, edition);
-    const record = await renderEditionLoop(edition, resolveLoopOptions(args, familyOutDir, browserPath));
-    rendered.push(record);
+    writeProgress(index + 1, total, edition);
+    const outcome = await renderOrReuseEdition(
+      edition,
+      resolveLoopOptions(args, familyOutDir, browserPath),
+      existingItemsByTokenId,
+      skipExisting,
+    );
     familyCounts.set(edition.shaderId, currentCount + 1);
     familyFolders.set(edition.shaderId, familyOutDir);
-  }
+    return outcome;
+  });
 
-  if (rendered.length === 0) {
+  const rendered = results.filter((result) => !result.skipped).map((result) => result.record);
+  const skippedRecords = results.filter((result) => result.skipped).map((result) => result.record);
+
+  if (rendered.length === 0 && skippedRecords.length === 0) {
     if (requestedFamilies) {
       throw new Error(
         `No editions matched --families ${[...requestedFamilies].join(",")}. Use shader IDs from the plan, such as radiant2 or cubic.`,
@@ -193,11 +208,13 @@ async function runRenderAllFamilies(args: string[]) {
     throw new Error("The long-run renderer did not find any editions to render.");
   }
 
-  const manifest = await mergeRenderManifest(renderManifestPath, rendered);
+  const manifest = await mergeRenderManifest(renderManifestPath, [...rendered, ...skippedRecords]);
   writeJson({
     ok: true,
     command: "render-all-families",
     rendered: rendered.length,
+    skipped: skippedRecords.length,
+    workers,
     families: [...familyCounts.entries()]
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([shaderId, count]) => ({
@@ -221,18 +238,37 @@ async function runRenderRange(args: string[]) {
   const renderManifestPath = resolveFlag(args, "--render-manifest") ?? path.resolve(process.cwd(), "shaders/animata/out/render-manifest.json");
   const outDir = resolveFlag(args, "--out-dir") ?? path.resolve(process.cwd(), "shaders/animata/out/media");
   const browserPath = resolveFlag(args, "--browser");
-  const rendered = [];
+  const workers = parseWorkers(resolveFlag(args, "--workers"));
+  const skipExisting = hasFlag(args, "--skip-existing");
+  const existingManifest =
+    skipExisting ? await readJsonIfExists<AnimataRenderManifest>(renderManifestPath) : null;
+  const existingItemsByTokenId = new Map(existingManifest?.items.map((item) => [item.tokenId, item]) ?? []);
   const selectedEditions = plan.editions.filter(
     (edition) => edition.tokenId >= start && edition.tokenId <= end,
   );
 
-  for (const [index, edition] of selectedEditions.entries()) {
-    writeProgress(index + 1, selectedEditions.length, edition);
-    rendered.push(await renderEditionLoop(edition, resolveLoopOptions(args, outDir, browserPath)));
-  }
+  const results = await runWorkerPool(selectedEditions, workers, async (edition, index, total) => {
+    writeProgress(index + 1, total, edition);
+    return renderOrReuseEdition(
+      edition,
+      resolveLoopOptions(args, outDir, browserPath),
+      existingItemsByTokenId,
+      skipExisting,
+    );
+  });
 
-  const manifest = await mergeRenderManifest(renderManifestPath, rendered);
-  writeJson({ ok: true, command: "render-range", rendered: rendered.length, renderManifestPath, items: manifest.items.length });
+  const rendered = results.filter((result) => !result.skipped).map((result) => result.record);
+  const skippedRecords = results.filter((result) => result.skipped).map((result) => result.record);
+  const manifest = await mergeRenderManifest(renderManifestPath, [...rendered, ...skippedRecords]);
+  writeJson({
+    ok: true,
+    command: "render-range",
+    rendered: rendered.length,
+    skipped: skippedRecords.length,
+    workers,
+    renderManifestPath,
+    items: manifest.items.length,
+  });
 }
 
 async function runBuildCardManifest(args: string[]) {
@@ -260,6 +296,8 @@ async function runRenderCardImages(args: string[]) {
   const end = parseOptionalPositiveInteger(resolveFlag(args, "--end"), "--end");
   const requestedFamilies = parseFamilyFilter(resolveFlag(args, "--families"));
   const browserPath = resolveFlag(args, "--browser");
+  const workers = parseWorkers(resolveFlag(args, "--workers"));
+  const skipExisting = hasFlag(args, "--skip-existing");
   const width = parseInteger(resolveFlag(args, "--width") ?? `${TOKEN_CARD_WIDTH}`, "--width");
   const height = parseInteger(resolveFlag(args, "--height") ?? `${TOKEN_CARD_HEIGHT}`, "--height");
   const heroFrameSeconds = parseFloatFlag(
@@ -267,14 +305,21 @@ async function runRenderCardImages(args: string[]) {
     HERO_FRAME_SECONDS,
     "--hero-frame-seconds",
   );
-  let rendered = 0;
+  const selectedEntries = tokenCardManifest.items.filter((entry) => {
+    if (requestedFamilies && !requestedFamilies.has(entry.shaderId)) return false;
+    if (start !== null && entry.tokenId < start) return false;
+    if (end !== null && entry.tokenId > end) return false;
+    return true;
+  });
 
-  for (const entry of tokenCardManifest.items) {
-    if (requestedFamilies && !requestedFamilies.has(entry.shaderId)) continue;
-    if (start !== null && entry.tokenId < start) continue;
-    if (end !== null && entry.tokenId > end) continue;
-
+  const results = await runWorkerPool(selectedEntries, workers, async (entry, index, total) => {
     const outPath = path.join(staticRoot, entry.imagePath.replace(/^\/+/, ""));
+    writeCardProgress(index + 1, total, entry);
+
+    if (skipExisting && await fileExists(outPath)) {
+      return { skipped: true };
+    }
+
     await renderTokenCardImage(entry, {
       width,
       height,
@@ -282,13 +327,19 @@ async function runRenderCardImages(args: string[]) {
       outPath,
       browserPath,
     });
-    rendered += 1;
-  }
+
+    return { skipped: false };
+  });
+
+  const rendered = results.filter((result) => !result.skipped).length;
+  const skipped = results.filter((result) => result.skipped).length;
 
   writeJson({
     ok: true,
     command: "render-card-images",
     rendered,
+    skipped,
+    workers,
     staticRoot,
     width,
     height,
@@ -417,10 +468,10 @@ function usageText() {
     "node --experimental-strip-types shaders/animata/animata.ts plan [--seed regents-club-v1] [--out ./shaders/animata/out/plan.json]",
     "node --experimental-strip-types shaders/animata/animata.ts render-one [--token-id 1] [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media]",
     "node --experimental-strip-types shaders/animata/animata.ts render-family-samples [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/family-samples]",
-    "node --experimental-strip-types shaders/animata/animata.ts render-all-families [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media] [--families radiant2,cubic] [--limit-per-family 1]",
-    "node --experimental-strip-types shaders/animata/animata.ts render-range --start 1 --end 1998 [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media]",
+    "node --experimental-strip-types shaders/animata/animata.ts render-all-families [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media] [--families radiant2,cubic] [--limit-per-family 1] [--workers 4] [--skip-existing]",
+    "node --experimental-strip-types shaders/animata/animata.ts render-range --start 1 --end 1998 [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/media] [--workers 4] [--skip-existing]",
     "node --experimental-strip-types shaders/animata/animata.ts build-card-manifest [--plan ./shaders/animata/out/plan.json] [--out ./priv/static/animata/token-card-manifest.json]",
-    "node --experimental-strip-types shaders/animata/animata.ts render-card-images [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--start 1] [--end 10]",
+    "node --experimental-strip-types shaders/animata/animata.ts render-card-images [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--start 1] [--end 10] [--workers 4] [--skip-existing]",
     "node --experimental-strip-types shaders/animata/animata.ts build-drop [--plan ./shaders/animata/out/plan.json] [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--out-dir ./shaders/animata/out/opensea-drop]",
     "node --experimental-strip-types shaders/animata/animata.ts build-metadata --card-manifest ./priv/static/animata/token-card-manifest.json --site-url https://regents.sh [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/metadata]",
     "node --experimental-strip-types shaders/animata/animata.ts refresh-opensea --card-manifest ./priv/static/animata/token-card-manifest.json --token-id 1 [--api-key-env OPENSEA_API_KEY]",
@@ -445,6 +496,10 @@ function resolveFlag(args: string[], flag: string) {
   return args[index + 1] ?? null;
 }
 
+function hasFlag(args: string[], flag: string) {
+  return args.includes(flag);
+}
+
 function parseInteger(rawValue: string, flag: string) {
   const parsed = Number.parseInt(rawValue, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -465,6 +520,11 @@ function parseOptionalPositiveFloat(rawValue: string | null, flag: string) {
     throw new Error(`${flag} must be a positive number.`);
   }
   return parsed;
+}
+
+function parseWorkers(rawValue: string | null) {
+  if (rawValue === null) return 1;
+  return parseInteger(rawValue, "--workers");
 }
 
 function parseFloatFlag(rawValue: string, defaultValue: number, flag: string) {
@@ -497,6 +557,10 @@ function writeProgress(index: number, total: number, edition: AnimataPlanDocumen
   process.stderr.write(
     `[${index}/${total}] token ${edition.tokenId} ${edition.shaderId} ${edition.loopDurationSeconds.toFixed(3)}s\n`,
   );
+}
+
+function writeCardProgress(index: number, total: number, entry: AnimataTokenCardManifestEntry) {
+  process.stderr.write(`[${index}/${total}] card ${entry.tokenId} ${entry.shaderId}\n`);
 }
 
 async function loadPlan(explicitPath: string | null): Promise<AnimataPlanDocument> {
@@ -561,6 +625,61 @@ async function mergeRenderManifest(
   return manifest;
 }
 
+async function renderOrReuseEdition(
+  edition: AnimataEditionPlan,
+  options: ReturnType<typeof resolveLoopOptions>,
+  existingItemsByTokenId: Map<number, AnimataRenderRecord>,
+  skipExisting: boolean,
+) {
+  const posterPath = path.join(options.outDir, edition.posterFileName);
+  const videoPath = path.join(options.outDir, edition.videoFileName);
+
+  if (
+    skipExisting &&
+    await fileExists(posterPath) &&
+    await fileExists(videoPath)
+  ) {
+    return {
+      skipped: true,
+      record:
+        existingItemsByTokenId.get(edition.tokenId) ??
+        synthesizeRenderRecord(edition, options, posterPath, videoPath),
+    };
+  }
+
+  return {
+    skipped: false,
+    record: await renderEditionLoop(edition, options),
+  };
+}
+
+function synthesizeRenderRecord(
+  edition: AnimataEditionPlan,
+  options: ReturnType<typeof resolveLoopOptions>,
+  posterPath: string,
+  videoPath: string,
+): AnimataRenderRecord {
+  const durationSeconds = options.durationSeconds ?? edition.loopDurationSeconds;
+  const frameCount = Math.max(1, Math.round(options.fps * durationSeconds));
+
+  return {
+    tokenId: edition.tokenId,
+    shaderId: edition.shaderId,
+    signature: edition.signature,
+    width: options.width,
+    height: options.height,
+    fps: options.fps,
+    durationSeconds,
+    frameCount,
+    loopSeamDelta: 0,
+    loopAdjacentDelta: 0,
+    loopSeamRatio: 0,
+    loopClosureScore: 0,
+    posterPath,
+    videoPath,
+  };
+}
+
 async function readJsonIfExists<T>(filePath: string) {
   try {
     return JSON.parse(await fs.readFile(filePath, "utf8")) as T;
@@ -570,6 +689,43 @@ async function readJsonIfExists<T>(filePath: string) {
     }
     throw error;
   }
+}
+
+async function fileExists(filePath: string) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function runWorkerPool<T, TResult>(
+  items: readonly T[],
+  workers: number,
+  task: (item: T, index: number, total: number) => Promise<TResult>,
+) {
+  if (items.length === 0) {
+    return [] as TResult[];
+  }
+
+  const total = items.length;
+  const workerCount = Math.max(1, Math.min(workers, total));
+  const results: TResult[] = [];
+  let nextIndex = 0;
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (true) {
+        const index = nextIndex;
+        nextIndex += 1;
+        if (index >= total) return;
+        results.push(await task(items[index]!, index, total));
+      }
+    }),
+  );
+
+  return results;
 }
 
 function writeJson(value: unknown) {

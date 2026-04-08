@@ -176,7 +176,6 @@ body,
 .pp-platform-content-shell,
 .pp-home-briefing,
 .pp-route-panel,
-.pp-dashboard-hero,
 .pp-demo-hero,
 .pp-demo-panel,
 .pp-sidebar-shell,
@@ -525,6 +524,17 @@ html[data-color-mode="dark"] .pp-voxel-background-svg {
   min-block-size: 100%;
 }
 
+@media (min-width: 1024px) {
+  .pp-mobile-nav-shell {
+    display: none;
+  }
+
+  .pp-sidebar-column {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .pp-sidebar-demo-panel {
   margin-top: auto;
   overflow: visible;
@@ -562,7 +572,6 @@ html[data-color-mode="dark"] .pp-voxel-background-svg {
 
 .pp-home-briefing,
 .pp-route-panel,
-.pp-dashboard-hero,
 .pp-demo-hero,
 .pp-demo-panel {
   border: 1px solid var(--border);
@@ -576,7 +585,6 @@ html[data-color-mode="dark"] .pp-voxel-background-svg {
 
 html[data-color-mode="dark"] .pp-home-briefing,
 html[data-color-mode="dark"] .pp-route-panel,
-html[data-color-mode="dark"] .pp-dashboard-hero,
 html[data-color-mode="dark"] .pp-demo-hero,
 html[data-color-mode="dark"] .pp-demo-panel,
 html[data-color-mode="dark"] .pp-platform-content-shell {
@@ -3333,61 +3341,6 @@ html[data-color-mode="dark"] .pp-preview-link {
   display: block;
 }
 
-.pp-dashboard-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
-  gap: 1rem;
-  align-items: start;
-  padding: 1.25rem;
-}
-
-.pp-dashboard-copy {
-  display: grid;
-  gap: 1rem;
-  align-content: start;
-}
-
-.pp-dashboard-readiness-grid {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.pp-dashboard-status-card {
-  display: grid;
-  gap: 0.45rem;
-  border: 1px solid var(--border);
-  border-radius: 1.2rem;
-  background: color-mix(in oklch, var(--background) 95%, var(--card) 5%);
-  padding: 1rem;
-}
-
-.pp-dashboard-status-value {
-  margin: 0;
-  color: var(--foreground);
-  font-family: "GeistPixel Circle", "GeistPixel Square", sans-serif;
-  font-size: clamp(1.25rem, 2.2vw, 1.65rem);
-  line-height: 1.05;
-}
-
-.pp-dashboard-service-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.pp-dashboard-service-card {
-  display: grid;
-  gap: 1rem;
-  align-content: start;
-}
-
-.pp-dashboard-service-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: auto;
-}
-
 .pp-dashboard-console-shell {
   gap: 1.15rem;
 }
@@ -3475,7 +3428,6 @@ html[data-color-mode="dark"] .pp-preview-link {
   .pp-scene-demo-grid,
   .pp-demo-reference,
   .pp-procedural-grid,
-  .pp-dashboard-hero,
   .pp-logo-row,
   .pp-cli-steps {
     grid-template-columns: 1fr;
@@ -3497,9 +3449,6 @@ html[data-color-mode="dark"] .pp-preview-link {
     grid-template-columns: 1fr;
   }
 
-  .pp-dashboard-service-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 980px) {
@@ -3577,11 +3526,6 @@ html[data-color-mode="dark"] .pp-preview-link {
     min-block-size: clamp(16.5rem, 46vw, 19rem);
   }
 
-  .pp-dashboard-service-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 700px) {
   .pp-entry-card,
   .pp-demo-card,
@@ -3590,7 +3534,6 @@ html[data-color-mode="dark"] .pp-preview-link {
   .pp-route-panel,
   .pp-demo-hero,
   .pp-demo-panel,
-  .pp-dashboard-hero,
   .pp-home-briefing,
   .pp-bug-ledger-header,
   .pp-bug-ledger-empty,
@@ -3660,10 +3603,6 @@ html[data-color-mode="dark"] .pp-preview-link {
 
   .pp-mobile-nav-shell {
     padding-inline: 0.9rem;
-  }
-
-  .pp-dashboard-hero {
-    padding-inline: 0;
   }
 
   .pp-logo-row {

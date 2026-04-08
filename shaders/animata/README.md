@@ -50,7 +50,9 @@ Run the long render for the full collection, grouped into family folders under `
 ```bash
 node --experimental-strip-types shaders/animata/animata.ts render-all-families \
   --plan ./shaders/animata/out/plan.json \
-  --out-dir ./shaders/animata/out/media
+  --out-dir ./shaders/animata/out/media \
+  --workers 4 \
+  --skip-existing
 ```
 
 This writes files like:
@@ -64,13 +66,16 @@ For a smaller test pass, you can limit it to specific shader IDs or a smaller co
 ```bash
 node --experimental-strip-types shaders/animata/animata.ts render-all-families \
   --families radiant2,cubic \
-  --limit-per-family 1
+  --limit-per-family 1 \
+  --workers 2
 ```
 
 Render the full collection in plain token batches:
 
 ```bash
-node --experimental-strip-types shaders/animata/animata.ts render-range --start 1 --end 1998
+node --experimental-strip-types shaders/animata/animata.ts render-range --start 1 --end 1998 \
+  --workers 4 \
+  --skip-existing
 ```
 
 Build the hosted token card manifest that the web route and metadata step both use:
@@ -87,7 +92,9 @@ Render portrait token card PNGs from that manifest:
 node --experimental-strip-types shaders/animata/animata.ts render-card-images \
   --card-manifest ./priv/static/animata/token-card-manifest.json \
   --static-root ./priv/static \
-  --start 1 --end 25
+  --start 1 --end 25 \
+  --workers 4 \
+  --skip-existing
 ```
 
 Build the OpenSea drop package from the rendered card images:
@@ -134,3 +141,5 @@ node --experimental-strip-types shaders/animata/animata.ts upload-lighthouse \
 - The renderer expects Chrome or Chromium to be available. It will first look at `REGENT_CHROME_EXECUTABLE`, then common macOS and Linux install paths.
 - The hosted OpenSea flow now uses the portrait token card PNG for `image` and the hosted Regents route for `animation_url`.
 - The raw looping MP4 render is still available for archival or non-OpenSea use, but it is no longer the primary OpenSea detail surface.
+- `--workers` lets one command run a small internal worker pool instead of forcing you to split the work by hand.
+- `--skip-existing` reuses already-finished PNG and MP4 outputs when those files are already present in the target output path.

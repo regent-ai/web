@@ -150,16 +150,24 @@ defmodule PlatformPhxWeb.PublicRoutesTest do
     assert html =~ "dashboard-voxel-background"
     assert html =~ "data-voxel-background=\"dashboard\""
     assert html =~ "platform-footer-voxel-classic"
-    assert html =~ "Use Regents from one LiveView surface"
-    assert html =~ "LiveView first"
     assert html =~ "services-wallet-console"
     assert html =~ "dashboard-root"
     assert html =~ "/api/opensea/redeem-stats"
-    assert html =~ "https://techtree.sh"
-    assert html =~ "https://autolaunch.sh"
+    assert html =~ "Connect your wallet here to redeem an Animata pass"
 
     refute html =~
              "A growing platform for all documentation and actions to take part in the Regents ecosystem."
+
+    refute html =~ "Use Regents from one LiveView surface"
+    refute html =~ "LiveView first"
+    refute html =~ "What is ready in this deployment"
+    refute html =~ "Agent economies"
+    refute html =~ "Bug report board"
+    refute html =~ "Privy login is configured for this environment."
+    refute html =~ "Open ledger"
+
+    refute html =~
+             "The surrounding page stays readable and useful without JavaScript. The wallet console below is the only browser-owned section because wallet auth and signing need client-side control."
 
     refute html =~ "platform-dashboard-surface"
   end
