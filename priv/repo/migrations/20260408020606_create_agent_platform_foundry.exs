@@ -8,6 +8,8 @@ defmodule PlatformPhx.Repo.Migrations.CreateAgentPlatformFoundry do
       add :wallet_addresses, {:array, :string}, null: false, default: []
       add :display_name, :string
       add :role, :string, null: false, default: "user"
+      add :stripe_llm_billing_status, :string, null: false, default: "action_required"
+      add :stripe_llm_external_ref, :string
 
       timestamps(inserted_at: :created_at, updated_at: :updated_at, type: :utc_datetime)
     end
@@ -22,11 +24,16 @@ defmodule PlatformPhx.Repo.Migrations.CreateAgentPlatformFoundry do
       add :claimed_label, :string, null: false
       add :basename_fqdn, :string, null: false
       add :ens_fqdn, :string, null: false
-      add :status, :string, null: false, default: "draft"
+      add :status, :string, null: false, default: "published"
       add :public_summary, :text, null: false
       add :hero_statement, :text
       add :sprite_name, :string
       add :sprite_url, :string
+      add :stripe_llm_billing_status, :string, null: false, default: "action_required"
+      add :stripe_llm_external_ref, :string
+      add :sprite_free_until, :utc_datetime
+      add :sprite_credit_balance_usd_cents, :integer, null: false, default: 0
+      add :sprite_metering_status, :string, null: false, default: "trialing"
       add :paperclip_url, :string
       add :paperclip_company_id, :string
       add :paperclip_agent_id, :string
@@ -43,6 +50,7 @@ defmodule PlatformPhx.Repo.Migrations.CreateAgentPlatformFoundry do
     create index(:platform_agents, [:owner_human_id])
     create index(:platform_agents, [:status])
     create index(:platform_agents, [:runtime_status])
+    create index(:platform_agents, [:sprite_metering_status])
 
     create table(:platform_agent_subdomains) do
       add :agent_id, references(:platform_agents, on_delete: :delete_all), null: false
