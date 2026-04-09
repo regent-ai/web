@@ -1,0 +1,33 @@
+{
+  "name": "Regents Club #2",
+  "description": "Looping Regents Club shader studies generated from the Regent avatar shader catalog.",
+  "external_url": "https://regents.sh/cards/regents-club/2",
+  "image": "https://regents.sh/images/animata/cards/2.png",
+  "animation_url": "https://regents.sh/cards/regents-club/2",
+  "attributes": [
+    {
+      "trait_type": "Family",
+      "value": "Cubic"
+    },
+    {
+      "trait_type": "Usage",
+      "value": "Background"
+    },
+    {
+      "trait_type": "Motion",
+      "value": "Calm"
+    },
+    {
+      "trait_type": "Palette",
+      "value": "Frost"
+    },
+    {
+      "trait_type": "Energy",
+      "value": "Mid"
+    },
+    {
+      "trait_type": "Seed",
+      "value": "37D3930E"
+    }
+  ]
+}

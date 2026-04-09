@@ -111,8 +111,7 @@ defmodule PlatformPhxWeb.Api.AgentPlatformControllerTest do
       privy_user_id: "privy-123",
       wallet_address: @address,
       wallet_addresses: [@address],
-      display_name: "operator@regents.sh",
-      role: "user"
+      display_name: "operator@regents.sh"
     })
     |> Repo.insert!()
   end

@@ -1,0 +1,33 @@
+{
+  "name": "Regents Club #1141",
+  "description": "Looping Regents Club shader studies generated from the Regent avatar shader catalog.",
+  "external_url": "https://regents.sh/cards/regents-club/1141",
+  "image": "https://regents.sh/images/animata/cards/1141.png",
+  "animation_url": "https://regents.sh/cards/regents-club/1141",
+  "attributes": [
+    {
+      "trait_type": "Family",
+      "value": "Centrifuge"
+    },
+    {
+      "trait_type": "Usage",
+      "value": "Background"
+    },
+    {
+      "trait_type": "Motion",
+      "value": "Calm"
+    },
+    {
+      "trait_type": "Palette",
+      "value": "Cobalt"
+    },
+    {
+      "trait_type": "Energy",
+      "value": "Mid"
+    },
+    {
+      "trait_type": "Seed",
+      "value": "7A348C21"
+    }
+  ]
+}

@@ -901,7 +901,6 @@ components:
           type: array
           items: {type: string}
         displayName: {type: [string, 'null']}
-        role: {type: [string, 'null']}
     ClaimedName:
       type: object
       required: [label, fqdn, claimed_at, in_use]
@@ -923,7 +922,7 @@ components:
         margin_bps: {type: integer}
     CurrentHuman:
       type: object
-      required: [id, privy_user_id, wallet_addresses, role, llm_billing]
+      required: [id, privy_user_id, wallet_addresses, llm_billing]
       properties:
         id: {type: integer}
         privy_user_id: {type: string}
@@ -932,7 +931,6 @@ components:
           type: array
           items: {type: string}
         display_name: {type: [string, 'null']}
-        role: {type: string}
         llm_billing:
           $ref: '#/components/schemas/LlmBillingStatus'
     CurrentHumanProfile:

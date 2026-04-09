@@ -16,7 +16,11 @@ defmodule PlatformPhx.Accounts do
   def upsert_human_by_privy_id(privy_user_id, attrs)
       when is_binary(privy_user_id) and is_map(attrs) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
-    normalized_attrs = Map.put(attrs, "privy_user_id", String.trim(privy_user_id))
+
+    normalized_attrs =
+      attrs
+      |> normalize_human_attrs()
+      |> Map.put("privy_user_id", String.trim(privy_user_id))
 
     Repo.insert(
       HumanUser.changeset(%HumanUser{}, normalized_attrs),
@@ -29,15 +33,28 @@ defmodule PlatformPhx.Accounts do
   defp upsert_fields(attrs, now) do
     attrs
     |> Enum.reduce([updated_at: now], fn {key, value}, acc ->
-      case normalize_attr_key(key) do
-        "wallet_address" -> [{:wallet_address, normalize_address(value)} | acc]
-        "wallet_addresses" -> [{:wallet_addresses, normalize_addresses(value)} | acc]
-        "display_name" -> [{:display_name, normalize_text(value, 80)} | acc]
-        "role" -> [{:role, normalize_role(value)} | acc]
+      case {normalize_attr_key(key), value} do
+        {"wallet_address", value} -> [{:wallet_address, value} | acc]
+        {"wallet_addresses", value} -> [{:wallet_addresses, value} | acc]
+        {"display_name", value} -> [{:display_name, value} | acc]
         _ -> acc
       end
     end)
     |> Enum.reverse()
+  end
+
+  defp normalize_human_attrs(attrs) do
+    Enum.reduce(attrs, %{}, fn {key, value}, acc ->
+      case normalize_attr_key(key) do
+        "wallet_address" -> Map.put(acc, "wallet_address", normalize_address(value))
+        "wallet_addresses" -> Map.put(acc, "wallet_addresses", normalize_addresses(value))
+        "display_name" -> Map.put(acc, "display_name", normalize_text(value, 80))
+        "stripe_llm_billing_status" -> Map.put(acc, "stripe_llm_billing_status", value)
+        "stripe_llm_external_ref" -> Map.put(acc, "stripe_llm_external_ref", value)
+        "privy_user_id" -> Map.put(acc, "privy_user_id", value)
+        _ -> acc
+      end
+    end)
   end
 
   defp normalize_attr_key(key) when is_atom(key), do: Atom.to_string(key)
@@ -64,9 +81,6 @@ defmodule PlatformPhx.Accounts do
   end
 
   defp normalize_addresses(_values), do: []
-
-  defp normalize_role(value) when value in ["admin", "operator", "user"], do: value
-  defp normalize_role(_value), do: "user"
 
   defp normalize_text(value, max_length) when is_binary(value) do
     value

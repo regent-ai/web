@@ -459,7 +459,7 @@ async function runBuildMetadata(args: string[]) {
   }
 
   const tokenCardManifest = await loadTokenCardManifest(cardManifestPath);
-  const outDir = resolveFlag(args, "--out-dir") ?? path.resolve(process.cwd(), "shaders/animata/out/metadata");
+  const outDir = resolveFlag(args, "--out-dir") ?? path.resolve(process.cwd(), "priv/static/metadata");
   const manifest = await buildHostedMetadataBundle(plan, tokenCardManifest, siteUrl, outDir);
   writeJson({ ok: true, command: "build-metadata", outDir, items: manifest.items.length });
 }
@@ -566,7 +566,7 @@ function usageText() {
     "node --experimental-strip-types shaders/animata/animata.ts analyze-card-images [--cards-dir ./priv/static/images/animata/cards] [--out ./shaders/animata/out/card-analysis.json]",
     "node --experimental-strip-types shaders/animata/animata.ts rerender-card-outliers [--analysis ./shaders/animata/out/card-analysis.json] [--threshold 100000] [--workers 4]",
     "node --experimental-strip-types shaders/animata/animata.ts build-drop [--plan ./shaders/animata/out/plan.json] [--card-manifest ./priv/static/animata/token-card-manifest.json] [--static-root ./priv/static] [--out-dir ./shaders/animata/out/opensea-drop]",
-    "node --experimental-strip-types shaders/animata/animata.ts build-metadata --card-manifest ./priv/static/animata/token-card-manifest.json --site-url https://regents.sh [--plan ./shaders/animata/out/plan.json] [--out-dir ./shaders/animata/out/metadata]",
+    "node --experimental-strip-types shaders/animata/animata.ts build-metadata --card-manifest ./priv/static/animata/token-card-manifest.json --site-url https://regents.sh [--plan ./shaders/animata/out/plan.json] [--out-dir ./priv/static/metadata]",
     "node --experimental-strip-types shaders/animata/animata.ts refresh-opensea --card-manifest ./priv/static/animata/token-card-manifest.json --token-id 1 [--api-key-env OPENSEA_API_KEY]",
     "node --experimental-strip-types shaders/animata/animata.ts upload-lighthouse --kind media|metadata --input ./path/to/manifest.json [--api-key-env LIGHTHOUSE_API_KEY] [--out ./shaders/animata/out/lighthouse-upload.json]",
   ].join("\n");

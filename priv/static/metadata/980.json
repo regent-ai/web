@@ -1,0 +1,33 @@
+{
+  "name": "Regents Club #980",
+  "description": "Looping Regents Club shader studies generated from the Regent avatar shader catalog.",
+  "external_url": "https://regents.sh/cards/regents-club/980",
+  "image": "https://regents.sh/images/animata/cards/980.png",
+  "animation_url": "https://regents.sh/cards/regents-club/980",
+  "attributes": [
+    {
+      "trait_type": "Family",
+      "value": "Ionize"
+    },
+    {
+      "trait_type": "Usage",
+      "value": "Avatar"
+    },
+    {
+      "trait_type": "Motion",
+      "value": "Calm"
+    },
+    {
+      "trait_type": "Palette",
+      "value": "Aurora"
+    },
+    {
+      "trait_type": "Energy",
+      "value": "Low"
+    },
+    {
+      "trait_type": "Seed",
+      "value": "54B9A860"
+    }
+  ]
+}

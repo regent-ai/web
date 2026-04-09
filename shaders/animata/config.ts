@@ -7,7 +7,7 @@ export const COLLECTION_VERSION = 1;
 export const COLLECTION_SEED = "regents-club-v1";
 export const COLLECTION_DESCRIPTION =
   "Looping Regents Club shader studies generated from the Regent avatar shader catalog.";
-export const COLLECTION_EXTERNAL_URL = "https://regents.sh/services";
+export const COLLECTION_EXTERNAL_URL_PREFIX = "https://regents.sh/cards/regents-club";
 export const REGENTS_CLUB_CONTRACT_ADDRESS = "0x2208aadbdecd47d3b4430b5b75a175f6d885d487";
 
 export const LOOP_WIDTH = 1024;

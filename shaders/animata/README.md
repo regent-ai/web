@@ -19,7 +19,7 @@ Defaults locked for this collection:
 - `Radiant 2` is the most common family at `173`
 - `Singularity` is the rarest family at `43`
 - item names use `Regents Club #<tokenID>`
-- metadata links point to `https://regents.sh/services`
+- metadata links point to `https://regents.sh/cards/regents-club/<token>`
 - render output is `1024x1024`, `24 fps`, with loop length chosen per shader family instead of one fixed MP4 duration
 - token card output is `1536x2048` and serves:
   - `image` from `/images/animata/cards/<token>.png`
@@ -115,8 +115,12 @@ node --experimental-strip-types shaders/animata/animata.ts build-metadata \
   --plan ./shaders/animata/out/plan.json \
   --card-manifest ./priv/static/animata/token-card-manifest.json \
   --site-url https://regents.sh \
-  --out-dir ./shaders/animata/out/metadata
+  --out-dir ./priv/static/metadata
 ```
+
+This publishes files like:
+- `https://regents.sh/metadata/1.json`
+- `https://regents.sh/metadata/615.json`
 
 Ask OpenSea to refresh tokens after the hosted images and metadata are live:
 

@@ -1,0 +1,33 @@
+{
+  "name": "Regents Club #16",
+  "description": "Looping Regents Club shader studies generated from the Regent avatar shader catalog.",
+  "external_url": "https://regents.sh/cards/regents-club/16",
+  "image": "https://regents.sh/images/animata/cards/16.png",
+  "animation_url": "https://regents.sh/cards/regents-club/16",
+  "attributes": [
+    {
+      "trait_type": "Family",
+      "value": "Rocaille"
+    },
+    {
+      "trait_type": "Usage",
+      "value": "Avatar"
+    },
+    {
+      "trait_type": "Motion",
+      "value": "Calm"
+    },
+    {
+      "trait_type": "Palette",
+      "value": "Aurora"
+    },
+    {
+      "trait_type": "Energy",
+      "value": "Mid"
+    },
+    {
+      "trait_type": "Seed",
+      "value": "1A1993A8"
+    }
+  ]
+}

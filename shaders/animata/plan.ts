@@ -3,7 +3,7 @@ import type { ShaderDefineControl } from "../../assets/js/shader/lib/types.ts";
 
 import {
   COLLECTION_DESCRIPTION,
-  COLLECTION_EXTERNAL_URL,
+  COLLECTION_EXTERNAL_URL_PREFIX,
   COLLECTION_NAME,
   COLLECTION_SEED,
   COLLECTION_VERSION,
@@ -149,7 +149,7 @@ function buildEdition(
     tokenId,
     name: `${COLLECTION_NAME} #${tokenId}`,
     description: COLLECTION_DESCRIPTION,
-    externalUrl: COLLECTION_EXTERNAL_URL,
+    externalUrl: `${COLLECTION_EXTERNAL_URL_PREFIX}/${tokenId}`,
     shaderId: shader.id,
     shaderTitle: shader.title,
     usage: slot.usage,

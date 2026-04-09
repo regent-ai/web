@@ -7,7 +7,6 @@ defmodule PlatformPhx.Repo.Migrations.AlignPlatformAgentsWithCurrentFoundryShape
       add :wallet_address, :string
       add :wallet_addresses, {:array, :string}, null: false, default: []
       add :display_name, :string
-      add :role, :string, null: false, default: "user"
       add :stripe_llm_billing_status, :string, null: false, default: "action_required"
       add :stripe_llm_external_ref, :string
 

@@ -1,21 +1,29 @@
 defmodule PlatformPhx.TokenCardManifest do
   @moduledoc false
 
-  @manifest_path Application.app_dir(
-                   :platform_phx,
-                   "priv/static/animata/token-card-manifest.json"
-                 )
+  require Logger
 
   @spec fetch(integer() | String.t()) :: {:ok, map()} | {:error, :not_found | :invalid_token_id}
   def fetch(token_id)
 
   def fetch(token_id) when is_integer(token_id) and token_id > 0 do
+    Logger.info("token_card_manifest fetch token_id=#{token_id}")
+
     with {:ok, items} <- load_items(),
          %{} = entry <- Enum.find(items, &(&1["tokenId"] == token_id)) do
+      Logger.info("token_card_manifest hit token_id=#{token_id}")
       {:ok, entry}
     else
-      nil -> {:error, :not_found}
-      {:error, _reason} = error -> error
+      nil ->
+        Logger.warning("token_card_manifest missing token_id=#{token_id}")
+        {:error, :not_found}
+
+      {:error, reason} = error ->
+        Logger.error(
+          "token_card_manifest load_failed token_id=#{token_id} reason=#{inspect(reason)}"
+        )
+
+        error
     end
   end
 
@@ -29,11 +37,27 @@ defmodule PlatformPhx.TokenCardManifest do
   def fetch(_token_id), do: {:error, :invalid_token_id}
 
   defp load_items do
-    with {:ok, body} <- File.read(@manifest_path),
+    path = manifest_path()
+
+    Logger.info("token_card_manifest load path=#{path}")
+
+    with {:ok, body} <- File.read(path),
          {:ok, %{"items" => items}} when is_list(items) <- Jason.decode(body) do
+      Logger.info("token_card_manifest loaded path=#{path} items=#{length(items)}")
       {:ok, items}
     else
-      _error -> {:error, :not_found}
+      {:error, reason} ->
+        {:error, {:read_failed, path, reason}}
+
+      {:ok, decoded} ->
+        {:error, {:unexpected_json_shape, path, decoded}}
+
+      decode_error ->
+        {:error, {:decode_failed, path, decode_error}}
     end
+  end
+
+  defp manifest_path do
+    Application.app_dir(:platform_phx, "priv/static/animata/token-card-manifest.json")
   end
 end

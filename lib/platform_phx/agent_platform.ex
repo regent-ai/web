@@ -378,7 +378,6 @@ defmodule PlatformPhx.AgentPlatform do
       wallet_address: human.wallet_address,
       wallet_addresses: linked_wallet_addresses(human),
       display_name: human.display_name,
-      role: human.role,
       llm_billing:
         llm_billing_payload(human.stripe_llm_billing_status, human.stripe_llm_external_ref)
     }

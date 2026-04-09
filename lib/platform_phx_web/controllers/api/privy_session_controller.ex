@@ -9,8 +9,7 @@ defmodule PlatformPhxWeb.Api.PrivySessionController do
     attrs = %{
       "wallet_address" => Map.get(params, "walletAddress"),
       "wallet_addresses" => Map.get(params, "walletAddresses", []),
-      "display_name" => Map.get(params, "displayName"),
-      "role" => Map.get(params, "role")
+      "display_name" => Map.get(params, "displayName")
     }
 
     with {:ok, human} <- Accounts.upsert_human_by_privy_id(privy_user_id, attrs),

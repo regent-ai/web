@@ -233,7 +233,6 @@ export interface CurrentHumanProfileResponse {
     wallet_address: `0x${string}` | null;
     wallet_addresses: `0x${string}`[];
     display_name: string | null;
-    role: string;
     llm_billing: LlmBillingStatus;
   } | null;
   claimed_names: ClaimedNameRecord[];
